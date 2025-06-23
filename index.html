@@ -11,124 +11,46 @@
     <h2>RPG Encounter List</h2>
 
     <div class="add-item-section">
-        <input type="text" id="newItemText" placeholder="Enter new item name" autocomplete="off">
-        <button id="addItemButton">Add Item</button>
+        <input type="text" id="newItemText" placeholder="Character Name" autocomplete="off">
+        <input type="number" id="newItemInitiative" placeholder="Initiative" autocomplete="off" value="0">
+        <button id="addItemButton">Add Character</button>
+    </div>
+    
+    <div class="sort-section">
+        <button id="sortInitiativeButton">Sort by Initiative</button>
     </div>
 
     <ul id="sortable-list">
-        <li><span class="handle">⋮</span><span class="item-text">Goblin Scout</span></li>
-        <li><span class="item-text">Orc Brute</span></li>
-        <li><span class="item-text">Dire Wolf</span></li>
-        <li><span class="item-text">Bandit Leader</span></li>
+        <li data-initiative="18">
+            <span class="handle">⋮</span>
+            <span class="item-text">Goblin Scout</span>
+            <button class="edit-button">Edit</button> <span class="initiative-score">18</span>
+            <button class="remove-button">X</button>
+        </li>
+        <li data-initiative="15">
+            <span class="handle">⋮</span>
+            <span class="item-text">Orc Brute</span>
+            <button class="edit-button">Edit</button> <span class="initiative-score">15</span>
+            <button class="remove-button">X</button>
+        </li>
+        <li data-initiative="20">
+            <span class="handle">⋮</span>
+            <span class="item-text">Dire Wolf</span>
+            <button class="edit-button">Edit</button> <span class="initiative-score">20</span>
+            <button class="remove-button">X</button>
+        </li>
+        <li data-initiative="12">
+            <span class="handle">⋮</span>
+            <span class="item-text">Bandit Leader</span>
+            <button class="edit-button">Edit</button> <span class="initiative-score">12</span>
+            <button class="remove-button">X</button>
+        </li>
     </ul>
 
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
     <script>
-        // Get references to the HTML elements we'll be interacting with
-        const sortableList = document.getElementById('sortable-list');
-        const newItemText = document.getElementById('newItemText');
-        const addItemButton = document.getElementById('addItemButton');
-
-        // --- Initialize SortableJS ---
-        // This makes the list items draggable and sortable.
-        // We store the Sortable instance in a variable so we can enable/disable it.
-        const sortable = Sortable.create(sortableList, {
-            animation: 150, // Smooth animation for item movement
-            ghostClass: 'sortable-ghost', // CSS class applied to the placeholder when dragging
-            chosenClass: 'sortable-chosen', // CSS class applied to the item being dragged
-            dragClass: 'sortable-drag', // CSS class applied to the actual dragging element
-            // If you want a specific part of the item to be draggable (e.g., a handle icon),
-            // you can uncomment the line below and add <span class="handle">::</span> to your <li> HTML.
-            // handle: '.handle',
-        });
-
-
-        // --- Function to Add a New List Item ---
-        function addListItem() {
-            const itemText = newItemText.value.trim(); // Get text from input, remove leading/trailing whitespace
-
-            if (itemText) { // Only add if the text field is not empty
-                const listItem = document.createElement('li'); // Create a new <li> element
-                // Set the inner HTML of the <li> with the item text wrapped in a span
-                // This span is crucial for targeted editing in the JavaScript
-                listItem.innerHTML = `<span class="item-text">${itemText}</span>`;
-
-                sortableList.appendChild(listItem); // Add the new <li> to the <ul> list
-                newItemText.value = ''; // Clear the input field after adding
-                newItemText.focus(); // Keep focus on the input for quick consecutive additions
-            }
-        }
-
-        // --- Event Listeners for Adding Items ---
-        // Add item when the "Add Item" button is clicked
-        addItemButton.addEventListener('click', addListItem);
-
-        // Add item when the Enter key is pressed in the input field
-        newItemText.addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') { // Check if the pressed key is 'Enter'
-                addListItem();
-            }
-        });
-
-
-        // --- Event Listeners for Editing List Items (using Event Delegation) ---
-        // We use event delegation: attach listeners to the parent list (sortableList)
-        // This ensures the listeners work for both existing and newly added items.
-
-        // Double-click to enable editing
-        sortableList.addEventListener('dblclick', function(event) {
-            // Find the closest parent <span> with class 'item-text' to the double-clicked element
-            const itemTextSpan = event.target.closest('.item-text');
-
-            // Proceed only if a valid .item-text span was double-clicked
-            if (itemTextSpan && itemTextSpan.tagName === 'SPAN') {
-                sortable.option('disabled', true); // Temporarily disable SortableJS to prevent drag conflicts
-
-                itemTextSpan.setAttribute('contenteditable', 'true'); // Make the span editable
-                itemTextSpan.focus(); // Set focus to the editable span
-
-                // Optional: Select all text within the editable span for easy full replacement
-                const range = document.createRange();
-                range.selectNodeContents(itemTextSpan);
-                const sel = window.getSelection();
-                sel.removeAllRanges(); // Clear any existing text selection
-                sel.addRange(range); // Select the content of the editable span
-            }
-        });
-
-        // Save changes when editing stops (blur event) or Enter key is pressed
-        // The 'blur' event fires when an element loses focus.
-        // The 'true' argument means the listener is in the 'capture' phase, which can be more reliable for blur events.
-        sortableList.addEventListener('blur', function(event) {
-            const targetElement = event.target;
-            // Check if the element that lost focus was an editable .item-text span
-            if (targetElement.getAttribute('contenteditable') === 'true' && targetElement.classList.contains('item-text')) {
-                sortable.option('disabled', false); // Re-enable SortableJS now that editing has stopped
-
-                targetElement.removeAttribute('contenteditable'); // Make the span non-editable again
-
-                // Trim whitespace from the edited text content
-                targetElement.textContent = targetElement.textContent.trim();
-
-                // Optional: Remove the entire <li> if the text content becomes empty after editing
-                if (targetElement.textContent === '') {
-                    const listItem = targetElement.closest('li'); // Get the parent <li> of the empty span
-                    if (listItem) {
-                        sortableList.removeChild(listItem); // Remove the <li> from the list
-                    }
-                }
-            }
-        }, true); // Use capture phase for blur event
-
-        // Listen for Enter key press within an editable item to stop editing
-        sortableList.addEventListener('keypress', function(event) {
-            // Check if Enter key was pressed on an editable .item-text span
-            if (event.key === 'Enter' && event.target.getAttribute('contenteditable') === 'true' && event.target.classList.contains('item-text')) {
-                event.preventDefault(); // Prevent a new line from being inserted
-                event.target.blur(); // Trigger the blur event to save changes and re-enable sorting
-            }
-        });
+        // (JavaScript will go here in the next section)
     </script>
 
 </body>
