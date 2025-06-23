@@ -10,39 +10,45 @@
 
     <h2>RPG Encounter List</h2>
 
-    <div class="add-item-section">
-        <input type="text" id="newItemText" placeholder="Character Name" autocomplete="off">
-        <input type="number" id="newItemInitiative" placeholder="Initiative" autocomplete="off" value="0">
-        <button id="addItemButton">Add Character</button>
-    </div>
-    
-    <div class="sort-section">
-        <button id="sortInitiativeButton">Sort by Initiative</button>
+    <div class="action-controls">
+        <div class="add-item-inputs">
+            <input type="text" id="newItemText" placeholder="Character Name" autocomplete="off">
+            <input type="number" id="newItemInitiative" placeholder="Initiative #" autocomplete="off">
+        </div>
+        
+        <div class="buttons-row">
+            <button id="addItemButton">Add Character</button>
+            <button id="sortInitiativeButton">Sort by Initiative</button>
+        </div>
     </div>
 
     <ul id="sortable-list">
         <li data-initiative="18">
             <span class="handle">⋮</span>
             <span class="item-text">Goblin Scout</span>
-            <button class="edit-button">Edit</button> <span class="initiative-score">18</span>
+            <button class="edit-button">Edit</button>
+            <span class="initiative-score">18</span>
             <button class="remove-button">X</button>
         </li>
         <li data-initiative="15">
             <span class="handle">⋮</span>
             <span class="item-text">Orc Brute</span>
-            <button class="edit-button">Edit</button> <span class="initiative-score">15</span>
+            <button class="edit-button">Edit</button>
+            <span class="initiative-score">15</span>
             <button class="remove-button">X</button>
         </li>
         <li data-initiative="20">
             <span class="handle">⋮</span>
             <span class="item-text">Dire Wolf</span>
-            <button class="edit-button">Edit</button> <span class="initiative-score">20</span>
+            <button class="edit-button">Edit</button>
+            <span class="initiative-score">20</span>
             <button class="remove-button">X</button>
         </li>
         <li data-initiative="12">
             <span class="handle">⋮</span>
             <span class="item-text">Bandit Leader</span>
-            <button class="edit-button">Edit</button> <span class="initiative-score">12</span>
+            <button class="edit-button">Edit</button>
+            <span class="initiative-score">12</span>
             <button class="remove-button">X</button>
         </li>
     </ul>
@@ -50,160 +56,163 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
     <script>
-       // Get references to all necessary HTML elements
-const sortableList = document.getElementById('sortable-list');
-const newItemText = document.getElementById('newItemText');
-const newItemInitiative = document.getElementById('newItemInitiative');
-const addItemButton = document.getElementById('addItemButton');
-const sortInitiativeButton = document.getElementById('sortInitiativeButton');
+        // (JavaScript remains largely the same, no functional changes needed)
+        // Get references to all necessary HTML elements
+        const sortableList = document.getElementById('sortable-list');
+        const newItemText = document.getElementById('newItemText');
+        const newItemInitiative = document.getElementById('newItemInitiative');
+        const addItemButton = document.getElementById('addItemButton');
+        const sortInitiativeButton = document.getElementById('sortInitiativeButton');
 
-// --- Initialize SortableJS ---
-const sortable = Sortable.create(sortableList, {
-    animation: 150,
-    ghostClass: 'sortable-ghost',
-    chosenClass: 'sortable-chosen',
-    dragClass: 'sortable-drag',
-    handle: '.handle', // Only the element with class 'handle' will initiate dragging
-});
+        // --- Initialize SortableJS ---
+        const sortable = Sortable.create(sortableList, {
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
+            dragClass: 'sortable-drag',
+            handle: '.handle', // Only the element with class 'handle' will initiate dragging
+        });
 
-// --- Function to Start Editing a Span ---
-function startEditingSpan(spanElement) {
-    sortable.option('disabled', true); // Disable SortableJS while editing
-    spanElement.setAttribute('contenteditable', 'true');
-    spanElement.focus();
+        // --- Function to Start Editing a Span ---
+        function startEditingSpan(spanElement) {
+            sortable.option('disabled', true); // Disable SortableJS while editing
+            spanElement.setAttribute('contenteditable', 'true');
+            spanElement.focus();
 
-    // Select all text in the span for easy editing
-    const range = document.createRange();
-    range.selectNodeContents(spanElement);
-    const sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
-}
-
-// --- Function to Add a New List Item ---
-function addListItem() {
-    const nameText = newItemText.value.trim();
-    const initiativeValue = parseInt(newItemInitiative.value.trim(), 10) || 0;
-
-    if (nameText) {
-        const listItem = document.createElement('li');
-        listItem.setAttribute('data-initiative', initiativeValue);
-
-        // Build the inner HTML for the list item, including the new handle and edit button
-        listItem.innerHTML = `
-            <span class="handle">⋮</span>
-            <span class="item-text">${nameText}</span>
-            <button class="edit-button">Edit</button> <span class="initiative-score">${initiativeValue}</span>
-            <button class="remove-button">X</button>
-        `;
-
-        sortableList.appendChild(listItem);
-        newItemText.value = '';
-        newItemInitiative.value = '0';
-        newItemText.focus();
-    }
-}
-
-// --- Event Listeners for Adding Items ---
-addItemButton.addEventListener('click', addListItem);
-newItemText.addEventListener('keypress', function(event) {
-    if (event.key === 'Enter') { addListItem(); }
-});
-newItemInitiative.addEventListener('keypress', function(event) {
-    if (event.key === 'Enter') { addListItem(); }
-});
-
-
-// --- Function to Remove a List Item ---
-sortableList.addEventListener('click', function(event) {
-    if (event.target.classList.contains('remove-button')) {
-        const listItem = event.target.closest('li');
-        if (listItem) {
-            sortableList.removeChild(listItem);
+            // Select all text in the span for easy editing
+            const range = document.createRange();
+            range.selectNodeContents(spanElement);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
         }
-    }
-});
 
-// --- Event Listener for Edit Button Click ---
-sortableList.addEventListener('click', function(event) {
-    if (event.target.classList.contains('edit-button')) {
-        const listItem = event.target.closest('li');
-        const itemTextSpan = listItem.querySelector('.item-text');
-        if (itemTextSpan) {
-            startEditingSpan(itemTextSpan);
-        }
-    }
-});
+        // --- Function to Add a New List Item ---
+        function addListItem() {
+            const nameText = newItemText.value.trim();
+            const initiativeValue = parseInt(newItemInitiative.value.trim(), 10) || 0;
 
+            if (nameText) {
+                const listItem = document.createElement('li');
+                listItem.setAttribute('data-initiative', initiativeValue);
 
-// --- Existing Double-Click Functionality (now uses startEditingSpan) ---
-sortableList.addEventListener('dblclick', function(event) {
-    // Only allow double-clicking on item-text or initiative-score, NOT the handle or buttons
-    const targetSpan = event.target.closest('.item-text') || event.target.closest('.initiative-score');
-    
-    // Ensure we don't accidentally make buttons/handle contenteditable
-    const isButtonOrHandle = event.target.classList.contains('handle') || 
-                             event.target.classList.contains('edit-button') || 
-                             event.target.classList.contains('remove-button');
+                // Build the inner HTML for the list item, including the new handle and edit button
+                listItem.innerHTML = `
+                    <span class="handle">⋮</span>
+                    <span class="item-text">${nameText}</span>
+                    <button class="edit-button">Edit</button>
+                    <span class="initiative-score">${initiativeValue}</span>
+                    <button class="remove-button">X</button>
+                `;
 
-    if (targetSpan && !isButtonOrHandle) { // Only proceed if it's a valid span and not a button/handle
-        startEditingSpan(targetSpan);
-    }
-});
-
-
-// --- Handle Editing Completion (on blur or Enter key) ---
-sortableList.addEventListener('blur', function(event) {
-    const targetElement = event.target;
-    if (targetElement.getAttribute('contenteditable') === 'true' &&
-        (targetElement.classList.contains('item-text') || targetElement.classList.contains('initiative-score'))) {
-
-        sortable.option('disabled', false); // Re-enable SortableJS
-        targetElement.removeAttribute('contenteditable');
-
-        let newContent = targetElement.textContent.trim();
-
-        if (targetElement.classList.contains('initiative-score')) {
-            let numValue = parseInt(newContent, 10);
-            if (isNaN(numValue)) { numValue = 0; }
-            targetElement.textContent = numValue;
-            const listItem = targetElement.closest('li');
-            if (listItem) { listItem.setAttribute('data-initiative', numValue); }
-        } else { // This is an item-text span
-            targetElement.textContent = newContent;
-            if (targetElement.textContent === '') {
-                // If text becomes empty, remove the item
-                const listItem = targetElement.closest('li');
-                if (listItem) { sortableList.removeChild(listItem); }
+                sortableList.appendChild(listItem);
+                newItemText.value = '';
+                // No longer setting value="0", just clearing it
+                newItemInitiative.value = ''; 
+                newItemText.focus();
             }
         }
-    }
-}, true); // Use capture phase for blur event
 
-sortableList.addEventListener('keypress', function(event) {
-    if (event.key === 'Enter' &&
-        event.target.getAttribute('contenteditable') === 'true' &&
-        (event.target.classList.contains('item-text') || event.target.classList.contains('initiative-score'))) {
-        event.preventDefault(); // Prevent new line
-        event.target.blur();    // Trigger blur to save and exit editing
-    }
-});
+        // --- Event Listeners for Adding Items ---
+        addItemButton.addEventListener('click', addListItem);
+        newItemText.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') { addListItem(); }
+        });
+        newItemInitiative.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') { addListItem(); }
+        });
 
 
-// --- Function to Sort the List by Initiative Score ---
-sortInitiativeButton.addEventListener('click', function() {
-    const listItems = Array.from(sortableList.children);
+        // --- Function to Remove a List Item ---
+        sortableList.addEventListener('click', function(event) {
+            if (event.target.classList.contains('remove-button')) {
+                const listItem = event.target.closest('li');
+                if (listItem) {
+                    sortableList.removeChild(listItem);
+                }
+            }
+        });
 
-    listItems.sort((a, b) => {
-        const initiativeA = parseInt(a.getAttribute('data-initiative'), 10) || 0;
-        const initiativeB = parseInt(b.getAttribute('data-initiative'), 10) || 0;
-        return initiativeB - initiativeA; // Descending sort (higher initiative first)
-    });
+        // --- Event Listener for Edit Button Click ---
+        sortableList.addEventListener('click', function(event) {
+            if (event.target.classList.contains('edit-button')) {
+                const listItem = event.target.closest('li');
+                const itemTextSpan = listItem.querySelector('.item-text');
+                if (itemTextSpan) {
+                    startEditingSpan(itemTextSpan);
+                }
+            }
+        });
 
-    listItems.forEach(item => {
-        sortableList.appendChild(item);
-    });
-});
+
+        // --- Existing Double-Click Functionality (now uses startEditingSpan) ---
+        sortableList.addEventListener('dblclick', function(event) {
+            // Only allow double-clicking on item-text or initiative-score, NOT the handle or buttons
+            const targetSpan = event.target.closest('.item-text') || event.target.closest('.initiative-score');
+            
+            // Ensure we don't accidentally make buttons/handle contenteditable
+            const isButtonOrHandle = event.target.classList.contains('handle') || 
+                                    event.target.classList.contains('edit-button') || 
+                                    event.target.classList.contains('remove-button');
+
+            if (targetSpan && !isButtonOrHandle) { // Only proceed if it's a valid span and not a button/handle
+                startEditingSpan(targetSpan);
+            }
+        });
+
+
+        // --- Handle Editing Completion (on blur or Enter key) ---
+        sortableList.addEventListener('blur', function(event) {
+            const targetElement = event.target;
+            if (targetElement.getAttribute('contenteditable') === 'true' &&
+                (targetElement.classList.contains('item-text') || targetElement.classList.contains('initiative-score'))) {
+
+                sortable.option('disabled', false); // Re-enable SortableJS
+                targetElement.removeAttribute('contenteditable');
+
+                let newContent = targetElement.textContent.trim();
+
+                if (targetElement.classList.contains('initiative-score')) {
+                    let numValue = parseInt(newContent, 10);
+                    if (isNaN(numValue)) { numValue = 0; }
+                    targetElement.textContent = numValue;
+                    const listItem = targetElement.closest('li');
+                    if (listItem) { listItem.setAttribute('data-initiative', numValue); }
+                } else { // This is an item-text span
+                    targetElement.textContent = newContent;
+                    if (targetElement.textContent === '') {
+                        // If text becomes empty, remove the item
+                        const listItem = targetElement.closest('li');
+                        if (listItem) { sortableList.removeChild(listItem); }
+                    }
+                }
+            }
+        }, true); // Use capture phase for blur event
+
+        sortableList.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter' &&
+                event.target.getAttribute('contenteditable') === 'true' &&
+                (event.target.classList.contains('item-text') || event.target.classList.contains('initiative-score'))) {
+                event.preventDefault(); // Prevent new line
+                event.target.blur();    // Trigger blur to save and exit editing
+            }
+        });
+
+
+        // --- Function to Sort the List by Initiative Score ---
+        sortInitiativeButton.addEventListener('click', function() {
+            const listItems = Array.from(sortableList.children);
+
+            listItems.sort((a, b) => {
+                const initiativeA = parseInt(a.getAttribute('data-initiative'), 10) || 0;
+                const initiativeB = parseInt(b.getAttribute('data-initiative'), 10) || 0;
+                return initiativeB - initiativeA; // Descending sort (higher initiative first)
+            });
+
+            listItems.forEach(item => {
+                sortableList.appendChild(item);
+            });
+        });
     </script>
 
 </body>
