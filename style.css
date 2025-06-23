@@ -13,23 +13,32 @@ h2 {
     font-size: 2.2em;
 }
 
-/* Add Item Section Styles */
-.add-item-section {
-    margin-bottom: 15px;
+/* NEW: Container for all action controls (inputs + buttons) */
+.action-controls {
     display: flex;
-    gap: 10px;
-    max-width: 400px;
-    margin-left: auto;
-    margin-right: auto;
-    flex-wrap: wrap;
+    flex-direction: column; /* Stack inputs and buttons vertically on small screens */
+    gap: 15px; /* Space between input group and button group */
+    max-width: 400px; /* Keep it aligned with the list width */
+    margin: 0 auto 20px auto; /* Center it and add space below */
+    padding: 0 10px; /* Add some padding on the sides */
+    box-sizing: border-box; /* Include padding in width */
 }
 
+
+/* NEW: Container for just the input fields */
+.add-item-inputs {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap; /* Allow inputs to wrap on smaller screens */
+}
+
+/* Existing input field styles, might need slight adjustments for new containers */
 #newItemText {
     padding: 10px 12px;
     border: 1px solid #c0c0c0;
     border-radius: 6px;
     font-size: 16px;
-    flex-grow: 2;
+    flex-grow: 2; /* Allows it to take more space */
     min-width: 150px;
     box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
 }
@@ -39,8 +48,8 @@ h2 {
     border: 1px solid #c0c0c0;
     border-radius: 6px;
     font-size: 16px;
-    flex-grow: 1;
-    max-width: 90px;
+    flex-grow: 1; /* Allows it to take remaining space */
+    max-width: 90px; /* Control max width */
     text-align: center;
     box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
     -moz-appearance: textfield;
@@ -52,6 +61,15 @@ h2 {
 }
 
 
+/* NEW: Container for the Add Character and Sort buttons */
+.buttons-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+    justify-content: center; /* Center buttons when they wrap */
+}
+
+/* Add Item Button (moved from .add-item-section) */
 #addItemButton {
     padding: 10px 18px;
     background-color: #4CAF50;
@@ -61,16 +79,13 @@ h2 {
     cursor: pointer;
     font-size: 16px;
     transition: background-color 0.2s ease, transform 0.1s ease;
-    flex-shrink: 0;
+    flex-grow: 1; /* Allow buttons to grow and fill space */
+    min-width: 120px; /* Ensure buttons don't get too small */
 }
 #addItemButton:hover { background-color: #45a049; transform: translateY(-1px); }
 #addItemButton:active { background-color: #3e8e41; transform: translateY(0); }
 
-/* Sort by Initiative Button Section */
-.sort-section {
-    text-align: center;
-    margin-bottom: 20px;
-}
+/* Sort by Initiative Button (moved from .sort-section) */
 #sortInitiativeButton {
     padding: 10px 20px;
     background-color: #007bff;
@@ -80,6 +95,8 @@ h2 {
     cursor: pointer;
     font-size: 16px;
     transition: background-color 0.2s ease, transform 0.1s ease;
+    flex-grow: 1; /* Allow buttons to grow and fill space */
+    min-width: 140px; /* Ensure buttons don't get too small */
 }
 #sortInitiativeButton:hover { background-color: #0056b3; transform: translateY(-1px); }
 #sortInitiativeButton:active { background-color: #004085; transform: translateY(0); }
@@ -153,7 +170,7 @@ h2 {
 /* Styling for the Drag Handle */
 #sortable-list li .handle {
     flex-shrink: 0;
-    width: 25px; /* Adjust size if needed */
+    width: 25px;
     height: 25px;
     background-color: #5a6268;
     color: white;
@@ -185,13 +202,12 @@ h2 {
     cursor: text;
     padding: 0 5px;
     border-radius: 3px;
-    /* NEW: Add some space before the Edit button */
     margin-right: 10px;
 }
 
-/* NEW: Styling for the Edit Button */
+/* Styling for the Edit Button */
 .edit-button {
-    background-color: #007bff; /* Blue color for edit */
+    background-color: #007bff;
     color: white;
     border: none;
     border-radius: 4px;
@@ -199,9 +215,9 @@ h2 {
     font-size: 0.85em;
     cursor: pointer;
     transition: background-color 0.2s ease, transform 0.1s ease;
-    flex-shrink: 0; /* Prevent it from shrinking */
-    margin-left: auto; /* Pushes it towards the right, before initiative and remove */
-    margin-right: 5px; /* Small space before initiative score */
+    flex-shrink: 0;
+    margin-left: auto;
+    margin-right: 5px;
 }
 
 .edit-button:hover {
@@ -252,8 +268,6 @@ h2 {
     cursor: pointer;
     transition: background-color 0.2s ease, transform 0.1s ease;
     flex-shrink: 0;
-    /* No margin-left: auto here anymore, as edit-button will take that. */
-    /* Remove this line if it was present: margin-left: auto; */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -268,3 +282,4 @@ h2 {
     background-color: #bd2130;
     transform: scale(1.0);
 }
+
