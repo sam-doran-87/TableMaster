@@ -98,7 +98,6 @@
             listItem.setAttribute('data-current-hp', currentHp);
             listItem.setAttribute('data-max-hp', maxHp);
 
-            // Default status object if none provided
             if (statusObj === null) {
                 statusObj = {
                     "Advantage": false,
@@ -142,24 +141,22 @@
                 const items = JSON.parse(savedList);
                 sortableList.innerHTML = ''; // Clear any default HTML items
                 items.forEach(item => {
-                    // Parse status string back to object before passing
+                    // Ensure status is parsed, or use a default if it's null/undefined
                     const statusObj = item.status ? JSON.parse(item.status) : null;
                     const listItem = createListItemElement(item.name, item.initiative, item.currentHp, item.maxHp, statusObj);
                     sortableList.appendChild(listItem);
                 });
-                console.log('List state loaded.');
+                console.log('List state loaded from localStorage.');
             } else {
-                console.log('No saved list found. Initializing with default items.');
-                // If no saved state, ensure the *currently existing HTML items* are correctly attributed and save them
+                console.log('No saved list found. Initializing with default items attributes and saving.');
+                // Ensure default items from HTML also have data-hp/status
+                const defaultStatusJson = JSON.stringify({
+                    "Advantage": false, "Disadvantage": false, "Poisoned": false, "KO": false, "Dead": false
+                });
                 sortableList.querySelectorAll('li').forEach(listItem => {
                     if (!listItem.hasAttribute('data-current-hp')) listItem.setAttribute('data-current-hp', '30');
                     if (!listItem.hasAttribute('data-max-hp')) listItem.setAttribute('data-max-hp', '30');
-                    if (!listItem.hasAttribute('data-status')) {
-                        const defaultStatus = JSON.stringify({
-                            "Advantage": false, "Disadvantage": false, "Poisoned": false, "KO": false, "Dead": false
-                        });
-                        listItem.setAttribute('data-status', defaultStatus);
-                    }
+                    if (!listItem.hasAttribute('data-status')) listItem.setAttribute('data-status', defaultStatusJson);
                 });
                 saveState(); // Save this initial state to create a baseline
             }
@@ -168,7 +165,6 @@
 
         // --- Function to Start Editing a Span ---
         function startEditingSpan(spanElement) {
-            // Disable SortableJS ONLY if editing within the sortableList items
             if (spanElement.closest('#sortable-list')) {
                 sortable.option('disabled', true);
             }
@@ -176,7 +172,6 @@
             spanElement.setAttribute('contenteditable', 'true');
             spanElement.focus();
 
-            // Place cursor at the end of the text
             const range = document.createRange();
             range.selectNodeContents(spanElement);
             range.collapse(false); // Collapse to the end
@@ -197,6 +192,11 @@
                 newItemInitiative.value = '';
                 newItemText.focus();
                 saveState();
+                // If this is the first item added, select it
+                if (sortableList.children.length === 1) {
+                    listItem.classList.add('highlighted');
+                    populateCharacterSheet(listItem);
+                }
             }
         }
 
@@ -220,12 +220,19 @@
             const currentHp = listItem.getAttribute('data-current-hp');
             const maxHp = listItem.getAttribute('data-max-hp');
             const statusString = listItem.getAttribute('data-status');
-            const statusObj = JSON.parse(statusString);
+
+            let statusObj;
+            try {
+                statusObj = JSON.parse(statusString);
+            } catch (e) {
+                console.error("Error parsing status JSON for", name, ":", e);
+                statusObj = {}; // Fallback to empty object on error
+            }
 
             sheetTitle.textContent = name;
             sheetCurrentHp.textContent = currentHp;
             sheetMaxHp.textContent = maxHp;
-            characterSheet.style.display = 'block';
+            characterSheet.style.display = 'block'; // Ensure sheet is visible
 
             // Set checkbox states based on statusObj
             statusCheckboxes.forEach(checkbox => {
@@ -246,6 +253,8 @@
             statusCheckboxes.forEach(checkbox => {
                 checkbox.checked = false;
             });
+            // You can optionally hide the sheet completely if no character is selected:
+            // characterSheet.style.display = 'none';
         }
 
         // --- CENTRALIZED Event Listener for List Item Clicks ---
@@ -254,10 +263,18 @@
 
             if (event.target.classList.contains('remove-button')) {
                 if (clickedItem) {
+                    const wasHighlighted = clickedItem.classList.contains('highlighted');
                     sortableList.removeChild(clickedItem);
                     saveState();
-                    if (clickedItem.classList.contains('highlighted')) {
-                        clearCharacterSheet();
+                    if (wasHighlighted) {
+                        // If the removed item was highlighted, try to highlight the next one or clear
+                        const newFirstItem = sortableList.querySelector('li');
+                        if (newFirstItem) {
+                            newFirstItem.classList.add('highlighted');
+                            populateCharacterSheet(newFirstItem);
+                        } else {
+                            clearCharacterSheet();
+                        }
                     }
                 }
                 return;
@@ -278,11 +295,14 @@
             }
 
             if (clickedItem) {
-                sortableList.querySelectorAll('li').forEach(item => {
-                    item.classList.remove('highlighted');
-                });
-                clickedItem.classList.add('highlighted');
-                populateCharacterSheet(clickedItem);
+                // Only change highlight if a different item is clicked
+                if (!clickedItem.classList.contains('highlighted')) {
+                    sortableList.querySelectorAll('li').forEach(item => {
+                        item.classList.remove('highlighted');
+                    });
+                    clickedItem.classList.add('highlighted');
+                    populateCharacterSheet(clickedItem);
+                }
             }
         });
 
@@ -304,8 +324,8 @@
                 targetElement.removeAttribute('contenteditable');
 
                 let newContent = targetElement.textContent.trim();
-                const listItem = targetElement.closest('li');
-                const highlightedListItem = document.querySelector('.highlighted');
+                const listItem = targetElement.closest('li'); // For list items (name/initiative)
+                const highlightedListItem = document.querySelector('.highlighted'); // For sheet HP
 
                 if (targetElement.classList.contains('initiative-score')) {
                     let numValue = parseInt(newContent, 10);
@@ -315,7 +335,20 @@
                 } else if (targetElement.classList.contains('item-text')) {
                     targetElement.textContent = newContent;
                     if (targetElement.textContent === '') {
-                        if (listItem) { sortableList.removeChild(listItem); }
+                        if (listItem) {
+                            // If the edited name is empty, remove the item
+                            const wasHighlighted = listItem.classList.contains('highlighted');
+                            sortableList.removeChild(listItem);
+                            if (wasHighlighted) {
+                                const newFirstItem = sortableList.querySelector('li');
+                                if (newFirstItem) {
+                                    newFirstItem.classList.add('highlighted');
+                                    populateCharacterSheet(newFirstItem);
+                                } else {
+                                    clearCharacterSheet();
+                                }
+                            }
+                        }
                     }
                 } else if (targetElement.id === 'sheet-current-hp') {
                     let numValue = parseInt(newContent, 10);
@@ -334,11 +367,13 @@
                 }
 
                 saveState();
+                // Re-populate the sheet if the edited item is the currently highlighted one
+                // This ensures HP/Status are refreshed if an attribute changed
                 if (highlightedListItem) {
                     populateCharacterSheet(highlightedListItem);
                 }
             }
-        }, true);
+        }, true); // Use capture phase for blur event for reliability
 
         document.addEventListener('keypress', function(event) {
             if (event.key === 'Enter' &&
@@ -355,6 +390,7 @@
 
 
         // --- Event Listeners for Character Sheet HP Clicks to Start Editing ---
+        // Ensure that a character is selected before making HP editable
         sheetCurrentHp.addEventListener('click', function() {
             if (document.querySelector('.highlighted')) {
                 startEditingSpan(sheetCurrentHp);
@@ -373,23 +409,33 @@
                 const highlightedListItem = document.querySelector('.highlighted');
                 if (highlightedListItem) {
                     const statusString = highlightedListItem.getAttribute('data-status');
-                    let statusObj = JSON.parse(statusString);
+                    let statusObj;
+                    try {
+                        statusObj = JSON.parse(statusString);
+                    } catch (e) {
+                        console.error("Error parsing status JSON on checkbox change:", e);
+                        statusObj = {}; // Fallback
+                    }
 
                     const statusKey = this.id.replace('status-', '');
 
                     // Handle "K.O." and "Dead" exclusivity
                     if (statusKey === 'ko' && this.checked) {
                         statusObj.Dead = false;
-                        document.getElementById('status-dead').checked = false;
+                        const deadCheckbox = document.getElementById('status-dead');
+                        if (deadCheckbox) deadCheckbox.checked = false;
                     } else if (statusKey === 'dead' && this.checked) {
                         statusObj.KO = false;
-                        document.getElementById('status-ko').checked = false;
+                        const koCheckbox = document.getElementById('status-ko');
+                        if (koCheckbox) koCheckbox.checked = false;
                     }
 
                     statusObj[statusKey] = this.checked;
 
                     highlightedListItem.setAttribute('data-status', JSON.stringify(statusObj));
                     saveState();
+                    // Re-populate to ensure UI reflects exclusivity rules immediately
+                    populateCharacterSheet(highlightedListItem);
                 }
             });
         });
@@ -398,6 +444,7 @@
         // --- Function to Sort the List by Initiative Score ---
         sortInitiativeButton.addEventListener('click', function() {
             const listItems = Array.from(sortableList.children);
+            const previouslySelectedName = document.querySelector('.highlighted .item-text')?.textContent;
 
             listItems.sort((a, b) => {
                 const initiativeA = parseInt(a.getAttribute('data-initiative'), 10) || 0;
@@ -409,9 +456,19 @@
                 sortableList.appendChild(item);
             });
             saveState();
-            const previouslySelected = document.querySelector('.highlighted');
-            if (previouslySelected) {
-                populateCharacterSheet(previouslySelected);
+
+            // Re-highlight and re-populate if a character was selected before sort
+            if (previouslySelectedName) {
+                const newHighlightedItem = Array.from(sortableList.children).find(item =>
+                    item.querySelector('.item-text').textContent === previouslySelectedName
+                );
+                if (newHighlightedItem) {
+                    sortableList.querySelectorAll('li').forEach(item => item.classList.remove('highlighted'));
+                    newHighlightedItem.classList.add('highlighted');
+                    populateCharacterSheet(newHighlightedItem);
+                } else {
+                    clearCharacterSheet(); // In case the previously selected item was removed before sort
+                }
             }
         });
 
@@ -420,8 +477,9 @@
         document.addEventListener('click', function(event) {
             const isClickInsideList = sortableList.contains(event.target);
             const isClickInsideSheet = characterSheet.contains(event.target);
-            const isStatusCheckbox = event.target.classList.contains('status-checkbox');
+            const isStatusCheckbox = event.target.classList.contains('status-checkbox'); // Keep this check
 
+            // Don't clear if click is inside list, inside sheet, or specifically on a status checkbox
             if (!isClickInsideList && !isClickInsideSheet && !isStatusCheckbox) {
                 sortableList.querySelectorAll('li').forEach(item => {
                     item.classList.remove('highlighted');
@@ -431,11 +489,12 @@
         });
 
 
-        // --- Load state when the page finishes loading ---
+        // --- Load state and initialize sheet when the page finishes loading ---
         window.addEventListener('load', () => {
-            loadState();
-            clearCharacterSheet();
-            // Automatically select the first item if the list is not empty after loading
+            loadState(); // Load existing data or initialize default list items
+            clearCharacterSheet(); // Ensure the sheet starts blank
+
+            // Automatically select and populate the sheet for the first item if the list is not empty
             const firstItem = sortableList.querySelector('li');
             if (firstItem) {
                 firstItem.classList.add('highlighted');
