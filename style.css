@@ -128,7 +128,7 @@ h2 {
 #sortable-list li:last-child { border-bottom: none; }
 
 
-/* NEW: Highlighted List Item Style */
+/* Highlighted List Item Style */
 #sortable-list li.highlighted {
     background: linear-gradient(to bottom, #ffd700, #ffa500); /* Gold/Orange gradient */
     color: #333333;
@@ -288,7 +288,7 @@ h2 {
 }
 
 
-/* NEW: Character Sheet Styles */
+/* Character Sheet Styles */
 #character-sheet {
     width: 400px;
     margin: 20px auto;
@@ -326,15 +326,17 @@ h2 {
     color: #000;
 }
 
+/* --- STYLES FOR EDITABLE CHARACTER SHEET FIELDS --- */
+
 /* Styling for when text/initiative spans are in editable mode */
 /* EXTENDED to character sheet spans */
 #sortable-list li .item-text[contenteditable="true"],
 #sortable-list li .initiative-score[contenteditable="true"],
-#character-sheet #sheet-hp[contenteditable="true"],    /* NEW */
-#character-sheet #sheet-status[contenteditable="true"] /* NEW */
+#character-sheet #sheet-hp[contenteditable="true"],
+#character-sheet #sheet-status[contenteditable="true"]
 {
     outline: 2px dashed #007bff;
-    background: #fffacd !important; /* Use !important to ensure override */
+    background: #fffacd !important;
     color: #333;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
     cursor: text;
@@ -342,7 +344,7 @@ h2 {
     border-radius: 3px;
 }
 
-/* NEW: Add pointer cursor to character sheet editable spans */
+/* Add pointer cursor to character sheet editable spans */
 #character-sheet #sheet-hp,
 #character-sheet #sheet-status {
     cursor: pointer;
