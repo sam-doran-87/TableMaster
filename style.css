@@ -247,7 +247,7 @@ h2 {
     cursor: text;
 }
 
-/* Styling for when text/initiative spans are in editable mode */
+/* Styling for when text/initiative spans are in editable mode (for list items) */
 #sortable-list li .item-text[contenteditable="true"],
 #sortable-list li .initiative-score[contenteditable="true"] {
     outline: 2px dashed #007bff;
@@ -326,14 +326,38 @@ h2 {
     color: #000;
 }
 
+/* Status Section specific styles */
+.status-section {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+.status-section p {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.status-section label {
+    display: block; /* Each checkbox on its own line */
+    margin-bottom: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    padding: 2px 0;
+}
+
+.status-section input[type="checkbox"] {
+    margin-right: 8px;
+    transform: scale(1.2); /* Slightly larger checkboxes */
+    cursor: pointer;
+}
+
+
 /* --- STYLES FOR EDITABLE CHARACTER SHEET FIELDS --- */
 
-/* Styling for when text/initiative spans are in editable mode */
-/* EXTENDED to character sheet spans */
-#sortable-list li .item-text[contenteditable="true"],
-#sortable-list li .initiative-score[contenteditable="true"],
-#character-sheet #sheet-hp[contenteditable="true"],
-#character-sheet #sheet-status[contenteditable="true"]
+/* Styling for when character sheet HP spans are in editable mode */
+#character-sheet #sheet-current-hp[contenteditable="true"],
+#character-sheet #sheet-max-hp[contenteditable="true"]
 {
     outline: 2px dashed #007bff;
     background: #fffacd !important;
@@ -344,8 +368,8 @@ h2 {
     border-radius: 3px;
 }
 
-/* Add pointer cursor to character sheet editable spans */
-#character-sheet #sheet-hp,
-#character-sheet #sheet-status {
+/* Add pointer cursor to character sheet editable HP spans */
+#character-sheet #sheet-current-hp,
+#character-sheet #sheet-max-hp {
     cursor: pointer;
 }
