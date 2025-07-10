@@ -62,163 +62,275 @@
      <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
     <script>
-        // (JavaScript remains largely the same, no functional changes needed)
-        // Get references to all necessary HTML elements
-        const sortableList = document.getElementById('sortable-list');
-        const newItemText = document.getElementById('newItemText');
-        const newItemInitiative = document.getElementById('newItemInitiative');
-        const addItemButton = document.getElementById('addItemButton');
-        const sortInitiativeButton = document.getElementById('sortInitiativeButton');
+  // Get references to all necessary HTML elements
+const sortableList = document.getElementById('sortable-list');
+const newItemText = document.getElementById('newItemText');
+const newItemInitiative = document.getElementById('newItemInitiative');
+const addItemButton = document.getElementById('addItemButton');
+const sortInitiativeButton = document.getElementById('sortInitiativeButton');
 
-        // --- Initialize SortableJS ---
-        const sortable = Sortable.create(sortableList, {
-            animation: 150,
-            ghostClass: 'sortable-ghost',
-            chosenClass: 'sortable-chosen',
-            dragClass: 'sortable-drag',
-            handle: '.handle', // Only the element with class 'handle' will initiate dragging
+// Get references to character sheet elements
+const characterSheet = document.getElementById('character-sheet');
+const sheetName = document.getElementById('sheet-name');
+const sheetHp = document.getElementById('sheet-hp');
+const sheetStatus = document.getElementById('sheet-status');
+
+
+// --- Initialize SortableJS ---
+const sortable = Sortable.create(sortableList, {
+    animation: 150,
+    ghostClass: 'sortable-ghost',
+    chosenClass: 'sortable-chosen',
+    dragClass: 'sortable-drag',
+    handle: '.handle',
+});
+
+// --- Helper function to create a new list item HTML element ---
+function createListItemElement(nameText, initiativeValue, hpValue = 30, statusText = "Normal") {
+    const listItem = document.createElement('li');
+    listItem.setAttribute('data-initiative', initiativeValue);
+    listItem.setAttribute('data-hp', hpValue);
+    listItem.setAttribute('data-status', statusText);
+
+    listItem.innerHTML = `
+        <span class="handle">⋮</span>
+        <span class="item-text">${nameText}</span>
+        <button class="edit-button">Edit</button>
+        <span class="initiative-score">${initiativeValue}</span>
+        <button class="remove-button">X</button>
+    `;
+    return listItem;
+}
+
+// --- Function to Save the Current State to localStorage ---
+function saveState() {
+    const items = [];
+    sortableList.querySelectorAll('li').forEach(listItem => {
+        const name = listItem.querySelector('.item-text').textContent;
+        const initiative = listItem.querySelector('.initiative-score').textContent;
+        const hp = listItem.getAttribute('data-hp');
+        const status = listItem.getAttribute('data-status');
+        items.push({ name: name, initiative: initiative, hp: hp, status: status });
+    });
+    localStorage.setItem('rpgEncounterList', JSON.stringify(items));
+    console.log('List state saved.');
+}
+
+// --- Function to Load the State from localStorage ---
+function loadState() {
+    const savedList = localStorage.getItem('rpgEncounterList');
+    if (savedList) {
+        const items = JSON.parse(savedList);
+        sortableList.innerHTML = ''; // Clear any default HTML items
+        items.forEach(item => {
+            const listItem = createListItemElement(item.name, item.initiative, item.hp, item.status);
+            sortableList.appendChild(listItem);
         });
+        console.log('List state loaded.');
+    } else {
+        console.log('No saved list found, ensuring default items have data attributes and saving initial state.');
+        // If no saved state, ensure default items from HTML also have data-hp/status
+        sortableList.querySelectorAll('li').forEach(listItem => {
+            if (!listItem.hasAttribute('data-hp')) listItem.setAttribute('data-hp', '30');
+            if (!listItem.hasAttribute('data-status')) listItem.setAttribute('data-status', 'Normal');
+        });
+        saveState(); // Save this initial state
+    }
+}
 
-        // --- Function to Start Editing a Span ---
-        function startEditingSpan(spanElement) {
-            sortable.option('disabled', true); // Disable SortableJS while editing
-            spanElement.setAttribute('contenteditable', 'true');
-            spanElement.focus();
 
-            // Select all text in the span for easy editing
-            const range = document.createRange();
-            range.selectNodeContents(spanElement);
-            const sel = window.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(range);
-        }
+// --- Function to Start Editing a Span ---
+function startEditingSpan(spanElement) {
+    sortable.option('disabled', true); // Disable SortableJS while editing
+    spanElement.setAttribute('contenteditable', 'true');
+    spanElement.focus();
 
-        // --- Function to Add a New List Item ---
-        function addListItem() {
-            const nameText = newItemText.value.trim();
-            const initiativeValue = parseInt(newItemInitiative.value.trim(), 10) || 0;
+    const range = document.createRange();
+    range.selectNodeContents(spanElement);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+}
 
-            if (nameText) {
-                const listItem = document.createElement('li');
-                listItem.setAttribute('data-initiative', initiativeValue);
+// --- Function to Add a New List Item ---
+function addListItem() {
+    const nameText = newItemText.value.trim();
+    const initiativeValue = parseInt(newItemInitiative.value.trim(), 10) || 0;
 
-                // Build the inner HTML for the list item, including the new handle and edit button
-                listItem.innerHTML = `
-                    <span class="handle">⋮</span>
-                    <span class="item-text">${nameText}</span>
-                    <button class="edit-button">Edit</button>
-                    <span class="initiative-score">${initiativeValue}</span>
-                    <button class="remove-button">X</button>
-                `;
+    if (nameText) {
+        const listItem = createListItemElement(nameText, initiativeValue, 30, "Normal");
+        sortableList.appendChild(listItem);
+        newItemText.value = '';
+        newItemInitiative.value = '';
+        newItemText.focus();
+        saveState(); // Save state after adding
+    }
+}
 
-                sortableList.appendChild(listItem);
-                newItemText.value = '';
-                // No longer setting value="0", just clearing it
-                newItemInitiative.value = ''; 
-                newItemText.focus();
+// --- Event Listeners for Adding Items ---
+addItemButton.addEventListener('click', addListItem);
+newItemText.addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') { addListItem(); }
+});
+newItemInitiative.addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') { addListItem(); }
+});
+
+
+// --- Function to populate the character sheet ---
+function populateCharacterSheet(listItem) {
+    if (!listItem) {
+        clearCharacterSheet();
+        return;
+    }
+    const name = listItem.querySelector('.item-text').textContent;
+    const hp = listItem.getAttribute('data-hp');
+    const status = listItem.getAttribute('data-status');
+
+    sheetName.textContent = name;
+    sheetHp.textContent = hp;
+    sheetStatus.textContent = status;
+    characterSheet.style.display = 'block'; // Ensure sheet is visible
+}
+
+// --- Function to clear the character sheet ---
+function clearCharacterSheet() {
+    sheetName.textContent = '--';
+    sheetHp.textContent = '--';
+    sheetStatus.textContent = '--';
+    // characterSheet.style.display = 'none'; // Optionally hide if nothing is selected
+}
+
+// --- NEW CENTRALIZED Event Listener for List Item Clicks ---
+sortableList.addEventListener('click', function(event) {
+    const clickedItem = event.target.closest('li');
+
+    // 1. Handle Remove Button click
+    if (event.target.classList.contains('remove-button')) {
+        if (clickedItem) {
+            sortableList.removeChild(clickedItem);
+            saveState();
+            // If the removed item was highlighted, clear the sheet
+            if (clickedItem.classList.contains('highlighted')) {
+                clearCharacterSheet();
             }
         }
+        return; // Stop further processing for this click
+    }
 
-        // --- Event Listeners for Adding Items ---
-        addItemButton.addEventListener('click', addListItem);
-        newItemText.addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') { addListItem(); }
-        });
-        newItemInitiative.addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') { addListItem(); }
-        });
-
-
-        // --- Function to Remove a List Item ---
-        sortableList.addEventListener('click', function(event) {
-            if (event.target.classList.contains('remove-button')) {
-                const listItem = event.target.closest('li');
-                if (listItem) {
-                    sortableList.removeChild(listItem);
-                }
+    // 2. Handle Edit Button click
+    if (event.target.classList.contains('edit-button')) {
+        if (clickedItem) {
+            const itemTextSpan = clickedItem.querySelector('.item-text');
+            if (itemTextSpan) {
+                startEditingSpan(itemTextSpan);
             }
+        }
+        return; // Stop further processing for this click
+    }
+
+    // 3. Handle Clicks on Drag Handle
+    if (event.target.classList.contains('handle')) {
+        // SortableJS will handle the drag. We don't want to highlight/populate on handle click directly
+        return; // Stop further processing for this click
+    }
+
+    // 4. If none of the above, it's a general click on the LI or its text/initiative span
+    if (clickedItem) {
+        // Remove highlight from all other items
+        sortableList.querySelectorAll('li').forEach(item => {
+            item.classList.remove('highlighted');
         });
 
-        // --- Event Listener for Edit Button Click ---
-        sortableList.addEventListener('click', function(event) {
-            if (event.target.classList.contains('edit-button')) {
-                const listItem = event.target.closest('li');
-                const itemTextSpan = listItem.querySelector('.item-text');
-                if (itemTextSpan) {
-                    startEditingSpan(itemTextSpan);
-                }
+        // Add highlight to the clicked item
+        clickedItem.classList.add('highlighted');
+
+        // Populate character sheet with this item's data
+        populateCharacterSheet(clickedItem);
+    }
+});
+
+
+// --- Handle Editing Completion (on blur or Enter key) ---
+sortableList.addEventListener('blur', function(event) {
+    const targetElement = event.target;
+    if (targetElement.getAttribute('contenteditable') === 'true' &&
+        (targetElement.classList.contains('item-text') || targetElement.classList.contains('initiative-score'))) {
+
+        sortable.option('disabled', false);
+        targetElement.removeAttribute('contenteditable');
+
+        let newContent = targetElement.textContent.trim();
+        const listItem = targetElement.closest('li'); // Get listItem reference here
+
+        if (targetElement.classList.contains('initiative-score')) {
+            let numValue = parseInt(newContent, 10);
+            if (isNaN(numValue)) { numValue = 0; }
+            targetElement.textContent = numValue;
+            if (listItem) { listItem.setAttribute('data-initiative', numValue); }
+        } else { // This is an item-text span
+            targetElement.textContent = newContent;
+            if (targetElement.textContent === '') {
+                if (listItem) { sortableList.removeChild(listItem); }
             }
+        }
+        saveState(); // Save state after editing
+        // If the edited item is highlighted, update the character sheet
+        if (listItem && listItem.classList.contains('highlighted')) {
+            populateCharacterSheet(listItem);
+        }
+    }
+}, true); // Use capture phase for blur event
+
+sortableList.addEventListener('keypress', function(event) {
+    if (event.key === 'Enter' &&
+        event.target.getAttribute('contenteditable') === 'true' &&
+        (event.target.classList.contains('item-text') || event.target.classList.contains('initiative-score'))) {
+        event.preventDefault(); // Prevent new line
+        event.target.blur();    // Trigger blur to save and exit editing
+    }
+});
+
+
+// --- Function to Sort the List by Initiative Score ---
+sortInitiativeButton.addEventListener('click', function() {
+    const listItems = Array.from(sortableList.children);
+
+    listItems.sort((a, b) => {
+        const initiativeA = parseInt(a.getAttribute('data-initiative'), 10) || 0;
+        const initiativeB = parseInt(b.getAttribute('data-initiative'), 10) || 0;
+        return initiativeB - initiativeA;
+    });
+
+    listItems.forEach(item => {
+        sortableList.appendChild(item);
+    });
+    saveState();
+    // Re-highlight and re-populate if a character was selected before sort
+    const previouslySelected = document.querySelector('.highlighted');
+    if (previouslySelected) {
+        populateCharacterSheet(previouslySelected);
+    }
+});
+
+
+// --- Clear highlight and sheet when clicking outside the list/sheet ---
+document.addEventListener('click', function(event) {
+    if (!sortableList.contains(event.target) && !characterSheet.contains(event.target)) {
+        sortableList.querySelectorAll('li').forEach(item => {
+            item.classList.remove('highlighted');
         });
+        clearCharacterSheet();
+    }
+});
 
 
-        // --- Existing Double-Click Functionality (now uses startEditingSpan) ---
-        sortableList.addEventListener('dblclick', function(event) {
-            // Only allow double-clicking on item-text or initiative-score, NOT the handle or buttons
-            const targetSpan = event.target.closest('.item-text') || event.target.closest('.initiative-score');
-            
-            // Ensure we don't accidentally make buttons/handle contenteditable
-            const isButtonOrHandle = event.target.classList.contains('handle') || 
-                                    event.target.classList.contains('edit-button') || 
-                                    event.target.classList.contains('remove-button');
+// --- Load state when the page finishes loading ---
+window.addEventListener('load', () => {
+    loadState();
+    clearCharacterSheet(); // Initialize character sheet to blank state on load
+});
 
-            if (targetSpan && !isButtonOrHandle) { // Only proceed if it's a valid span and not a button/handle
-                startEditingSpan(targetSpan);
-            }
-        });
-
-
-        // --- Handle Editing Completion (on blur or Enter key) ---
-        sortableList.addEventListener('blur', function(event) {
-            const targetElement = event.target;
-            if (targetElement.getAttribute('contenteditable') === 'true' &&
-                (targetElement.classList.contains('item-text') || targetElement.classList.contains('initiative-score'))) {
-
-                sortable.option('disabled', false); // Re-enable SortableJS
-                targetElement.removeAttribute('contenteditable');
-
-                let newContent = targetElement.textContent.trim();
-
-                if (targetElement.classList.contains('initiative-score')) {
-                    let numValue = parseInt(newContent, 10);
-                    if (isNaN(numValue)) { numValue = 0; }
-                    targetElement.textContent = numValue;
-                    const listItem = targetElement.closest('li');
-                    if (listItem) { listItem.setAttribute('data-initiative', numValue); }
-                } else { // This is an item-text span
-                    targetElement.textContent = newContent;
-                    if (targetElement.textContent === '') {
-                        // If text becomes empty, remove the item
-                        const listItem = targetElement.closest('li');
-                        if (listItem) { sortableList.removeChild(listItem); }
-                    }
-                }
-            }
-        }, true); // Use capture phase for blur event
-
-        sortableList.addEventListener('keypress', function(event) {
-            if (event.key === 'Enter' &&
-                event.target.getAttribute('contenteditable') === 'true' &&
-                (event.target.classList.contains('item-text') || event.target.classList.contains('initiative-score'))) {
-                event.preventDefault(); // Prevent new line
-                event.target.blur();    // Trigger blur to save and exit editing
-            }
-        });
-
-
-        // --- Function to Sort the List by Initiative Score ---
-        sortInitiativeButton.addEventListener('click', function() {
-            const listItems = Array.from(sortableList.children);
-
-            listItems.sort((a, b) => {
-                const initiativeA = parseInt(a.getAttribute('data-initiative'), 10) || 0;
-                const initiativeB = parseInt(b.getAttribute('data-initiative'), 10) || 0;
-                return initiativeB - initiativeA; // Descending sort (higher initiative first)
-            });
-
-            listItems.forEach(item => {
-                sortableList.appendChild(item);
-            });
-        });
     </script>
 
 
