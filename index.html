@@ -23,9 +23,11 @@
 
     <ul id="sortable-list">
         </ul>
-  <div class="reset-controls">
+
+    <div class="reset-controls">
         <button id="resetListButton">Reset List</button>
     </div>
+
     <div id="character-sheet">
         <h3 id="sheet-title">Selected Character</h3>
         <p><strong>HP:</strong> <span id="sheet-current-hp" class="editable-hp">--</span> / <span id="sheet-max-hp" class="editable-hp">--</span></p>
@@ -47,6 +49,7 @@
         const newItemInitiative = document.getElementById('newItemInitiative');
         const addItemButton = document.getElementById('addItemButton');
         const sortInitiativeButton = document.getElementById('sortInitiativeButton');
+        const resetListButton = document.getElementById('resetListButton'); // New button reference
 
         // Get references to character sheet elements
         const characterSheet = document.getElementById('character-sheet');
@@ -123,19 +126,8 @@
                 });
                 console.log('List state loaded from localStorage.');
             } else {
-                console.log('No saved list found. Populating with default items.');
-                // Default items to create if localStorage is empty
-                const defaultCharacters = [
-                    { name: "Goblin Scout", initiative: 18, currentHp: 30, maxHp: 30, status: null },
-                    { name: "Orc Brute", initiative: 15, currentHp: 25, maxHp: 25, status: null },
-                    { name: "Dire Wolf", initiative: 20, currentHp: 10, maxHp: 10, status: { "Advantage": false, "Disadvantage": false, "Poisoned": false, "KO": true, "Dead": false } },
-                    { name: "Bandit Leader", initiative: 12, currentHp: 40, maxHp: 40, status: { "Advantage": true, "Disadvantage": false, "Poisoned": false, "KO": false, "Dead": false } }
-                ];
-                defaultCharacters.forEach(char => {
-                    const listItem = createListItemElement(char.name, char.initiative, char.currentHp, char.maxHp, char.status);
-                    sortableList.appendChild(listItem);
-                });
-                saveState(); // Save these default items immediately
+                console.log('No saved list found. List remains empty as per user preference.');
+                // No default characters are added here; the list starts empty.
             }
         }
 
@@ -450,15 +442,26 @@
             }
         });
 
+        // --- New: Reset List Functionality ---
+        resetListButton.addEventListener('click', function() {
+            if (confirm('Are you sure you want to clear all characters from the list? This cannot be undone.')) {
+                sortableList.innerHTML = ''; // Clear all list items
+                localStorage.removeItem('rpgEncounterList'); // Remove from local storage
+                clearCharacterSheet(); // Clear the character sheet, which also clears any highlight
+                console.log('List reset and local storage cleared.');
+            }
+        });
+
 
         // --- Clear highlight and sheet when clicking outside the list/sheet ---
         document.addEventListener('click', function(event) {
             const isClickInsideList = sortableList.contains(event.target);
             const isClickInsideSheet = characterSheet.contains(event.target);
             const isStatusCheckbox = event.target.classList.contains('status-checkbox'); // Keep this check
+            const isResetButton = resetListButton.contains(event.target); // Exclude reset button click
 
-            // Don't clear if click is inside list, inside sheet, or specifically on a status checkbox
-            if (!isClickInsideList && !isClickInsideSheet && !isStatusCheckbox) {
+            // Don't clear if click is inside list, inside sheet, on a status checkbox, or on the reset button itself
+            if (!isClickInsideList && !isClickInsideSheet && !isStatusCheckbox && !isResetButton) {
                 sortableList.querySelectorAll('li').forEach(item => {
                     item.classList.remove('highlighted');
                 });
@@ -469,9 +472,9 @@
 
         // --- Load state and initialize sheet when the page finishes loading ---
         window.addEventListener('load', () => {
-            loadState(); // Load existing data or initialize default list items
+            loadState(); // Load existing data or ensure list starts empty if no data
 
-            // Automatically select and populate the sheet for the first item if the list is not empty
+            // Select and populate the sheet for the first item if the list is not empty
             const firstItem = sortableList.querySelector('li');
             if (firstItem) {
                 firstItem.classList.add('highlighted');
