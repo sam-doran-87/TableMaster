@@ -13,9 +13,8 @@
     <div class="action-controls">
         <div class="add-item-inputs">
             <input type="text" id="newItemText" placeholder="Character Name" autocomplete="off">
-            <input type="number" id="newItemInitiative" placeholder="Initiative #" autocomplete="off">
+            <input type="number" id="newItemInitiative" placeholder="Initiative Score" autocomplete="off">
         </div>
-        
         <div class="buttons-row">
             <button id="addItemButton">Add Character</button>
             <button id="sortInitiativeButton">Sort by Initiative</button>
@@ -23,28 +22,28 @@
     </div>
 
     <ul id="sortable-list">
-        <li data-initiative="18">
+        <li data-initiative="18" data-hp="30" data-status="Normal">
             <span class="handle">⋮</span>
             <span class="item-text">Goblin Scout</span>
             <button class="edit-button">Edit</button>
             <span class="initiative-score">18</span>
             <button class="remove-button">X</button>
         </li>
-        <li data-initiative="15">
+        <li data-initiative="15" data-hp="30" data-status="Normal">
             <span class="handle">⋮</span>
             <span class="item-text">Orc Brute</span>
             <button class="edit-button">Edit</button>
             <span class="initiative-score">15</span>
             <button class="remove-button">X</button>
         </li>
-        <li data-initiative="20">
+        <li data-initiative="20" data-hp="30" data-status="Normal">
             <span class="handle">⋮</span>
             <span class="item-text">Dire Wolf</span>
             <button class="edit-button">Edit</button>
             <span class="initiative-score">20</span>
             <button class="remove-button">X</button>
         </li>
-        <li data-initiative="12">
+        <li data-initiative="12" data-hp="30" data-status="Normal">
             <span class="handle">⋮</span>
             <span class="item-text">Bandit Leader</span>
             <button class="edit-button">Edit</button>
@@ -53,7 +52,14 @@
         </li>
     </ul>
 
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <div id="character-sheet">
+        <h3>Selected Character</h3>
+        <p><strong>Name:</strong> <span id="sheet-name">--</span></p>
+        <p><strong>HP:</strong> <span id="sheet-hp">--</span></p>
+        <p><strong>Status:</strong> <span id="sheet-status">--</span></p>
+    </div>
+
+     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
     <script>
         // (JavaScript remains largely the same, no functional changes needed)
@@ -214,6 +220,11 @@
             });
         });
     </script>
+
+
+</body>
+</html>
+
 
 </body>
 </html>
