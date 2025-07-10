@@ -46,7 +46,7 @@ h2 {
     border-radius: 6px;
     font-size: 16px;
     flex-grow: 1;
-    max-width: 90px;
+    max-width: 100px; /* Adjusted max-width to ensure "Initiative" fits */
     text-align: center;
     box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
     -moz-appearance: textfield;
@@ -123,19 +123,19 @@ h2 {
     background: linear-gradient(to bottom, #333333, #000000);
     color: #ffffff;
     transition: background 0.3s ease, border-color 0.3s ease, transform 0.1s ease;
-    cursor: pointer; /* Indicate it's clickable */
+    cursor: pointer;
 }
 #sortable-list li:last-child { border-bottom: none; }
 
 
 /* Highlighted List Item Style */
 #sortable-list li.highlighted {
-    background: linear-gradient(to bottom, #ffd700, #ffa500); /* Gold/Orange gradient */
+    background: linear-gradient(to bottom, #ffd700, #ffa500);
     color: #333333;
-    border: 2px solid #ffaa00; /* Matching border */
-    transform: scale(1.01); /* Slightly enlarge */
-    box-shadow: 0 4px 10px rgba(255, 165, 0, 0.4); /* Glow effect */
-    z-index: 1; /* Bring to front if overlapping */
+    border: 2px solid #ffaa00;
+    transform: scale(1.01);
+    box-shadow: 0 4px 10px rgba(255, 165, 0, 0.4);
+    z-index: 1;
 }
 
 
@@ -317,7 +317,7 @@ h2 {
 
 #character-sheet p strong {
     color: #555;
-    min-width: 70px; /* Align labels if needed */
+    min-width: 70px;
     display: inline-block;
 }
 
@@ -339,7 +339,7 @@ h2 {
 }
 
 .status-section label {
-    display: block; /* Each checkbox on its own line */
+    display: block;
     margin-bottom: 5px;
     font-size: 1em;
     cursor: pointer;
@@ -348,7 +348,7 @@ h2 {
 
 .status-section input[type="checkbox"] {
     margin-right: 8px;
-    transform: scale(1.2); /* Slightly larger checkboxes */
+    transform: scale(1.2);
     cursor: pointer;
 }
 
