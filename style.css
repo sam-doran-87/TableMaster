@@ -46,7 +46,7 @@ h2 {
     border-radius: 6px;
     font-size: 16px;
     flex-grow: 1;
-    max-width: 100px; /* Adjusted max-width to ensure "Initiative" fits */
+    max-width: 100px; /* Adjusted max-width to better fit "Initiative" */
     text-align: center;
     box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
     -moz-appearance: textfield;
@@ -298,6 +298,8 @@ h2 {
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.05);
     color: #333;
+    /* Ensure it's always block by default, content will be populated by JS */
+    display: block; /* Important: Ensures the sheet is always visible */
 }
 
 #character-sheet h3 {
@@ -369,7 +371,6 @@ h2 {
 }
 
 /* Add pointer cursor to character sheet editable HP spans */
-#character-sheet #sheet-current-hp,
-#character-sheet #sheet-max-hp {
+#character-sheet .editable-hp { /* Use the class to apply cursor */
     cursor: pointer;
 }
