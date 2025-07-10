@@ -629,3 +629,25 @@ window.addEventListener('load', loadState);
 
 // Initialize character sheet to blank state on load
 clearCharacterSheet();
+
+/* Styling for when text/initiative spans are in editable mode */
+/* EXTENDED to character sheet spans */
+#sortable-list li .item-text[contenteditable="true"],
+#sortable-list li .initiative-score[contenteditable="true"],
+#character-sheet #sheet-hp[contenteditable="true"],    /* NEW */
+#character-sheet #sheet-status[contenteditable="true"] /* NEW */
+{
+    outline: 2px dashed #007bff;
+    background: #fffacd !important;
+    color: #333;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    cursor: text;
+    padding: 0 2px;
+    border-radius: 3px;
+}
+
+/* NEW: Add pointer cursor to character sheet editable spans */
+#character-sheet #sheet-hp,
+#character-sheet #sheet-status {
+    cursor: pointer;
+}
