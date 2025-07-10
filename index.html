@@ -62,7 +62,7 @@
      <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
     <script>
-  // Get references to all necessary HTML elements
+// Get references to all necessary HTML elements
 const sortableList = document.getElementById('sortable-list');
 const newItemText = document.getElementById('newItemText');
 const newItemInitiative = document.getElementById('newItemInitiative');
@@ -129,7 +129,6 @@ function loadState() {
         console.log('List state loaded.');
     } else {
         console.log('No saved list found, ensuring default items have data attributes and saving initial state.');
-        // If no saved state, ensure default items from HTML also have data-hp/status
         sortableList.querySelectorAll('li').forEach(listItem => {
             if (!listItem.hasAttribute('data-hp')) listItem.setAttribute('data-hp', '30');
             if (!listItem.hasAttribute('data-status')) listItem.setAttribute('data-status', 'Normal');
@@ -141,7 +140,11 @@ function loadState() {
 
 // --- Function to Start Editing a Span ---
 function startEditingSpan(spanElement) {
-    sortable.option('disabled', true); // Disable SortableJS while editing
+    // Disable SortableJS ONLY if editing within the sortableList items
+    if (spanElement.closest('#sortable-list')) {
+        sortable.option('disabled', true);
+    }
+
     spanElement.setAttribute('contenteditable', 'true');
     spanElement.focus();
 
@@ -201,7 +204,7 @@ function clearCharacterSheet() {
     // characterSheet.style.display = 'none'; // Optionally hide if nothing is selected
 }
 
-// --- NEW CENTRALIZED Event Listener for List Item Clicks ---
+// --- CENTRALIZED Event Listener for List Item Clicks ---
 sortableList.addEventListener('click', function(event) {
     const clickedItem = event.target.closest('li');
 
@@ -252,42 +255,86 @@ sortableList.addEventListener('click', function(event) {
 
 
 // --- Handle Editing Completion (on blur or Enter key) ---
-sortableList.addEventListener('blur', function(event) {
+// This listener handles both list item edits AND new character sheet edits
+document.addEventListener('blur', function(event) { // Use document for broader scope
     const targetElement = event.target;
-    if (targetElement.getAttribute('contenteditable') === 'true' &&
-        (targetElement.classList.contains('item-text') || targetElement.classList.contains('initiative-score'))) {
 
-        sortable.option('disabled', false);
+    // Check if the blurred element is an editable span (either in list or character sheet)
+    if (targetElement.getAttribute('contenteditable') === 'true' &&
+        (targetElement.classList.contains('item-text') ||
+         targetElement.classList.contains('initiative-score') ||
+         targetElement.id === 'sheet-hp' || // NEW
+         targetElement.id === 'sheet-status')) // NEW
+    {
+        // Re-enable SortableJS ONLY if editing within the sortableList items
+        if (targetElement.closest('#sortable-list')) {
+            sortable.option('disabled', false);
+        }
+
         targetElement.removeAttribute('contenteditable');
 
         let newContent = targetElement.textContent.trim();
-        const listItem = targetElement.closest('li'); // Get listItem reference here
+        const listItem = targetElement.closest('li'); // For list items
+        const highlightedListItem = document.querySelector('.highlighted'); // For character sheet
 
         if (targetElement.classList.contains('initiative-score')) {
             let numValue = parseInt(newContent, 10);
             if (isNaN(numValue)) { numValue = 0; }
             targetElement.textContent = numValue;
             if (listItem) { listItem.setAttribute('data-initiative', numValue); }
-        } else { // This is an item-text span
+        } else if (targetElement.classList.contains('item-text')) {
             targetElement.textContent = newContent;
             if (targetElement.textContent === '') {
                 if (listItem) { sortableList.removeChild(listItem); }
             }
+        } else if (targetElement.id === 'sheet-hp') { // NEW: Handle HP edit in character sheet
+            let numValue = parseInt(newContent, 10);
+            if (isNaN(numValue)) { numValue = 0; }
+            targetElement.textContent = numValue;
+            if (highlightedListItem) {
+                highlightedListItem.setAttribute('data-hp', numValue);
+            }
+        } else if (targetElement.id === 'sheet-status') { // NEW: Handle Status edit in character sheet
+            targetElement.textContent = newContent;
+            if (highlightedListItem) {
+                highlightedListItem.setAttribute('data-status', newContent);
+            }
         }
-        saveState(); // Save state after editing
-        // If the edited item is highlighted, update the character sheet
-        if (listItem && listItem.classList.contains('highlighted')) {
-            populateCharacterSheet(listItem);
+
+        saveState(); // Save state after any edit
+        // If the edited item is highlighted (or was just edited in the sheet), re-populate the character sheet
+        if (highlightedListItem) {
+            populateCharacterSheet(highlightedListItem);
         }
     }
 }, true); // Use capture phase for blur event
 
-sortableList.addEventListener('keypress', function(event) {
+document.addEventListener('keypress', function(event) { // Use document for broader scope
     if (event.key === 'Enter' &&
         event.target.getAttribute('contenteditable') === 'true' &&
-        (event.target.classList.contains('item-text') || event.target.classList.contains('initiative-score'))) {
+        (event.target.classList.contains('item-text') ||
+         event.target.classList.contains('initiative-score') ||
+         event.target.id === 'sheet-hp' || // NEW
+         event.target.id === 'sheet-status')) // NEW
+    {
         event.preventDefault(); // Prevent new line
         event.target.blur();    // Trigger blur to save and exit editing
+    }
+});
+
+
+// --- NEW: Event Listener for Character Sheet HP/Status Clicks to Start Editing ---
+sheetHp.addEventListener('click', function() {
+    // Only allow editing if a character is currently selected/highlighted
+    if (document.querySelector('.highlighted')) {
+        startEditingSpan(sheetHp);
+    }
+});
+
+sheetStatus.addEventListener('click', function() {
+    // Only allow editing if a character is currently selected/highlighted
+    if (document.querySelector('.highlighted')) {
+        startEditingSpan(sheetStatus);
     }
 });
 
@@ -316,7 +363,11 @@ sortInitiativeButton.addEventListener('click', function() {
 
 // --- Clear highlight and sheet when clicking outside the list/sheet ---
 document.addEventListener('click', function(event) {
-    if (!sortableList.contains(event.target) && !characterSheet.contains(event.target)) {
+    // Check if the click target is within sortableList or characterSheet
+    const isClickInsideList = sortableList.contains(event.target);
+    const isClickInsideSheet = characterSheet.contains(event.target);
+
+    if (!isClickInsideList && !isClickInsideSheet) {
         sortableList.querySelectorAll('li').forEach(item => {
             item.classList.remove('highlighted');
         });
