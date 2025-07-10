@@ -22,35 +22,7 @@
     </div>
 
     <ul id="sortable-list">
-        <li data-initiative="18" data-current-hp="30" data-max-hp="30" data-status='{"Advantage":false,"Disadvantage":false,"Poisoned":false,"KO":false,"Dead":false}'>
-            <span class="handle">⋮</span>
-            <span class="item-text">Goblin Scout</span>
-            <button class="edit-button">Edit</button>
-            <span class="initiative-score">18</span>
-            <button class="remove-button">X</button>
-        </li>
-        <li data-initiative="15" data-current-hp="25" data-max-hp="25" data-status='{"Advantage":false,"Disadvantage":false,"Poisoned":false,"KO":false,"Dead":false}'>
-            <span class="handle">⋮</span>
-            <span class="item-text">Orc Brute</span>
-            <button class="edit-button">Edit</button>
-            <span class="initiative-score">15</span>
-            <button class="remove-button">X</button>
-        </li>
-        <li data-initiative="20" data-current-hp="10" data-max-hp="10" data-status='{"Advantage":false,"Disadvantage":false,"Poisoned":false,"KO":true,"Dead":false}'>
-            <span class="handle">⋮</span>
-            <span class="item-text">Dire Wolf</span>
-            <button class="edit-button">Edit</button>
-            <span class="initiative-score">20</span>
-            <button class="remove-button">X</button>
-        </li>
-        <li data-initiative="12" data-current-hp="40" data-max-hp="40" data-status='{"Advantage":true,"Disadvantage":false,"Poisoned":false,"KO":false,"Dead":false}'>
-            <span class="handle">⋮</span>
-            <span class="item-text">Bandit Leader</span>
-            <button class="edit-button">Edit</button>
-            <span class="initiative-score">12</span>
-            <button class="remove-button">X</button>
-        </li>
-    </ul>
+        </ul>
 
     <div id="character-sheet">
         <h3 id="sheet-title">Selected Character</h3>
@@ -137,9 +109,10 @@
         // --- Function to Load the State from localStorage ---
         function loadState() {
             const savedList = localStorage.getItem('rpgEncounterList');
+            sortableList.innerHTML = ''; // Always clear current HTML to prevent duplicates
+
             if (savedList) {
                 const items = JSON.parse(savedList);
-                sortableList.innerHTML = ''; // Clear any default HTML items
                 items.forEach(item => {
                     // Ensure status is parsed, or use a default if it's null/undefined
                     const statusObj = item.status ? JSON.parse(item.status) : null;
@@ -148,17 +121,19 @@
                 });
                 console.log('List state loaded from localStorage.');
             } else {
-                console.log('No saved list found. Initializing with default items attributes and saving.');
-                // Ensure default items from HTML also have data-hp/status
-                const defaultStatusJson = JSON.stringify({
-                    "Advantage": false, "Disadvantage": false, "Poisoned": false, "KO": false, "Dead": false
+                console.log('No saved list found. Populating with default items.');
+                // Default items to create if localStorage is empty
+                const defaultCharacters = [
+                    { name: "Goblin Scout", initiative: 18, currentHp: 30, maxHp: 30, status: null },
+                    { name: "Orc Brute", initiative: 15, currentHp: 25, maxHp: 25, status: null },
+                    { name: "Dire Wolf", initiative: 20, currentHp: 10, maxHp: 10, status: { "Advantage": false, "Disadvantage": false, "Poisoned": false, "KO": true, "Dead": false } },
+                    { name: "Bandit Leader", initiative: 12, currentHp: 40, maxHp: 40, status: { "Advantage": true, "Disadvantage": false, "Poisoned": false, "KO": false, "Dead": false } }
+                ];
+                defaultCharacters.forEach(char => {
+                    const listItem = createListItemElement(char.name, char.initiative, char.currentHp, char.maxHp, char.status);
+                    sortableList.appendChild(listItem);
                 });
-                sortableList.querySelectorAll('li').forEach(listItem => {
-                    if (!listItem.hasAttribute('data-current-hp')) listItem.setAttribute('data-current-hp', '30');
-                    if (!listItem.hasAttribute('data-max-hp')) listItem.setAttribute('data-max-hp', '30');
-                    if (!listItem.hasAttribute('data-status')) listItem.setAttribute('data-status', defaultStatusJson);
-                });
-                saveState(); // Save this initial state to create a baseline
+                saveState(); // Save these default items immediately
             }
         }
 
@@ -236,11 +211,12 @@
 
             // Set checkbox states based on statusObj
             statusCheckboxes.forEach(checkbox => {
-                const statusKey = checkbox.id.replace('status-', '');
+                const statusKey = checkbox.id.replace('status-', ''); // e.g., "advantage", "ko"
+                // Handle case sensitivity or missing keys gracefully
                 if (statusObj.hasOwnProperty(statusKey)) {
                     checkbox.checked = statusObj[statusKey];
                 } else {
-                    checkbox.checked = false;
+                    checkbox.checked = false; // Default to unchecked if key not found
                 }
             });
         }
@@ -492,13 +468,14 @@
         // --- Load state and initialize sheet when the page finishes loading ---
         window.addEventListener('load', () => {
             loadState(); // Load existing data or initialize default list items
-            clearCharacterSheet(); // Ensure the sheet starts blank
 
             // Automatically select and populate the sheet for the first item if the list is not empty
             const firstItem = sortableList.querySelector('li');
             if (firstItem) {
                 firstItem.classList.add('highlighted');
                 populateCharacterSheet(firstItem);
+            } else {
+                clearCharacterSheet(); // If list is empty, ensure sheet is clear
             }
         });
     </script>
