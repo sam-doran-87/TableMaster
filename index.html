@@ -308,11 +308,11 @@
             }
         }, true); // Use capture phase for blur event
 
-        document.addEventListener('keypress', function(event) { // Use document for broader scope
+ document.addEventListener('keypress', function(event) { // Use document for broader scope
             if (event.key === 'Enter' &&
                 event.target.getAttribute('contenteditable') === 'true' &&
-                (event.target.classList.contains('item-text') ||
-                 event.target.classList.contains('initiative-score') ||
+                (event.target.classList.contains('item-text') || // Corrected: was targetElement
+                 event.target.classList.contains('initiative-score') || // Corrected: was targetElement
                  event.target.id === 'sheet-hp' ||
                  event.target.id === 'sheet-status'))
             {
