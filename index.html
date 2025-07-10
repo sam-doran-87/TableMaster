@@ -29,21 +29,21 @@
             <span class="initiative-score">18</span>
             <button class="remove-button">X</button>
         </li>
-        <li data-initiative="15" data-current-hp="30" data-max-hp="30" data-status='{"Advantage":false,"Disadvantage":false,"Poisoned":false,"KO":false,"Dead":false}'>
+        <li data-initiative="15" data-current-hp="25" data-max-hp="25" data-status='{"Advantage":false,"Disadvantage":false,"Poisoned":false,"KO":false,"Dead":false}'>
             <span class="handle">⋮</span>
             <span class="item-text">Orc Brute</span>
             <button class="edit-button">Edit</button>
             <span class="initiative-score">15</span>
             <button class="remove-button">X</button>
         </li>
-        <li data-initiative="20" data-current-hp="30" data-max-hp="30" data-status='{"Advantage":false,"Disadvantage":false,"Poisoned":false,"KO":false,"Dead":false}'>
+        <li data-initiative="20" data-current-hp="10" data-max-hp="10" data-status='{"Advantage":false,"Disadvantage":false,"Poisoned":false,"KO":true,"Dead":false}'>
             <span class="handle">⋮</span>
             <span class="item-text">Dire Wolf</span>
             <button class="edit-button">Edit</button>
             <span class="initiative-score">20</span>
             <button class="remove-button">X</button>
         </li>
-        <li data-initiative="12" data-current-hp="30" data-max-hp="30" data-status='{"Advantage":false,"Disadvantage":false,"Poisoned":false,"KO":false,"Dead":false}'>
+        <li data-initiative="12" data-current-hp="40" data-max-hp="40" data-status='{"Advantage":true,"Disadvantage":false,"Poisoned":false,"KO":false,"Dead":false}'>
             <span class="handle">⋮</span>
             <span class="item-text">Bandit Leader</span>
             <button class="edit-button">Edit</button>
@@ -53,7 +53,8 @@
     </ul>
 
     <div id="character-sheet">
-        <h3 id="sheet-title">Selected Character</h3> <p><strong>HP:</strong> <span id="sheet-current-hp">--</span> / <span id="sheet-max-hp">--</span></p>
+        <h3 id="sheet-title">Selected Character</h3>
+        <p><strong>HP:</strong> <span id="sheet-current-hp" class="editable-hp">--</span> / <span id="sheet-max-hp" class="editable-hp">--</span></p>
         <div class="status-section">
             <p><strong>Status:</strong></p>
             <label><input type="checkbox" class="status-checkbox" id="status-advantage"> Advantage</label>
@@ -75,10 +76,10 @@
 
         // Get references to character sheet elements
         const characterSheet = document.getElementById('character-sheet');
-        const sheetTitle = document.getElementById('sheet-title'); // Renamed sheetName to sheetTitle for the h3
-        const sheetCurrentHp = document.getElementById('sheet-current-hp'); // New current HP span
-        const sheetMaxHp = document.getElementById('sheet-max-hp'); // New max HP span
-        const statusCheckboxes = document.querySelectorAll('.status-checkbox'); // Select all status checkboxes
+        const sheetTitle = document.getElementById('sheet-title');
+        const sheetCurrentHp = document.getElementById('sheet-current-hp');
+        const sheetMaxHp = document.getElementById('sheet-max-hp');
+        const statusCheckboxes = document.querySelectorAll('.status-checkbox');
 
 
         // --- Initialize SortableJS ---
@@ -91,12 +92,11 @@
         });
 
         // --- Helper function to create a new list item HTML element ---
-        // Now accepts currentHp and maxHp, and a default status object
         function createListItemElement(nameText, initiativeValue, currentHp = 30, maxHp = 30, statusObj = null) {
             const listItem = document.createElement('li');
             listItem.setAttribute('data-initiative', initiativeValue);
-            listItem.setAttribute('data-current-hp', currentHp); // Store current HP
-            listItem.setAttribute('data-max-hp', maxHp);     // Store max HP
+            listItem.setAttribute('data-current-hp', currentHp);
+            listItem.setAttribute('data-max-hp', maxHp);
 
             // Default status object if none provided
             if (statusObj === null) {
@@ -108,7 +108,7 @@
                     "Dead": false
                 };
             }
-            listItem.setAttribute('data-status', JSON.stringify(statusObj)); // Store status as JSON string
+            listItem.setAttribute('data-status', JSON.stringify(statusObj));
 
             listItem.innerHTML = `
                 <span class="handle">⋮</span>
@@ -149,17 +149,19 @@
                 });
                 console.log('List state loaded.');
             } else {
-                console.log('No saved list found, ensuring default items have data attributes and saving initial state.');
-                // Ensure default items from HTML also have data-hp/status
-                const defaultStatus = JSON.stringify({
-                    "Advantage": false, "Disadvantage": false, "Poisoned": false, "KO": false, "Dead": false
-                });
+                console.log('No saved list found. Initializing with default items.');
+                // If no saved state, ensure the *currently existing HTML items* are correctly attributed and save them
                 sortableList.querySelectorAll('li').forEach(listItem => {
                     if (!listItem.hasAttribute('data-current-hp')) listItem.setAttribute('data-current-hp', '30');
                     if (!listItem.hasAttribute('data-max-hp')) listItem.setAttribute('data-max-hp', '30');
-                    if (!listItem.hasAttribute('data-status')) listItem.setAttribute('data-status', defaultStatus);
+                    if (!listItem.hasAttribute('data-status')) {
+                        const defaultStatus = JSON.stringify({
+                            "Advantage": false, "Disadvantage": false, "Poisoned": false, "KO": false, "Dead": false
+                        });
+                        listItem.setAttribute('data-status', defaultStatus);
+                    }
                 });
-                saveState(); // Save this initial state
+                saveState(); // Save this initial state to create a baseline
             }
         }
 
@@ -174,8 +176,10 @@
             spanElement.setAttribute('contenteditable', 'true');
             spanElement.focus();
 
+            // Place cursor at the end of the text
             const range = document.createRange();
             range.selectNodeContents(spanElement);
+            range.collapse(false); // Collapse to the end
             const sel = window.getSelection();
             sel.removeAllRanges();
             sel.addRange(range);
@@ -187,13 +191,12 @@
             const initiativeValue = parseInt(newItemInitiative.value.trim(), 10) || 0;
 
             if (nameText) {
-                // New items start with default HP and status
                 const listItem = createListItemElement(nameText, initiativeValue, 30, 30);
                 sortableList.appendChild(listItem);
                 newItemText.value = '';
                 newItemInitiative.value = '';
                 newItemText.focus();
-                saveState(); // Save state after adding
+                saveState();
             }
         }
 
@@ -217,54 +220,49 @@
             const currentHp = listItem.getAttribute('data-current-hp');
             const maxHp = listItem.getAttribute('data-max-hp');
             const statusString = listItem.getAttribute('data-status');
-            const statusObj = JSON.parse(statusString); // Parse status JSON string
+            const statusObj = JSON.parse(statusString);
 
-            sheetTitle.textContent = name; // Update the h3 title
+            sheetTitle.textContent = name;
             sheetCurrentHp.textContent = currentHp;
             sheetMaxHp.textContent = maxHp;
-            characterSheet.style.display = 'block'; // Ensure sheet is visible
+            characterSheet.style.display = 'block';
 
             // Set checkbox states based on statusObj
             statusCheckboxes.forEach(checkbox => {
-                const statusKey = checkbox.id.replace('status-', ''); // Get "advantage", "ko", etc.
-                if (statusObj.hasOwnProperty(statusKey)) { // Check if key exists in our status object
+                const statusKey = checkbox.id.replace('status-', '');
+                if (statusObj.hasOwnProperty(statusKey)) {
                     checkbox.checked = statusObj[statusKey];
                 } else {
-                    checkbox.checked = false; // Default to unchecked if key not found
+                    checkbox.checked = false;
                 }
             });
         }
 
         // --- Function to clear the character sheet ---
         function clearCharacterSheet() {
-            sheetTitle.textContent = 'Selected Character'; // Reset title
+            sheetTitle.textContent = 'Selected Character';
             sheetCurrentHp.textContent = '--';
             sheetMaxHp.textContent = '--';
-            // Uncheck all status checkboxes
             statusCheckboxes.forEach(checkbox => {
                 checkbox.checked = false;
             });
-            // characterSheet.style.display = 'none'; // Optionally hide if nothing is selected
         }
 
         // --- CENTRALIZED Event Listener for List Item Clicks ---
         sortableList.addEventListener('click', function(event) {
             const clickedItem = event.target.closest('li');
 
-            // 1. Handle Remove Button click
             if (event.target.classList.contains('remove-button')) {
                 if (clickedItem) {
                     sortableList.removeChild(clickedItem);
                     saveState();
-                    // If the removed item was highlighted, clear the sheet
                     if (clickedItem.classList.contains('highlighted')) {
                         clearCharacterSheet();
                     }
                 }
-                return; // Stop further processing for this click
+                return;
             }
 
-            // 2. Handle Edit Button click
             if (event.target.classList.contains('edit-button')) {
                 if (clickedItem) {
                     const itemTextSpan = clickedItem.querySelector('.item-text');
@@ -272,44 +270,33 @@
                         startEditingSpan(itemTextSpan);
                     }
                 }
-                return; // Stop further processing for this click
+                return;
             }
 
-            // 3. Handle Clicks on Drag Handle
             if (event.target.classList.contains('handle')) {
-                // SortableJS will handle the drag. We don't want to highlight/populate on handle click directly
-                return; // Stop further processing for this click
+                return;
             }
 
-            // 4. If none of the above, it's a general click on the LI or its text/initiative span
             if (clickedItem) {
-                // Remove highlight from all other items
                 sortableList.querySelectorAll('li').forEach(item => {
                     item.classList.remove('highlighted');
                 });
-
-                // Add highlight to the clicked item
                 clickedItem.classList.add('highlighted');
-
-                // Populate character sheet with this item's data
                 populateCharacterSheet(clickedItem);
             }
         });
 
 
         // --- Handle Editing Completion (on blur or Enter key) ---
-        // This listener handles both list item edits AND character sheet HP edits
-        document.addEventListener('blur', function(event) { // Use document for broader scope
+        document.addEventListener('blur', function(event) {
             const targetElement = event.target;
 
-            // Check if the blurred element is an editable span (either in list or character sheet)
             if (targetElement.getAttribute('contenteditable') === 'true' &&
                 (targetElement.classList.contains('item-text') ||
                  targetElement.classList.contains('initiative-score') ||
-                 targetElement.id === 'sheet-current-hp' || // Updated ID
-                 targetElement.id === 'sheet-max-hp'))     // New ID
+                 targetElement.id === 'sheet-current-hp' ||
+                 targetElement.id === 'sheet-max-hp'))
             {
-                // Re-enable SortableJS ONLY if editing within the sortableList items
                 if (targetElement.closest('#sortable-list')) {
                     sortable.option('disabled', false);
                 }
@@ -317,8 +304,8 @@
                 targetElement.removeAttribute('contenteditable');
 
                 let newContent = targetElement.textContent.trim();
-                const listItem = targetElement.closest('li'); // For list items
-                const highlightedListItem = document.querySelector('.highlighted'); // For character sheet
+                const listItem = targetElement.closest('li');
+                const highlightedListItem = document.querySelector('.highlighted');
 
                 if (targetElement.classList.contains('initiative-score')) {
                     let numValue = parseInt(newContent, 10);
@@ -330,14 +317,14 @@
                     if (targetElement.textContent === '') {
                         if (listItem) { sortableList.removeChild(listItem); }
                     }
-                } else if (targetElement.id === 'sheet-current-hp') { // Handle Current HP edit
+                } else if (targetElement.id === 'sheet-current-hp') {
                     let numValue = parseInt(newContent, 10);
                     if (isNaN(numValue)) { numValue = 0; }
                     targetElement.textContent = numValue;
                     if (highlightedListItem) {
                         highlightedListItem.setAttribute('data-current-hp', numValue);
                     }
-                } else if (targetElement.id === 'sheet-max-hp') { // Handle Max HP edit
+                } else if (targetElement.id === 'sheet-max-hp') {
                     let numValue = parseInt(newContent, 10);
                     if (isNaN(numValue)) { numValue = 0; }
                     targetElement.textContent = numValue;
@@ -346,24 +333,23 @@
                     }
                 }
 
-                saveState(); // Save state after any edit
-                // If the edited item is highlighted (or was just edited in the sheet), re-populate the character sheet
+                saveState();
                 if (highlightedListItem) {
                     populateCharacterSheet(highlightedListItem);
                 }
             }
-        }, true); // Use capture phase for blur event
+        }, true);
 
-        document.addEventListener('keypress', function(event) { // Use document for broader scope
+        document.addEventListener('keypress', function(event) {
             if (event.key === 'Enter' &&
                 event.target.getAttribute('contenteditable') === 'true' &&
                 (event.target.classList.contains('item-text') ||
                  event.target.classList.contains('initiative-score') ||
-                 event.target.id === 'sheet-current-hp' || // Updated ID
-                 event.target.id === 'sheet-max-hp'))      // New ID
+                 event.target.id === 'sheet-current-hp' ||
+                 event.target.id === 'sheet-max-hp'))
             {
-                event.preventDefault(); // Prevent new line
-                event.target.blur();    // Trigger blur to save and exit editing
+                event.preventDefault();
+                event.target.blur();
             }
         });
 
@@ -381,7 +367,7 @@
             }
         });
 
-        // --- NEW: Event Listeners for Status Checkbox Changes ---
+        // --- Event Listeners for Status Checkbox Changes ---
         statusCheckboxes.forEach(checkbox => {
             checkbox.addEventListener('change', function() {
                 const highlightedListItem = document.querySelector('.highlighted');
@@ -389,18 +375,18 @@
                     const statusString = highlightedListItem.getAttribute('data-status');
                     let statusObj = JSON.parse(statusString);
 
-                    const statusKey = this.id.replace('status-', ''); // e.g., "advantage", "ko"
+                    const statusKey = this.id.replace('status-', '');
 
                     // Handle "K.O." and "Dead" exclusivity
                     if (statusKey === 'ko' && this.checked) {
-                        statusObj.Dead = false; // Uncheck Dead if K.O. is checked
+                        statusObj.Dead = false;
                         document.getElementById('status-dead').checked = false;
                     } else if (statusKey === 'dead' && this.checked) {
-                        statusObj.KO = false; // Uncheck K.O. if Dead is checked
+                        statusObj.KO = false;
                         document.getElementById('status-ko').checked = false;
                     }
 
-                    statusObj[statusKey] = this.checked; // Update the specific status
+                    statusObj[statusKey] = this.checked;
 
                     highlightedListItem.setAttribute('data-status', JSON.stringify(statusObj));
                     saveState();
@@ -423,7 +409,6 @@
                 sortableList.appendChild(item);
             });
             saveState();
-            // Re-highlight and re-populate if a character was selected before sort
             const previouslySelected = document.querySelector('.highlighted');
             if (previouslySelected) {
                 populateCharacterSheet(previouslySelected);
@@ -433,11 +418,8 @@
 
         // --- Clear highlight and sheet when clicking outside the list/sheet ---
         document.addEventListener('click', function(event) {
-            // Check if the click target is within sortableList or characterSheet
             const isClickInsideList = sortableList.contains(event.target);
             const isClickInsideSheet = characterSheet.contains(event.target);
-
-            // Also check if the click target is a status checkbox (to prevent clearing sheet when toggling)
             const isStatusCheckbox = event.target.classList.contains('status-checkbox');
 
             if (!isClickInsideList && !isClickInsideSheet && !isStatusCheckbox) {
@@ -452,7 +434,13 @@
         // --- Load state when the page finishes loading ---
         window.addEventListener('load', () => {
             loadState();
-            clearCharacterSheet(); // Initialize character sheet to blank state on load
+            clearCharacterSheet();
+            // Automatically select the first item if the list is not empty after loading
+            const firstItem = sortableList.querySelector('li');
+            if (firstItem) {
+                firstItem.classList.add('highlighted');
+                populateCharacterSheet(firstItem);
+            }
         });
     </script>
 
