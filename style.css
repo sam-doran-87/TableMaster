@@ -1,4 +1,4 @@
-/* New Color Palette Variables (Optional but good practice) */
+/* New Color Palette Variables (from previous iteration - keeping them for consistency) */
 :root {
     --bg-primary: #f2f4f8; /* Light blue-gray background */
     --bg-card: #ffffff; /* White card/container background */
@@ -57,83 +57,118 @@
 /* General body and heading styling */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0; /* Reset default margin */
-    padding: 20px; /* Add padding to body */
+    margin: 0;
+    padding: 20px; /* Overall body padding */
     background-color: var(--bg-primary);
     color: var(--text-dark);
-    display: flex; /* Use flexbox for overall layout */
-    flex-direction: column; /* Stack content vertically */
+    display: flex;
+    flex-direction: column;
     align-items: center; /* Center content horizontally */
-    min-height: 100vh; /* Full viewport height */
-    box-sizing: border-box; /* Include padding in element's total width/height */
+    min-height: 100vh;
+    box-sizing: border-box;
 }
 
 h2 {
     color: var(--text-dark);
     text-align: center;
-    margin-bottom: 30px;
-    font-size: 2.5em; /* Slightly larger heading */
+    margin-bottom: 30px; /* Space below main title */
+    font-size: 2.5em;
     letter-spacing: -0.02em;
 }
 
-/* Container for main interactive sections */
-.container {
+/* Main container for the two columns (Tracker and Character Sheet) */
+.main-content-wrapper {
     display: flex;
-    flex-direction: column;
-    gap: 25px; /* Space between main sections */
-    width: 100%; /* Take full width of body padding */
-    max-width: 480px; /* Overall max width for a cleaner look on desktop */
-    margin: 0 auto; /* Center the container */
+    flex-direction: row; /* Default to row for desktop */
+    gap: 25px; /* Space between the two main cards */
+    width: 100%;
+    max-width: 1000px; /* Max width for the entire layout on desktop */
+    margin: 0 auto; /* Center the wrapper */
+    align-items: flex-start; /* Align items to the top */
 }
 
 /* Base styles for cards/sections */
 .card {
     background-color: var(--bg-card);
     border: 1px solid var(--border-light);
-    border-radius: 12px; /* Slightly more rounded corners */
-    box-shadow: 0 6px 12px rgba(0,0,0,0.08); /* More pronounced shadow */
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+    padding: 20px; /* Default card padding */
+    box-sizing: border-box;
+}
+
+/* The primary Encounter Tracker Card that contains most elements */
+.encounter-tracker-card {
+    flex-grow: 1; /* Allows it to grow and fill space */
+    flex-basis: 55%; /* Give it a larger base width */
+    min-width: 320px; /* Minimum width before wrapping */
+    
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Space between sections within this card */
+
+    /* Inherit .card styles */
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.08);
     padding: 20px;
     box-sizing: border-box;
 }
 
+/* The Character Sheet Card */
+#character-sheet {
+    flex-grow: 1; /* Allows it to grow and fill space */
+    flex-basis: 45%; /* Give it a smaller base width */
+    min-width: 300px; /* Minimum width before wrapping */
+
+    /* Inherit .card styles */
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+    padding: 25px; /* Slightly more internal padding for the sheet */
+    box-sizing: border-box;
+}
+
+/* Specific styling for elements *inside* the tracker card, overriding previous direct styling */
 /* Action Controls (Add Character, Sort) */
 .action-controls {
-    @extend .card; /* Inherit card styles */
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    padding: 20px; /* Increased padding for the card */
+    gap: 12px; /* Slightly reduced gap */
+    padding: 0; /* Remove card-level padding, already in parent .encounter-tracker-card */
 }
 
 .add-item-inputs {
     display: flex;
     gap: 10px;
-    flex-wrap: wrap; /* Allow inputs to wrap on smaller screens */
+    flex-wrap: wrap;
     justify-content: center;
 }
 
 #newItemText, #newItemInitiative {
-    padding: 12px 15px; /* More padding */
+    padding: 10px 12px; /* Smaller padding for inputs */
     border: 1px solid var(--border-light);
-    border-radius: 8px; /* Consistent border-radius */
-    font-size: 17px; /* Slightly larger font */
-    box-shadow: inset 0 1px 4px rgba(0,0,0,0.08); /* Stronger inset shadow */
+    border-radius: 8px;
+    font-size: 16px; /* Smaller font */
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.07); /* Lighter inset shadow */
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 #newItemText:focus, #newItemInitiative:focus {
     border-color: var(--btn-primary);
-    box-shadow: inset 0 1px 4px rgba(0,0,0,0.1), 0 0 0 3px rgba(14, 116, 144, 0.2); /* Focus glow */
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.09), 0 0 0 3px rgba(14, 116, 144, 0.2);
     outline: none;
 }
 #newItemText {
     flex-grow: 2;
-    min-width: 160px; /* Slightly larger min-width */
+    min-width: 150px;
 }
 #newItemInitiative {
     flex-grow: 1;
-    max-width: 110px;
+    max-width: 100px; /* Slightly smaller width */
     text-align: center;
-    -moz-appearance: textfield; /* Firefox spinner removal */
+    -moz-appearance: textfield;
 }
 #newItemInitiative::-webkit-outer-spin-button,
 #newItemInitiative::-webkit-inner-spin-button {
@@ -143,25 +178,25 @@ h2 {
 
 .buttons-row {
     display: flex;
-    gap: 15px; /* Increased gap */
+    gap: 10px; /* Reduced gap */
     flex-wrap: wrap;
     justify-content: center;
 }
 
-/* General Button Styling */
+/* General Button Styling (Made smaller) */
 button {
-    padding: 12px 22px; /* More padding */
+    padding: 10px 18px; /* Smaller padding */
     border: none;
-    border-radius: 8px; /* Consistent border-radius */
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 17px;
-    font-weight: 600; /* Slightly bolder text */
+    font-size: 16px; /* Smaller font */
+    font-weight: 600;
     transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
     flex-grow: 1;
-    min-width: 130px; /* Consistent min-width */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle button shadow */
+    min-width: 120px; /* Adjusted min-width for smaller buttons */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08); /* Slightly lighter button shadow */
 }
-button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
+button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
 
 #addItemButton {
     background-color: var(--btn-primary);
@@ -180,19 +215,17 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
 
 /* Turn Controls */
 .turn-controls {
-    @extend .card; /* Inherit card styles */
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 20px; /* Increased gap */
-    padding: 15px 20px; /* Slightly less padding than other cards */
-    margin-bottom: 25px; /* Space below turn controls */
+    gap: 15px; /* Reduced gap */
+    padding: 0; /* Remove card-level padding */
 }
 
 #prevTurnButton, #nextTurnButton {
     background-color: var(--btn-turn);
     color: white;
-    min-width: 110px; /* Slightly smaller for turn buttons */
+    min-width: 100px; /* Adjusted min-width */
 }
 #prevTurnButton:hover { background-color: var(--btn-turn-hover); }
 #prevTurnButton:active { background-color: var(--btn-turn-active); }
@@ -200,12 +233,12 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
 #nextTurnButton:active { background-color: var(--btn-turn-active); }
 
 #roundCounter {
-    font-size: 1.4em; /* Larger round counter */
-    font-weight: 700; /* Bolder */
+    font-size: 1.3em; /* Slightly smaller */
+    font-weight: 700;
     color: var(--text-dark);
     flex-shrink: 0;
     text-align: center;
-    min-width: 80px; /* Ensure space for "Round: XX" */
+    min-width: 70px;
 }
 
 
@@ -213,62 +246,58 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
 #sortable-list {
     list-style: none;
     padding: 0;
-    width: 100%; /* Full width within its parent (.container) */
-    /* Remove redundant margin and border/shadow from here, as parent .card provides it */
-    margin: 0;
+    width: 100%;
+    margin: 0; /* No external margin for the list */
+    /* No border/shadow here; the parent .encounter-tracker-card will provide it */
+    border-radius: 0; /* Ensure no residual border-radius conflicts with parent */
 }
 
 /* Default List Item Styles */
 #sortable-list li {
     margin: 0;
-    padding: 12px 18px; /* More padding for items */
+    padding: 10px 15px; /* Smaller padding for list items */
     border-bottom: 1px solid var(--border-light);
-    font-size: 16px;
+    font-size: 15px; /* Slightly smaller font */
     line-height: 1.5;
     display: flex;
     align-items: center;
-    gap: 12px; /* Consistent gap between elements in list item */
+    gap: 10px; /* Reduced gap */
     justify-content: space-between;
 
-    background-color: var(--bg-card); /* White background for items */
+    background-color: var(--bg-card);
     color: var(--text-dark);
     transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
     cursor: pointer;
-    border-left: 5px solid transparent; /* For visual cues like locked/highlighted */
+    border-left: 5px solid transparent;
 }
-#sortable-list li:last-child { border-bottom: none; }
-#sortable-list li:first-child { border-top-left-radius: 12px; border-top-right-radius: 12px; }
-#sortable-list li:last-child { border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
-/* Override specific borders for middle items to retain overall card shape */
-#sortable-list li:not(:first-child):not(:last-child) { border-radius: 0; }
+/* No border-radius on list items themselves to maintain the parent card's rounded corners */
+#sortable-list li:first-child { border-top-left-radius: 0; border-top-right-radius: 0; }
+#sortable-list li:last-child { border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom: none; }
 
 
 /* Highlighted List Item Style */
 #sortable-list li.highlighted {
     background-color: var(--highlight-bg);
     color: var(--highlight-text);
-    border-left: 5px solid var(--highlight-border); /* Visual highlight */
-    transform: scale(1.00); /* No scale, just a border/color change */
-    box-shadow: 0 2px 8px rgba(234, 179, 8, 0.2); /* Soft shadow for highlight */
+    border-left: 5px solid var(--highlight-border);
+    transform: scale(1.00);
+    box-shadow: 0 2px 8px rgba(234, 179, 8, 0.2);
     z-index: 1;
 }
 
-
 /* Hover State for List Items */
 #sortable-list li:not(.sortable-chosen):not(.sortable-ghost):not(.highlighted):hover {
-    background-color: var(--bg-primary); /* Lighter background on hover */
-    /* border-color: var(--border-light); */ /* Already has bottom border */
+    background-color: var(--bg-primary);
     color: var(--text-dark);
     transform: translateY(-1px);
     box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
-
 /* Dragging Styles (SortableJS specific classes) */
 #sortable-list li.sortable-chosen {
-    padding: 15px; /* Slightly larger padding when chosen */
+    padding: 12px 18px; /* Slightly larger padding when chosen */
     background-color: var(--drag-chosen-bg);
-    border: 1px solid var(--drag-chosen-border); /* Single border for chosen item */
+    border: 1px solid var(--drag-chosen-border);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
     transform: scale(1.02);
     z-index: 1000;
@@ -277,28 +306,28 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
 }
 
 #sortable-list li.sortable-ghost {
-    opacity: 0.3; /* More transparent ghost */
+    opacity: 0.3;
     background-color: var(--border-light);
     border: 2px dashed var(--text-subtle);
-    padding: 12px 18px; /* Match normal list item padding */
+    padding: 10px 15px; /* Match normal list item padding */
     box-sizing: border-box;
 }
 
 /* Styling for the Drag Handle */
 #sortable-list li .handle {
     flex-shrink: 0;
-    width: 28px; /* Slightly larger handle */
-    height: 28px;
-    background-color: var(--text-subtle); /* Grayish handle */
+    width: 26px; /* Slightly smaller handle */
+    height: 26px;
+    background-color: var(--text-subtle);
     color: white;
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 6px; /* Slightly more rounded */
-    font-size: 1.3em; /* Larger icon */
+    border-radius: 5px; /* Slightly less rounded */
+    font-size: 1.2em; /* Smaller icon */
     font-weight: bold;
     cursor: grab;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 #sortable-list li .handle:hover {
     background-color: var(--text-dark);
@@ -308,18 +337,18 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
     cursor: grabbing;
 }
 
-
 /* Styling for the Initiative Score span */
 #sortable-list li .initiative-score {
     flex-shrink: 0;
-    width: 45px; /* Wider for better numbers */
+    width: 40px; /* Slightly narrower */
     text-align: center;
     font-weight: bold;
-    background-color: rgba(0, 0, 0, 0.05); /* Subtle dark background */
-    color: var(--text-dark); /* Darker text */
-    padding: 5px 0;
-    border-radius: 6px;
+    background-color: rgba(0, 0, 0, 0.04);
+    color: var(--text-dark);
+    padding: 4px 0; /* Smaller padding */
+    border-radius: 5px;
     cursor: text;
+    font-size: 0.95em; /* Smaller font */
 }
 
 /* Styling for the Character Name span */
@@ -327,21 +356,21 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
     flex-grow: 1;
     min-height: 1.5em;
     cursor: text;
-    padding: 0 5px;
+    padding: 0 4px; /* Smaller padding */
     border-radius: 4px;
-    /* margin-right: 10px; removed as gap handles spacing */
     color: var(--text-dark);
 }
 
 /* HP display within the list item */
 .list-item-hp {
     flex-shrink: 0;
-    font-weight: 700; /* Bolder HP */
-    padding: 4px 8px; /* More padding */
-    border-radius: 6px;
-    min-width: 60px; /* Ensure enough space for "HP: XX" */
+    font-weight: 600; /* Slightly less bold */
+    padding: 3px 7px; /* Smaller padding */
+    border-radius: 5px;
+    min-width: 55px; /* Adjusted min-width */
     text-align: center;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2); /* Subtle text shadow for readability */
+    text-shadow: 0 1px 1px rgba(0,0,0,0.15); /* Lighter shadow */
+    font-size: 0.9em; /* Smaller font */
 }
 
 /* HP color coding (using variables) */
@@ -355,13 +384,13 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
 .edit-button {
     background-color: var(--btn-edit);
     color: white;
-    border-radius: 6px; /* Slightly smaller radius for small buttons */
-    padding: 6px 12px; /* Adjusted padding */
-    font-size: 0.8em; /* Smaller font for control buttons */
+    border-radius: 5px; /* Consistent smaller radius */
+    padding: 5px 10px; /* Adjusted padding */
+    font-size: 0.75em; /* Smaller font for control buttons */
     font-weight: 500;
-    min-width: unset; /* Override general button min-width */
-    flex-grow: 0; /* Don't grow */
-    box-shadow: none; /* No shadow for small buttons */
+    min-width: unset;
+    flex-grow: 0;
+    box-shadow: none;
 }
 .edit-button:hover { background-color: var(--btn-edit-hover); }
 .edit-button:active { background-color: var(--btn-edit-active); }
@@ -371,9 +400,9 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
 .lock-button {
     background-color: var(--btn-lock);
     color: white;
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 0.8em;
+    border-radius: 5px;
+    padding: 5px 10px;
+    font-size: 0.75em;
     font-weight: 500;
     min-width: unset;
     flex-grow: 0;
@@ -392,16 +421,16 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
 .remove-button {
     background-color: var(--btn-remove);
     color: white;
-    border-radius: 50%; /* Circle button */
-    width: 28px; /* Consistent size with handle */
-    height: 28px;
-    font-size: 0.9em; /* Slightly larger X */
+    border-radius: 50%;
+    width: 26px; /* Consistent size with handle */
+    height: 26px;
+    font-size: 0.8em; /* Slightly smaller X */
     font-weight: bold;
-    min-width: unset; /* Override general button min-width */
+    min-width: unset;
     flex-grow: 0;
     box-shadow: none;
 }
-.remove-button:hover { background-color: var(--btn-remove-hover); transform: scale(1.15); } /* More prominent hover */
+.remove-button:hover { background-color: var(--btn-remove-hover); transform: scale(1.1); } /* Slightly less prominent hover */
 .remove-button:active { background-color: var(--btn-remove-active); transform: scale(1.0); }
 
 
@@ -412,30 +441,29 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
     background: var(--editable-bg) !important;
     color: var(--text-dark);
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-    padding: 0 4px; /* More internal padding */
+    padding: 0 4px;
     border-radius: 4px;
 }
 
 /* Reset Controls */
 .reset-controls {
-    @extend .card; /* Inherit card styles */
     display: flex;
     flex-direction: column;
-    gap: 15px; /* Space between reset buttons */
-    padding: 20px;
+    gap: 10px; /* Reduced gap */
+    padding: 0; /* Remove card-level padding */
 }
 
 #resetListButton {
     background-color: var(--btn-reset-list);
     color: white;
-    min-width: unset; /* Allow to fill container */
+    min-width: unset;
 }
 #resetListButton:hover { background-color: var(--btn-reset-list-hover); }
 #resetListButton:active { background-color: var(--btn-reset-list-active); }
 
 #resetTurnButton {
     background-color: var(--btn-reset-turns);
-    color: var(--text-dark); /* Dark text on yellow */
+    color: var(--text-dark);
     min-width: unset;
 }
 #resetTurnButton:hover { background-color: var(--btn-reset-turns-hover); }
@@ -443,32 +471,27 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
 
 
 /* Character Sheet Styles */
-#character-sheet {
-    @extend .card; /* Inherit card styles */
-    padding: 25px 25px 20px; /* More padding, especially vertical */
-}
-
 #character-sheet h3 {
     text-align: center;
     color: var(--text-dark);
     margin-top: 0;
-    margin-bottom: 20px; /* More space below heading */
-    font-size: 2em; /* Slightly larger */
-    border-bottom: 1px solid var(--border-light); /* Lighter border */
-    padding-bottom: 12px; /* More padding */
+    margin-bottom: 18px; /* Slightly less space */
+    font-size: 1.8em; /* Slightly smaller */
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: 10px;
 }
 
 #character-sheet p {
-    margin-bottom: 10px; /* More space between lines */
-    font-size: 1.15em; /* Slightly larger font */
+    margin-bottom: 8px; /* Reduced space between lines */
+    font-size: 1.05em; /* Slightly smaller font */
     display: flex;
     align-items: baseline;
-    gap: 10px; /* Space between strong and span */
+    gap: 8px; /* Reduced space */
 }
 
 #character-sheet p strong {
-    color: var(--text-subtle); /* More subtle label color */
-    min-width: 80px; /* More space for labels */
+    color: var(--text-subtle);
+    min-width: 70px; /* Adjusted min-width */
     flex-shrink: 0;
 }
 
@@ -482,207 +505,51 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
 #character-sheet .editable-hp,
 #character-sheet .editable-stat {
     cursor: pointer;
-    min-width: 40px; /* Ensure good clickable area */
+    min-width: 35px; /* Adjusted clickable area */
     display: inline-block;
-    padding: 2px 4px; /* Slight padding for visual consistency */
+    padding: 1px 3px; /* Smaller padding */
     border-radius: 4px;
-    background-color: rgba(0,0,0,0.02); /* Very subtle background */
+    background-color: rgba(0,0,0,0.015); /* More subtle background */
 }
 #character-sheet .editable-hp:hover,
 #character-sheet .editable-stat:hover {
-    background-color: rgba(0,0,0,0.05); /* Slightly darker on hover */
+    background-color: rgba(0,0,0,0.04);
 }
 
 
 /* Status Section specific styles */
 .status-section {
-    margin-top: 20px; /* More margin */
-    padding-top: 15px;
+    margin-top: 18px; /* Reduced margin */
+    padding-top: 12px; /* Reduced padding */
     border-top: 1px solid var(--border-light);
 }
 
 .status-section p {
-    font-weight: 700; /* Bolder status heading */
-    margin-bottom: 12px;
-    font-size: 1.15em;
+    font-weight: 600; /* Slightly less bold */
+    margin-bottom: 10px;
+    font-size: 1.05em;
     color: var(--text-dark);
 }
 
 .status-section label {
-    display: flex; /* Flexbox for checkbox and text alignment */
+    display: flex;
     align-items: center;
-    margin-bottom: 8px; /* More space between checkboxes */
-    font-size: 1.05em;
+    margin-bottom: 6px; /* Reduced space */
+    font-size: 1em; /* Slightly smaller */
     cursor: pointer;
     color: var(--text-dark);
 }
 
 .status-section input[type="checkbox"] {
-    margin-right: 10px; /* More space */
-    transform: scale(1.3); /* Slightly larger checkboxes */
+    margin-right: 8px; /* Reduced space */
+    transform: scale(1.2); /* Slightly smaller checkboxes */
     cursor: pointer;
-    accent-color: var(--btn-primary); /* Accent color for checked state */
+    accent-color: var(--btn-primary);
 }
 
 
 /* Notes Section Styles */
 .notes-section {
-    margin-top: 20px;
-    padding-top: 15px;
-    border-top: 1px solid var(--border-light);
-}
-
-.notes-section p {
-    font-weight: 700;
-    margin-bottom: 8px;
-    font-size: 1.15em;
-    color: var(--text-dark);
-}
-
-#sheet-notes {
-    display: block;
-    width: 100%; /* Take full width of parent padding */
-    min-height: 100px; /* Taller notes area */
-    border: 1px solid var(--border-light);
-    border-radius: 8px;
-    padding: 10px;
-    font-size: 1em;
-    line-height: 1.5;
-    overflow-y: auto;
-    cursor: text;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.08); /* Consistent inset shadow */
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    color: var(--text-dark);
-}
-#sheet-notes:focus {
-    border-color: var(--editable-outline);
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1), 0 0 0 3px rgba(60, 150, 250, 0.2);
-    outline: none;
-}
-
-/* Styles for when character sheet fields are in editable mode */
-#character-sheet .editable-hp[contenteditable="true"],
-#character-sheet .editable-stat[contenteditable="true"],
-#character-sheet #sheet-notes[contenteditable="true"]
-{
-    outline: 2px dashed var(--editable-outline);
-    background: var(--editable-bg) !important;
-    color: var(--text-dark);
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-    padding: 2px 4px; /* Consistent padding when editable */
-    border-radius: 4px;
-}
-
-
-/* --- Responsive Adjustments --- */
-@media (max-width: 600px) {
-    body {
-        padding: 15px; /* Reduce overall body padding on small screens */
-    }
-
-    h2 {
-        font-size: 2em;
-        margin-bottom: 20px;
-    }
-
-    .container {
-        gap: 20px; /* Slightly less gap between sections */
-    }
-
-    .card {
-        padding: 15px; /* Reduce card padding */
-        border-radius: 10px; /* Slightly less rounded corners */
-        box-shadow: 0 4px 10px rgba(0,0,0,0.06);
-    }
-
-    /* Input fields stack vertically on very small screens */
-    .add-item-inputs {
-        flex-direction: column;
-        gap: 12px;
-    }
-    #newItemText, #newItemInitiative {
-        width: 100%; /* Full width */
-        min-width: unset;
-        max-width: unset;
-        text-align: left; /* Align text left for full-width inputs */
-    }
-    #newItemInitiative {
-        text-align: center; /* Keep initiative centered */
-    }
-
-
-    /* Buttons stack vertically on smaller screens */
-    .buttons-row {
-        flex-direction: column;
-        gap: 12px;
-    }
-    button {
-        width: 100%; /* Full width for buttons */
-        min-width: unset;
-        font-size: 16px;
-        padding: 10px 15px;
-    }
-
-    /* Turn controls adjustments */
-    .turn-controls {
-        flex-wrap: wrap; /* Allow wrapping */
-        gap: 12px;
-        padding: 12px 15px;
-    }
-    #prevTurnButton, #nextTurnButton {
-        width: calc(50% - 6px); /* Two buttons per row */
-        min-width: unset;
-    }
-    #roundCounter {
-        width: 100%; /* Full width for round counter */
-        order: -1; /* Place round counter at the top of the flex container */
-        font-size: 1.2em;
-        margin-bottom: 5px;
-    }
-
-    /* List item adjustments */
-    #sortable-list li {
-        flex-wrap: wrap; /* Allow contents to wrap */
-        padding: 10px 15px;
-        gap: 8px 10px; /* Vertical and horizontal gap */
-    }
-    #sortable-list li .handle { order: 1; }
-    #sortable-list li .initiative-score { order: 2; width: auto; min-width: 40px; }
-    #sortable-list li .list-item-hp { order: 3; width: auto; min-width: 60px; }
-    #sortable-list li .item-text { order: 4; flex-basis: 100%; margin-right: 0;} /* Name takes full row below */
-    #sortable-list li .lock-button { order: 5; }
-    #sortable-list li .edit-button { order: 6; }
-    #sortable-list li .remove-button { order: 7; }
-
-    /* Character sheet adjustments */
-    #character-sheet {
-        padding: 20px;
-    }
-    #character-sheet p {
-        font-size: 1em;
-        flex-direction: column; /* Labels and values stack */
-        align-items: flex-start;
-        gap: 2px;
-    }
-    #character-sheet p strong {
-        min-width: unset;
-    }
-
-    .status-section label {
-        font-size: 0.95em;
-    }
-    .status-section input[type="checkbox"] {
-        transform: scale(1.1);
-    }
-
-    #sheet-notes {
-        min-height: 80px;
-    }
-}
-
-/* Ensure the main container element is correctly setup in HTML */
-/* <div class="container"> */
-/* ... all your sections ... */
-/* </div> */
+    margin-top: 18px;
+    padding-top: 12px;
+    border
