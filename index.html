@@ -97,6 +97,16 @@
             chosenClass: 'sortable-chosen',
             dragClass: 'sortable-drag',
             handle: '.handle',
+ sortable.options.onEnd = function (evt) {
+            saveState(); // Save state after drag-and-drop reorder
+            // Re-calculate highlightedIndex if the highlighted item moved
+            const currentHighlighted = document.querySelector('.highlighted');
+            if (currentHighlighted) {
+                highlightedIndex = Array.from(sortableList.children).indexOf(currentHighlighted);
+            } else {
+                highlightedIndex = -1;
+            }
+        };
         });
 
         // --- Helper function to create a new list item HTML element ---
@@ -179,23 +189,91 @@
             sel.removeAllRanges();
             sel.addRange(range);
         }
+ // Get references to character sheet elements (add new ones)
+        const characterSheet = document.getElementById('character-sheet');
+        const sheetTitle = document.getElementById('sheet-title');
+        const sheetCurrentHp = document.getElementById('sheet-current-hp');
+        const sheetMaxHp = document.getElementById('sheet-max-hp');
+        const sheetAC = document.getElementById('sheet-ac');         // New reference
+        const sheetSpeed = document.getElementById('sheet-speed');   // New reference
+        const sheetNotes = document.getElementById('sheet-notes');   // New reference
+        const statusCheckboxes = document.querySelectorAll('.status-checkbox');
 
+
+        // --- Helper function to create a new list item HTML element ---
+        // Add new parameters for AC, Speed, Notes, and Locked status
+        function createListItemElement(nameText, initiativeValue, currentHp = 30, maxHp = 30, ac = 10, speed = '30ft', notes = '', statusObj = null, locked = false) {
+            const listItem = document.createElement('li');
+            listItem.setAttribute('data-initiative', initiativeValue);
+            listItem.setAttribute('data-current-hp', currentHp);
+            listItem.setAttribute('data-max-hp', maxHp);
+            listItem.setAttribute('data-ac', ac); // New attribute
+            listItem.setAttribute('data-speed', speed); // New attribute
+            listItem.setAttribute('data-notes', notes); // New attribute
+            listItem.setAttribute('data-name', nameText); // Store original name for locked items
+
+            if (locked) {
+                listItem.classList.add('locked');
+            }
+
+            if (statusObj === null) {
+                statusObj = {
+                    "advantage": false, // Change keys to lowercase for consistency with IDs
+                    "disadvantage": false,
+                    "poisoned": false,
+                    "ko": false,
+                    "dead": false
+                };
+            }
+            listItem.setAttribute('data-status', JSON.stringify(statusObj));
+
+            listItem.innerHTML = `
+                <span class="handle">⋮</span>
+                <span class="initiative-score">${initiativeValue}</span>
+                <span class="item-text">${nameText}</span>
+                <span class="list-item-hp">HP: ${currentHp}</span> <button class="lock-button">${locked ? 'Locked' : 'Lock'}</button> <button class="edit-button">Edit</button>
+                <button class="remove-button">X</button>
+            `;
+            // Apply initial HP color
+            applyHpColor(listItem);
+            return listItem;
+        }
+
+        // --- Helper function to apply HP color to list item ---
+        function applyHpColor(listItem) {
+            const currentHp = parseInt(listItem.getAttribute('data-current-hp'), 10);
+            const maxHp = parseInt(listItem.getAttribute('data-max-hp'), 10);
+            const hpSpan = listItem.querySelector('.list-item-hp');
+
+            if (!hpSpan) return; // Exit if the HP span isn't found
+
+            hpSpan.classList.remove('hp-full', 'hp-mid', 'hp-low', 'hp-zero');
+
+            if (currentHp <= 0) {
+                hpSpan.classList.add('hp-zero');
+            } else if (currentHp / maxHp <= 0.25) { // 25% or less
+                hpSpan.classList.add('hp-low');
+            } else if (currentHp / maxHp <= 0.75) { // 75% or less (but greater than 25%)
+                hpSpan.classList.add('hp-mid');
+            } else { // Greater than 75%
+                hpSpan.classList.add('hp-full');
+            }
+        }
         // --- Function to Add a New List Item ---
-        function addListItem() {
+       function addListItem() {
             const nameText = newItemText.value.trim();
             const initiativeValue = parseInt(newItemInitiative.value.trim(), 10) || 0;
 
             if (nameText) {
-                const listItem = createListItemElement(nameText, initiativeValue, 30, 30);
+                // Pass default values for AC, Speed, Notes, and locked (false)
+                const listItem = createListItemElement(nameText, initiativeValue, 30, 30, 10, '30ft', '', null, false);
                 sortableList.appendChild(listItem);
                 newItemText.value = '';
                 newItemInitiative.value = '';
                 newItemText.focus();
                 saveState();
-                // If this is the first item added, select it
                 if (sortableList.children.length === 1) {
-                    listItem.classList.add('highlighted');
-                    populateCharacterSheet(listItem);
+                    updateHighlight(listItem);
                 }
             }
         }
@@ -245,7 +323,41 @@
                 }
             });
         }
+ statusCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const highlightedListItem = document.querySelector('.highlighted');
+                if (highlightedListItem) {
+                    const statusString = highlightedListItem.getAttribute('data-status');
+                    let statusObj;
+                    try {
+                        statusObj = JSON.parse(statusString);
+                    } catch (e) {
+                        console.error("Error parsing status JSON on checkbox change:", e);
+                        statusObj = {}; // Fallback
+                    }
 
+                    const statusKey = this.id.replace('status-', ''); // e.g., "advantage", "ko"
+
+                    // Handle "K.O." and "Dead" exclusivity (using consistent lowercase keys)
+                    if (statusKey === 'ko' && this.checked) {
+                        statusObj.dead = false; // Note: using lowercase here
+                        const deadCheckbox = document.getElementById('status-dead');
+                        if (deadCheckbox) deadCheckbox.checked = false;
+                    } else if (statusKey === 'dead' && this.checked) {
+                        statusObj.ko = false; // Note: using lowercase here
+                        const koCheckbox = document.getElementById('status-ko');
+                        if (koCheckbox) koCheckbox.checked = false;
+                    }
+
+                    statusObj[statusKey] = this.checked;
+
+                    highlightedListItem.setAttribute('data-status', JSON.stringify(statusObj));
+                    saveState();
+                    // Re-populate to ensure UI reflects exclusivity rules immediately
+                    populateCharacterSheet(highlightedListItem);
+                }
+            });
+        });
         // --- Function to clear the character sheet ---
         function clearCharacterSheet() {
             sheetTitle.textContent = 'Selected Character';
@@ -257,24 +369,101 @@
             // You can optionally hide the sheet completely if no character is selected:
             // characterSheet.style.display = 'none';
         }
+function populateCharacterSheet(listItem) {
+            if (!listItem) {
+                clearCharacterSheet();
+                return;
+            }
+            const name = listItem.querySelector('.item-text').textContent;
+            const currentHp = listItem.getAttribute('data-current-hp');
+            const maxHp = listItem.getAttribute('data-max-hp');
+            const ac = listItem.getAttribute('data-ac'); // New
+            const speed = listItem.getAttribute('data-speed'); // New
+            const notes = listItem.getAttribute('data-notes'); // New
+            const statusString = listItem.getAttribute('data-status');
 
+            let statusObj;
+            try {
+                statusObj = JSON.parse(statusString);
+            } catch (e) {
+                console.error("Error parsing status JSON for", name, ":", e);
+                statusObj = {}; // Fallback to empty object on error
+            }
+
+            sheetTitle.textContent = name;
+            sheetCurrentHp.textContent = currentHp;
+            sheetMaxHp.textContent = maxHp;
+            sheetAC.textContent = ac;       // Set AC
+            sheetSpeed.textContent = speed; // Set Speed
+            sheetNotes.textContent = notes; // Set Notes
+            characterSheet.style.display = 'block';
+
+            // Set checkbox states based on statusObj (ensure keys match new lowercase)
+            statusCheckboxes.forEach(checkbox => {
+                const statusKey = checkbox.id.replace('status-', ''); // e.g., "advantage", "ko"
+                if (statusObj.hasOwnProperty(statusKey)) {
+                    checkbox.checked = statusObj[statusKey];
+                } else {
+                    checkbox.checked = false;
+                }
+            });
+
+            // Update lock button text based on listItem's locked status
+            const lockButton = listItem.querySelector('.lock-button');
+            if (lockButton) {
+                if (listItem.classList.contains('locked')) {
+                    lockButton.textContent = 'Locked';
+                    lockButton.classList.add('locked'); // Add class for styling
+                } else {
+                    lockButton.textContent = 'Lock';
+                    lockButton.classList.remove('locked'); // Remove class for styling
+                }
+            }
+        }
+
+        // --- Function to clear the character sheet ---
+        // Clear new fields (AC, Speed, Notes)
+        function clearCharacterSheet() {
+            sheetTitle.textContent = 'Selected Character';
+            sheetCurrentHp.textContent = '--';
+            sheetMaxHp.textContent = '--';
+            sheetAC.textContent = '--';       // Clear AC
+            sheetSpeed.textContent = '--';    // Clear Speed
+            sheetNotes.textContent = 'No notes.'; // Clear Notes
+            statusCheckboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+        }
+        
         // --- CENTRALIZED Event Listener for List Item Clicks ---
         sortableList.addEventListener('click', function(event) {
             const clickedItem = event.target.closest('li');
 
             if (event.target.classList.contains('remove-button')) {
                 if (clickedItem) {
+                    if (clickedItem.classList.contains('locked')) {
+                        alert("This character is locked and cannot be removed. Unlock them first.");
+                        return; // Prevent removal if locked
+                    }
                     const wasHighlighted = clickedItem.classList.contains('highlighted');
-                    sortableList.removeChild(clickedItem);
-                    saveState();
-                    if (wasHighlighted) {
-                        // If the removed item was highlighted, try to highlight the next one or clear
-                        const newFirstItem = sortableList.querySelector('li');
-                        if (newFirstItem) {
-                            newFirstItem.classList.add('highlighted');
-                            populateCharacterSheet(newFirstItem);
+                    if (confirm(`Are you sure you want to remove "${clickedItem.querySelector('.item-text').textContent}"?`)) {
+                        sortableList.removeChild(clickedItem);
+                        saveState();
+                        if (wasHighlighted) {
+                            const newFirstItem = sortableList.querySelector('li');
+                            if (newFirstItem) {
+                                updateHighlight(newFirstItem);
+                            } else {
+                                updateHighlight(null);
+                            }
                         } else {
-                            clearCharacterSheet();
+                            // If a non-highlighted item was removed, adjust highlightedIndex
+                            const currentHighlighted = document.querySelector('.highlighted');
+                            if (currentHighlighted) {
+                                highlightedIndex = Array.from(sortableList.children).indexOf(currentHighlighted);
+                            } else {
+                                highlightedIndex = -1;
+                            }
                         }
                     }
                 }
@@ -485,11 +674,16 @@
 
 
         // --- Clear highlight and sheet when clicking outside the list/sheet ---
-        document.addEventListener('click', function(event) {
+   document.addEventListener('click', function(event) {
             const isClickInsideList = sortableList.contains(event.target);
             const isClickInsideSheet = characterSheet.contains(event.target);
-            const isStatusCheckbox = event.target.classList.contains('status-checkbox'); // Keep this check
-            const isResetButton = resetListButton.contains(event.target); // Exclude reset button click
+            const isStatusCheckbox = event.target.classList.contains('status-checkbox');
+            const isResetButton = resetListButton.contains(event.target) || resetTurnButton.contains(event.target); // Include new reset button
+
+            if (!isClickInsideList && !isClickInsideSheet && !isStatusCheckbox && !isResetButton) {
+                updateHighlight(null); // Clear highlight and sheet
+            }
+        });
 
             // Don't clear if click is inside list, inside sheet, on a status checkbox, or on the reset button itself
             if (!isClickInsideList && !isClickInsideSheet && !isStatusCheckbox && !isResetButton) {
@@ -705,6 +899,67 @@
             }
             // ... existing edit-button and handle logic ...
 
+             if (event.target.classList.contains('edit-button')) {
+                if (clickedItem) {
+                    const itemTextSpan = clickedItem.querySelector('.item-text');
+                    const initiativeScoreSpan = clickedItem.querySelector('.initiative-score'); // Also make initiative editable directly
+                    if (itemTextSpan) {
+                        startEditingSpan(itemTextSpan);
+                    }
+                    if (initiativeScoreSpan) {
+                        startEditingSpan(initiativeScoreSpan);
+                    }
+                }
+                return;
+            }
+
+            if (event.target.classList.contains('lock-button')) { // New: Lock/Unlock button
+                if (clickedItem) {
+                    clickedItem.classList.toggle('locked');
+                    const lockButton = event.target;
+                    if (clickedItem.classList.contains('locked')) {
+                        lockButton.textContent = 'Locked';
+                        lockButton.classList.add('locked');
+                        listItem.setAttribute('data-name', listItem.querySelector('.item-text').textContent); // Store current name for locked items
+                    } else {
+                        lockButton.textContent = 'Lock';
+                        lockButton.classList.remove('locked');
+                        listItem.removeAttribute('data-name'); // Remove if unlocked
+                    }
+                    saveState();
+                }
+                return;
+            }
+
+            if (event.target.classList.contains('handle')) {
+                return;
+            }
+
+            if (clickedItem) {
+                if (!clickedItem.classList.contains('highlighted')) {
+                    updateHighlight(clickedItem); // Use the new helper
+                }
+            }
+        });
+
+        // Add event listeners for new character sheet editable fields
+        sheetAC.addEventListener('click', function() {
+            if (document.querySelector('.highlighted')) {
+                startEditingSpan(sheetAC);
+            }
+        });
+        sheetSpeed.addEventListener('click', function() {
+            if (document.querySelector('.highlighted')) {
+                startEditingSpan(sheetSpeed);
+            }
+        });
+        sheetNotes.addEventListener('click', function() {
+            if (document.querySelector('.highlighted')) {
+                startEditingSpan(sheetNotes);
+            }
+        });
+
+        
             if (clickedItem) {
                 // Only change highlight if a different item is clicked
                 if (!clickedItem.classList.contains('highlighted')) {
