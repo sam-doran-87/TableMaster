@@ -22,13 +22,6 @@
     --btn-reset-turns-hover: #eab308;
     --btn-reset-turns-active: #d97706;
 
-    /* --btn-edit: #3b82f6; */ /* REMOVED - no more explicit edit button */
-    /* --btn-edit-hover: #2563eb; */
-    /* --btn-edit-active: #1d4ed8; */
-
-    /* --btn-lock: #0ea5e9; */ /* REMOVED - replaced by icon button with locked/unlocked states */
-    /* --btn-lock-hover: #0284c7; */
-    /* --btn-lock-active: #0369a1; */
     --btn-locked: #22c55e; /* Green when locked */
     --btn-locked-hover: #16a34a;
     --btn-locked-active: #15803d;
@@ -140,16 +133,16 @@ h2 {
 /* Action Controls (Add Character, Sort) */
 .action-controls {
     display: flex;
-    flex-direction: column;
-    gap: 12px;
+    flex-direction: column; /* Stack input row and sort button row */
+    gap: 15px; /* Space between input line and sort button */
     padding: 0;
 }
 
 .add-item-inputs {
     display: flex;
     gap: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
+    flex-wrap: wrap; /* Allow items to wrap */
+    align-items: center; /* Align vertically */
 }
 
 #newItemText, #newItemInitiative {
@@ -166,12 +159,12 @@ h2 {
     outline: none;
 }
 #newItemText {
-    flex-grow: 2;
-    min-width: 150px;
+    flex-grow: 1; /* Allow to grow */
+    min-width: 150px; /* Minimum width before wrapping */
 }
 #newItemInitiative {
-    flex-grow: 1;
-    max-width: 100px;
+    flex-grow: 0; /* Don't grow much */
+    width: 80px; /* Fixed width */
     text-align: center;
     -moz-appearance: textfield;
 }
@@ -181,7 +174,19 @@ h2 {
     margin: 0;
 }
 
-.buttons-row {
+/* Add Character Button (now next to inputs) */
+#addItemButton {
+    background-color: var(--btn-primary);
+    color: white;
+    flex-grow: 0; /* Don't grow automatically */
+    min-width: 120px; /* Ensure it has a reasonable minimum width */
+    padding: 10px 18px;
+}
+#addItemButton:hover { background-color: var(--btn-primary-hover); }
+#addItemButton:active { background-color: var(--btn-primary-active); }
+
+
+.buttons-row { /* This now only contains the Sort button */
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
@@ -197,18 +202,12 @@ button {
     font-size: 16px;
     font-weight: 600;
     transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
-    flex-grow: 1;
+    flex-grow: 1; /* By default, buttons in a flex container will grow */
     min-width: 120px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.08);
 }
 button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
 
-#addItemButton {
-    background-color: var(--btn-primary);
-    color: white;
-}
-#addItemButton:hover { background-color: var(--btn-primary-hover); }
-#addItemButton:active { background-color: var(--btn-primary-active); }
 
 #sortInitiativeButton {
     background-color: var(--btn-primary);
@@ -385,35 +384,35 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
 
 /* Styling for the Lock/Unlock Icon Button */
 .lock-button {
-    background-color: transparent; /* No background */
-    color: var(--icon-btn-neutral); /* Default gray color for icon */
-    border-radius: 50%; /* Make it round */
-    width: 28px; /* Fixed width/height */
+    background-color: transparent;
+    color: var(--icon-btn-neutral);
+    border-radius: 50%;
+    width: 28px;
     height: 28px;
     padding: 0;
-    font-size: 1.1em; /* Icon size */
+    font-size: 1.1em;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-width: unset; /* Override button defaults */
+    min-width: unset;
     flex-grow: 0;
     box-shadow: none;
     transition: color 0.2s ease, transform 0.1s ease;
 }
 .lock-button i {
-    pointer-events: none; /* Make icon clicks pass through to parent button */
+    pointer-events: none;
 }
 .lock-button:hover {
-    background-color: rgba(0,0,0,0.05); /* Light hover background */
+    background-color: rgba(0,0,0,0.05);
     color: var(--icon-btn-neutral-hover);
 }
 .lock-button:active {
     background-color: rgba(0,0,0,0.1);
     color: var(--icon-btn-neutral-active);
-    transform: translateY(0); /* Remove button active effect */
+    transform: translateY(0);
 }
 .lock-button.locked {
-    color: var(--icon-btn-locked-color); /* Green when locked */
+    color: var(--icon-btn-locked-color);
 }
 .lock-button.locked:hover {
     color: var(--icon-btn-locked-hover);
@@ -422,8 +421,8 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
 
 /* Styling for the Remove (X) Icon Button */
 .remove-button {
-    background-color: transparent; /* No background */
-    color: var(--icon-btn-neutral); /* Gray color for icon */
+    background-color: transparent;
+    color: var(--icon-btn-neutral);
     border-radius: 50%;
     width: 28px;
     height: 28px;
@@ -441,8 +440,8 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
     pointer-events: none;
 }
 .remove-button:hover {
-    background-color: rgba(255, 0, 0, 0.1); /* Subtle red hover background */
-    color: var(--btn-remove); /* Red 'X' on hover */
+    background-color: rgba(255, 0, 0, 0.1);
+    color: var(--btn-remove);
 }
 .remove-button:active {
     background-color: rgba(255, 0, 0, 0.2);
@@ -464,13 +463,13 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
 
 /* Reset Controls (Now side-by-side) */
 .reset-controls {
-    display: flex; /* Make them a flex container */
-    flex-direction: row; /* Arrange horizontally */
+    display: flex;
+    flex-direction: row;
     gap: 10px;
     padding: 0;
 }
 .reset-controls button {
-    flex-grow: 1; /* Allow them to grow and share space */
+    flex-grow: 1;
 }
 
 
@@ -623,7 +622,7 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
 hr.list-separator {
     border: none;
     border-top: 1px solid var(--border-light);
-    margin: 15px 0; /* Adjust spacing as needed */
+    margin: 15px 0;
 }
 
 
@@ -641,6 +640,24 @@ hr.list-separator {
         width: 100%;
         flex-basis: auto;
         min-width: unset;
+    }
+
+    /* For smaller screens, ensure Add Character button takes full width */
+    .add-item-inputs {
+        flex-direction: column;
+    }
+    #newItemText, #newItemInitiative, #addItemButton {
+        width: 100%;
+        max-width: unset;
+        min-width: unset;
+    }
+    #newItemInitiative {
+        text-align: center;
+    }
+
+    /* Sort button remains in its row and takes full width */
+    .buttons-row button {
+        width: 100%;
     }
 }
 
@@ -668,11 +685,11 @@ hr.list-separator {
         flex-direction: column;
         gap: 10px;
     }
-    #newItemText, #newItemInitiative {
+    #newItemText, #newItemInitiative, #addItemButton { /* Ensure add button also stacks */
         width: 100%;
         min-width: unset;
         max-width: unset;
-        text-align: left;
+        text-align: left; /* Text input */
         font-size: 15px;
         padding: 8px 10px;
     }
@@ -727,8 +744,8 @@ hr.list-separator {
     #sortable-list li .initiative-score { order: 2; width: auto; min-width: 35px; font-size: 0.9em; }
     #sortable-list li .list-item-hp { order: 3; width: auto; min-width: 50px; font-size: 0.85em; }
     #sortable-list li .item-text { order: 4; flex-basis: 100%; margin-right: 0;}
-    #sortable-list li .lock-button { order: 5; font-size: 1em; width: 26px; height: 26px;} /* Adjusted icon button size */
-    #sortable-list li .remove-button { order: 7; width: 26px; height: 26px; font-size: 1em; } /* Adjusted icon button size */
+    #sortable-list li .lock-button { order: 5; font-size: 1em; width: 26px; height: 26px;}
+    #sortable-list li .remove-button { order: 7; width: 26px; height: 26px; font-size: 1em; }
 
 
     /* Character sheet adjustments */
