@@ -547,7 +547,6 @@ h1 {
     color: var(--text-dark);
     min-width: 30px; /* Ensure space for + and - */
     text-align: right;
-    flex-shrink: 0;
 }
 
 .modifier-input {
