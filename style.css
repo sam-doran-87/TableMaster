@@ -1,240 +1,309 @@
+/* New Color Palette Variables (Optional but good practice) */
+:root {
+    --bg-primary: #f2f4f8; /* Light blue-gray background */
+    --bg-card: #ffffff; /* White card/container background */
+    --border-light: #e0e6ed; /* Light gray-blue border */
+    --text-dark: #334155; /* Dark slate blue text */
+    --text-subtle: #64748b; /* Medium slate blue text */
+
+    --btn-primary: #0e7490; /* Teal-blue for primary actions (Add, Sort) */
+    --btn-primary-hover: #155e75;
+    --btn-primary-active: #0c4a6e;
+
+    --btn-turn: #4c1d95; /* Darker purple for turn controls */
+    --btn-turn-hover: #3b0764;
+    --btn-turn-active: #2e0551;
+
+    --btn-reset-list: #64748b; /* Neutral gray for Reset List */
+    --btn-reset-list-hover: #475569;
+    --btn-reset-list-active: #334155;
+
+    --btn-reset-turns: #facc15; /* Yellow for Reset Turns */
+    --btn-reset-turns-hover: #eab308;
+    --btn-reset-turns-active: #d97706;
+
+    --btn-edit: #3b82f6; /* Blue for Edit button */
+    --btn-edit-hover: #2563eb;
+    --btn-edit-active: #1d4ed8;
+
+    --btn-lock: #0ea5e9; /* Sky blue for Lock button */
+    --btn-lock-hover: #0284c7;
+    --btn-lock-active: #0369a1;
+    --btn-locked: #22c55e; /* Green when locked */
+    --btn-locked-hover: #16a34a;
+    --btn-locked-active: #15803d;
+
+    --btn-remove: #ef4444; /* Red for Remove button */
+    --btn-remove-hover: #dc2626;
+    --btn-remove-active: #b91c1c;
+
+    --highlight-bg: #fde68a; /* Lighter gold for list item highlight */
+    --highlight-border: #facc15;
+    --highlight-text: var(--text-dark); /* Dark text on highlight */
+
+    --drag-chosen-bg: #bfdbfe; /* Light blue for dragging item */
+    --drag-chosen-border: #60a5fa;
+
+    --editable-outline: #2563eb; /* Darker blue for editable outline */
+    --editable-bg: #fffbe6; /* Very light yellow for editable background */
+
+    /* HP Colors (can keep these vibrant for clear visibility) */
+    --hp-full: #28a745;
+    --hp-mid: #ffc107;
+    --hp-low: #dc3545;
+    --hp-zero: #6c757d;
+}
+
 /* General body and heading styling */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 20px;
-    background-color: #f8f8f8;
-    color: #333;
+    margin: 0; /* Reset default margin */
+    padding: 20px; /* Add padding to body */
+    background-color: var(--bg-primary);
+    color: var(--text-dark);
+    display: flex; /* Use flexbox for overall layout */
+    flex-direction: column; /* Stack content vertically */
+    align-items: center; /* Center content horizontally */
+    min-height: 100vh; /* Full viewport height */
+    box-sizing: border-box; /* Include padding in element's total width/height */
 }
 
 h2 {
-    color: #2c3e50;
+    color: var(--text-dark);
     text-align: center;
-    margin-bottom: 25px;
-    font-size: 2.2em;
+    margin-bottom: 30px;
+    font-size: 2.5em; /* Slightly larger heading */
+    letter-spacing: -0.02em;
 }
 
+/* Container for main interactive sections */
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 25px; /* Space between main sections */
+    width: 100%; /* Take full width of body padding */
+    max-width: 480px; /* Overall max width for a cleaner look on desktop */
+    margin: 0 auto; /* Center the container */
+}
+
+/* Base styles for cards/sections */
+.card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: 12px; /* Slightly more rounded corners */
+    box-shadow: 0 6px 12px rgba(0,0,0,0.08); /* More pronounced shadow */
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Action Controls (Add Character, Sort) */
 .action-controls {
+    @extend .card; /* Inherit card styles */
     display: flex;
     flex-direction: column;
     gap: 15px;
-    max-width: 400px;
-    margin: 0 auto 20px auto;
-    padding: 0 10px;
-    box-sizing: border-box;
+    padding: 20px; /* Increased padding for the card */
 }
 
 .add-item-inputs {
     display: flex;
     gap: 10px;
-    flex-wrap: wrap;
+    flex-wrap: wrap; /* Allow inputs to wrap on smaller screens */
     justify-content: center;
 }
 
-#newItemText {
-    padding: 10px 12px;
-    border: 1px solid #c0c0c0;
-    border-radius: 6px;
-    font-size: 16px;
-    flex-grow: 2;
-    min-width: 150px;
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+#newItemText, #newItemInitiative {
+    padding: 12px 15px; /* More padding */
+    border: 1px solid var(--border-light);
+    border-radius: 8px; /* Consistent border-radius */
+    font-size: 17px; /* Slightly larger font */
+    box-shadow: inset 0 1px 4px rgba(0,0,0,0.08); /* Stronger inset shadow */
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-
+#newItemText:focus, #newItemInitiative:focus {
+    border-color: var(--btn-primary);
+    box-shadow: inset 0 1px 4px rgba(0,0,0,0.1), 0 0 0 3px rgba(14, 116, 144, 0.2); /* Focus glow */
+    outline: none;
+}
+#newItemText {
+    flex-grow: 2;
+    min-width: 160px; /* Slightly larger min-width */
+}
 #newItemInitiative {
-    padding: 10px 12px;
-    border: 1px solid #c0c0c0;
-    border-radius: 6px;
-    font-size: 16px;
     flex-grow: 1;
-    max-width: 100px; /* Adjusted max-width to better fit "Initiative" */
+    max-width: 110px;
     text-align: center;
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
     -moz-appearance: textfield; /* Firefox spinner removal */
 }
 #newItemInitiative::-webkit-outer-spin-button,
 #newItemInitiative::-webkit-inner-spin-button {
-    -webkit-appearance: none; /* Webkit/Blink spinner removal */
+    -webkit-appearance: none;
     margin: 0;
 }
 
 .buttons-row {
     display: flex;
-    gap: 10px;
+    gap: 15px; /* Increased gap */
     flex-wrap: wrap;
     justify-content: center;
 }
 
-#addItemButton {
-    padding: 10px 18px;
-    background-color: #4CAF50;
-    color: white;
+/* General Button Styling */
+button {
+    padding: 12px 22px; /* More padding */
     border: none;
-    border-radius: 6px;
+    border-radius: 8px; /* Consistent border-radius */
     cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.2s ease, transform 0.1s ease;
+    font-size: 17px;
+    font-weight: 600; /* Slightly bolder text */
+    transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
     flex-grow: 1;
-    min-width: 120px;
+    min-width: 130px; /* Consistent min-width */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle button shadow */
 }
-#addItemButton:hover { background-color: #45a049; transform: translateY(-1px); }
-#addItemButton:active { background-color: #3e8e41; transform: translateY(0); }
+button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
+
+#addItemButton {
+    background-color: var(--btn-primary);
+    color: white;
+}
+#addItemButton:hover { background-color: var(--btn-primary-hover); }
+#addItemButton:active { background-color: var(--btn-primary-active); }
 
 #sortInitiativeButton {
-    padding: 10px 20px;
-    background-color: #007bff;
+    background-color: var(--btn-primary);
     color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-    flex-grow: 1;
-    min-width: 140px;
 }
-#sortInitiativeButton:hover { background-color: #0056b3; transform: translateY(-1px); }
-#sortInitiativeButton:active { background-color: #004085; transform: translateY(0); }
+#sortInitiativeButton:hover { background-color: var(--btn-primary-hover); }
+#sortInitiativeButton:active { background-color: var(--btn-primary-active); }
+
 
 /* Turn Controls */
 .turn-controls {
+    @extend .card; /* Inherit card styles */
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 15px;
-    margin: 20px auto;
-    max-width: 400px;
-    padding: 10px 15px;
-    background-color: #e9ecef;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    gap: 20px; /* Increased gap */
+    padding: 15px 20px; /* Slightly less padding than other cards */
+    margin-bottom: 25px; /* Space below turn controls */
 }
 
-#prevTurnButton,
-#nextTurnButton {
-    padding: 10px 18px;
-    background-color: #6f42c1; /* Purple-ish */
+#prevTurnButton, #nextTurnButton {
+    background-color: var(--btn-turn);
     color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-    flex-grow: 1;
-    min-width: 120px;
+    min-width: 110px; /* Slightly smaller for turn buttons */
 }
-#prevTurnButton:hover,
-#nextTurnButton:hover { background-color: #59359e; transform: translateY(-1px); }
-#prevTurnButton:active,
-#nextTurnButton:active { background-color: #4c2d82; transform: translateY(0); }
+#prevTurnButton:hover { background-color: var(--btn-turn-hover); }
+#prevTurnButton:active { background-color: var(--btn-turn-active); }
+#nextTurnButton:hover { background-color: var(--btn-turn-hover); }
+#nextTurnButton:active { background-color: var(--btn-turn-active); }
 
 #roundCounter {
-    font-size: 1.3em;
-    font-weight: bold;
-    color: #2c3e50;
-    flex-shrink: 0; /* Prevents it from shrinking */
+    font-size: 1.4em; /* Larger round counter */
+    font-weight: 700; /* Bolder */
+    color: var(--text-dark);
+    flex-shrink: 0;
+    text-align: center;
+    min-width: 80px; /* Ensure space for "Round: XX" */
 }
+
 
 /* Sortable List Container */
 #sortable-list {
     list-style: none;
     padding: 0;
-    width: 400px;
-    margin: 20px auto;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-    overflow: hidden;
+    width: 100%; /* Full width within its parent (.container) */
+    /* Remove redundant margin and border/shadow from here, as parent .card provides it */
+    margin: 0;
 }
 
 /* Default List Item Styles */
 #sortable-list li {
     margin: 0;
-    padding: 10px 15px;
-    border-bottom: 1px solid #eee;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 12px 18px; /* More padding for items */
+    border-bottom: 1px solid var(--border-light);
     font-size: 16px;
     line-height: 1.5;
-    position: relative;
     display: flex;
     align-items: center;
-    gap: 10px; /* Space between flex items */
-    justify-content: space-between; /* Distribute items with space */
+    gap: 12px; /* Consistent gap between elements in list item */
+    justify-content: space-between;
 
-    background: linear-gradient(to bottom, #333333, #000000);
-    color: #ffffff;
-    transition: background 0.3s ease, border-color 0.3s ease, transform 0.1s ease;
+    background-color: var(--bg-card); /* White background for items */
+    color: var(--text-dark);
+    transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
     cursor: pointer;
+    border-left: 5px solid transparent; /* For visual cues like locked/highlighted */
 }
 #sortable-list li:last-child { border-bottom: none; }
+#sortable-list li:first-child { border-top-left-radius: 12px; border-top-right-radius: 12px; }
+#sortable-list li:last-child { border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
+/* Override specific borders for middle items to retain overall card shape */
+#sortable-list li:not(:first-child):not(:last-child) { border-radius: 0; }
 
 
 /* Highlighted List Item Style */
 #sortable-list li.highlighted {
-    background: linear-gradient(to bottom, #ffd700, #ffa500);
-    color: #333333;
-    border: 2px solid #ffaa00;
-    transform: scale(1.01);
-    box-shadow: 0 4px 10px rgba(255, 165, 0, 0.4);
+    background-color: var(--highlight-bg);
+    color: var(--highlight-text);
+    border-left: 5px solid var(--highlight-border); /* Visual highlight */
+    transform: scale(1.00); /* No scale, just a border/color change */
+    box-shadow: 0 2px 8px rgba(234, 179, 8, 0.2); /* Soft shadow for highlight */
     z-index: 1;
 }
 
 
 /* Hover State for List Items */
 #sortable-list li:not(.sortable-chosen):not(.sortable-ghost):not(.highlighted):hover {
-    background: linear-gradient(to bottom, #e0e0e0, #ffffff);
-    border-color: #a0a0a0;
-    color: #333333;
+    background-color: var(--bg-primary); /* Lighter background on hover */
+    /* border-color: var(--border-light); */ /* Already has bottom border */
+    color: var(--text-dark);
     transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
 
 /* Dragging Styles (SortableJS specific classes) */
 #sortable-list li.sortable-chosen {
-    padding: 15px;
-    background: linear-gradient(to bottom, #add8e6, #87ceeb);
-    border-color: #007bff;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    padding: 15px; /* Slightly larger padding when chosen */
+    background-color: var(--drag-chosen-bg);
+    border: 1px solid var(--drag-chosen-border); /* Single border for chosen item */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
     transform: scale(1.02);
     z-index: 1000;
-    color: #333333;
+    color: var(--text-dark);
+    border-left: 5px solid var(--drag-chosen-border);
 }
 
 #sortable-list li.sortable-ghost {
-    opacity: 0.4;
-    background-color: #cccccc;
-    border: 2px dashed #999999;
-    padding: 10px 15px;
+    opacity: 0.3; /* More transparent ghost */
+    background-color: var(--border-light);
+    border: 2px dashed var(--text-subtle);
+    padding: 12px 18px; /* Match normal list item padding */
     box-sizing: border-box;
-}
-
-#sortable-list li.sortable-drag {
-    opacity: 1;
 }
 
 /* Styling for the Drag Handle */
 #sortable-list li .handle {
     flex-shrink: 0;
-    width: 25px;
-    height: 25px;
-    background-color: #5a6268;
+    width: 28px; /* Slightly larger handle */
+    height: 28px;
+    background-color: var(--text-subtle); /* Grayish handle */
     color: white;
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 4px;
-    font-size: 1.2em;
+    border-radius: 6px; /* Slightly more rounded */
+    font-size: 1.3em; /* Larger icon */
     font-weight: bold;
     cursor: grab;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    transition: background-color 0.2s ease, transform 0.1s ease;
-    order: 1; /* First element in flex order */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
 }
-
 #sortable-list li .handle:hover {
-    background-color: #6c757d;
+    background-color: var(--text-dark);
     transform: scale(1.05);
 }
-
 #sortable-list li .handle:active {
     cursor: grabbing;
 }
@@ -243,295 +312,377 @@ h2 {
 /* Styling for the Initiative Score span */
 #sortable-list li .initiative-score {
     flex-shrink: 0;
-    width: 40px;
+    width: 45px; /* Wider for better numbers */
     text-align: center;
     font-weight: bold;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.05); /* Subtle dark background */
+    color: var(--text-dark); /* Darker text */
     padding: 5px 0;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: text;
-    order: 2; /* Second element */
 }
 
 /* Styling for the Character Name span */
 #sortable-list li .item-text {
-    flex-grow: 1; /* Allows it to take up remaining space */
+    flex-grow: 1;
     min-height: 1.5em;
     cursor: text;
     padding: 0 5px;
-    border-radius: 3px;
-    margin-right: 10px; /* Space between name and HP */
-    order: 3; /* Third element */
+    border-radius: 4px;
+    /* margin-right: 10px; removed as gap handles spacing */
+    color: var(--text-dark);
 }
 
 /* HP display within the list item */
 .list-item-hp {
     flex-shrink: 0;
-    font-weight: bold;
-    margin-left: 10px;
-    padding: 3px 6px;
-    border-radius: 4px;
-    min-width: 50px; /* Ensure enough space for "HP: XX" */
+    font-weight: 700; /* Bolder HP */
+    padding: 4px 8px; /* More padding */
+    border-radius: 6px;
+    min-width: 60px; /* Ensure enough space for "HP: XX" */
     text-align: center;
-    background-color: rgba(255, 255, 255, 0.2);
-    order: 4; /* Fourth element */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2); /* Subtle text shadow for readability */
 }
 
-/* HP color coding */
-.list-item-hp.hp-full { background-color: #28a745; color: white; } /* Green */
-.list-item-hp.hp-mid { background-color: #ffc107; color: #333; } /* Yellow */
-.list-item-hp.hp-low { background-color: #dc3545; color: white; } /* Red */
-.list-item-hp.hp-zero { background-color: #6c757d; color: white; } /* Gray for KO/Dead */
-
-
-/* Styling for the Lock Button */
-.lock-button {
-    background-color: #17a2b8; /* Info blue */
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 5px 8px;
-    font-size: 0.85em;
-    cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-    flex-shrink: 0;
-    margin-left: 5px; /* Space between HP and lock */
-    order: 5; /* Fifth element */
-}
-
-.lock-button.locked {
-    background-color: #28a745; /* Success green when locked */
-}
-
-.lock-button:hover { background-color: #138496; transform: translateY(-1px); }
-.lock-button:active { background-color: #117a8b; transform: translateY(0); }
+/* HP color coding (using variables) */
+.list-item-hp.hp-full { background-color: var(--hp-full); color: white; }
+.list-item-hp.hp-mid { background-color: var(--hp-mid); color: var(--text-dark); }
+.list-item-hp.hp-low { background-color: var(--hp-low); color: white; }
+.list-item-hp.hp-zero { background-color: var(--hp-zero); color: white; }
 
 
 /* Styling for the Edit Button */
 .edit-button {
-    background-color: #007bff;
+    background-color: var(--btn-edit);
     color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 5px 10px;
-    font-size: 0.85em;
-    cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-    flex-shrink: 0;
-    margin-left: 5px; /* Space between lock and edit */
-    order: 6; /* Sixth element */
+    border-radius: 6px; /* Slightly smaller radius for small buttons */
+    padding: 6px 12px; /* Adjusted padding */
+    font-size: 0.8em; /* Smaller font for control buttons */
+    font-weight: 500;
+    min-width: unset; /* Override general button min-width */
+    flex-grow: 0; /* Don't grow */
+    box-shadow: none; /* No shadow for small buttons */
 }
+.edit-button:hover { background-color: var(--btn-edit-hover); }
+.edit-button:active { background-color: var(--btn-edit-active); }
 
-.edit-button:hover {
-    background-color: #0056b3;
-    transform: translateY(-1px);
-}
 
-.edit-button:active {
-    background-color: #004085;
-    transform: translateY(0);
+/* Styling for the Lock Button */
+.lock-button {
+    background-color: var(--btn-lock);
+    color: white;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 0.8em;
+    font-weight: 500;
+    min-width: unset;
+    flex-grow: 0;
+    box-shadow: none;
 }
+.lock-button.locked {
+    background-color: var(--btn-locked);
+}
+.lock-button:hover { background-color: var(--btn-lock-hover); }
+.lock-button:active { background-color: var(--btn-lock-active); }
+.lock-button.locked:hover { background-color: var(--btn-locked-hover); }
+.lock-button.locked:active { background-color: var(--btn-locked-active); }
+
+
+/* Styling for the Remove Button */
+.remove-button {
+    background-color: var(--btn-remove);
+    color: white;
+    border-radius: 50%; /* Circle button */
+    width: 28px; /* Consistent size with handle */
+    height: 28px;
+    font-size: 0.9em; /* Slightly larger X */
+    font-weight: bold;
+    min-width: unset; /* Override general button min-width */
+    flex-grow: 0;
+    box-shadow: none;
+}
+.remove-button:hover { background-color: var(--btn-remove-hover); transform: scale(1.15); } /* More prominent hover */
+.remove-button:active { background-color: var(--btn-remove-active); transform: scale(1.0); }
 
 
 /* Styling for when text/initiative spans are in editable mode (for list items) */
 #sortable-list li .item-text[contenteditable="true"],
 #sortable-list li .initiative-score[contenteditable="true"] {
-    outline: 2px dashed #007bff;
-    background: #fffacd !important; /* Light yellow background to indicate editing */
-    color: #333;
+    outline: 2px dashed var(--editable-outline);
+    background: var(--editable-bg) !important;
+    color: var(--text-dark);
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-    cursor: text;
-    padding: 0 2px;
-    border-radius: 3px;
-}
-
-/* Styling for the Remove Button */
-.remove-button {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 25px;
-    height: 25px;
-    font-size: 0.8em;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-    flex-shrink: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    order: 7; /* Last element */
-}
-
-.remove-button:hover {
-    background-color: #c82333;
-    transform: scale(1.1);
-}
-
-.remove-button:active {
-    background-color: #bd2130;
-    transform: scale(1.0);
+    padding: 0 4px; /* More internal padding */
+    border-radius: 4px;
 }
 
 /* Reset Controls */
 .reset-controls {
+    @extend .card; /* Inherit card styles */
     display: flex;
-    flex-direction: column; /* Stack buttons vertically */
-    align-items: center;
-    gap: 10px; /* Space between buttons */
-    margin: 20px auto;
-    max-width: 400px;
-    padding: 0 10px;
+    flex-direction: column;
+    gap: 15px; /* Space between reset buttons */
+    padding: 20px;
 }
 
-#resetListButton,
-#resetTurnButton { /* Combined styling for both reset buttons */
-    padding: 10px 20px;
-    background-color: #6c757d; /* A neutral gray for reset list */
+#resetListButton {
+    background-color: var(--btn-reset-list);
     color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-    width: 100%; /* Make it fill the container */
-    max-width: 200px; /* Limit its max width */
+    min-width: unset; /* Allow to fill container */
 }
+#resetListButton:hover { background-color: var(--btn-reset-list-hover); }
+#resetListButton:active { background-color: var(--btn-reset-list-active); }
 
-#resetListButton:hover,
-#resetTurnButton:hover { background-color: #5a6268; transform: translateY(-1px); }
-#resetListButton:active,
-#resetTurnButton:active { background-color: #4e555b; transform: translateY(0); }
-
-/* Specific style for Reset Turns to make it yellow */
 #resetTurnButton {
-    background-color: #ffc107; /* Yellow for attention */
-    color: #333; /* Dark text on yellow */
+    background-color: var(--btn-reset-turns);
+    color: var(--text-dark); /* Dark text on yellow */
+    min-width: unset;
 }
-
-#resetTurnButton:hover { background-color: #e0a800; }
-#resetTurnButton:active { background-color: #cc9900; }
+#resetTurnButton:hover { background-color: var(--btn-reset-turns-hover); }
+#resetTurnButton:active { background-color: var(--btn-reset-turns-active); }
 
 
 /* Character Sheet Styles */
 #character-sheet {
-    width: 400px;
-    margin: 20px auto;
-    padding: 15px 20px;
-    background-color: #ffffff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-    color: #333;
-    /* Ensure it's always block by default, content will be populated by JS */
-    display: block;
+    @extend .card; /* Inherit card styles */
+    padding: 25px 25px 20px; /* More padding, especially vertical */
 }
 
 #character-sheet h3 {
     text-align: center;
-    color: #2c3e50;
+    color: var(--text-dark);
     margin-top: 0;
-    margin-bottom: 15px;
-    font-size: 1.8em;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
+    margin-bottom: 20px; /* More space below heading */
+    font-size: 2em; /* Slightly larger */
+    border-bottom: 1px solid var(--border-light); /* Lighter border */
+    padding-bottom: 12px; /* More padding */
 }
 
 #character-sheet p {
-    margin-bottom: 8px;
-    font-size: 1.1em;
-    display: flex; /* For aligning labels and values */
+    margin-bottom: 10px; /* More space between lines */
+    font-size: 1.15em; /* Slightly larger font */
+    display: flex;
     align-items: baseline;
+    gap: 10px; /* Space between strong and span */
 }
 
 #character-sheet p strong {
-    color: #555;
-    min-width: 70px; /* Give space for labels */
-    display: inline-block;
-    flex-shrink: 0; /* Prevent label from shrinking */
+    color: var(--text-subtle); /* More subtle label color */
+    min-width: 80px; /* More space for labels */
+    flex-shrink: 0;
 }
 
 #character-sheet span {
     font-weight: normal;
-    color: #000;
-    flex-grow: 1; /* Allow editable spans to grow and fill space */
+    color: var(--text-dark);
+    flex-grow: 1;
 }
 
 /* Add pointer cursor to character sheet editable HP/stat spans */
 #character-sheet .editable-hp,
 #character-sheet .editable-stat {
     cursor: pointer;
-    min-width: 30px; /* Ensure some clickable area */
+    min-width: 40px; /* Ensure good clickable area */
     display: inline-block;
+    padding: 2px 4px; /* Slight padding for visual consistency */
+    border-radius: 4px;
+    background-color: rgba(0,0,0,0.02); /* Very subtle background */
 }
+#character-sheet .editable-hp:hover,
+#character-sheet .editable-stat:hover {
+    background-color: rgba(0,0,0,0.05); /* Slightly darker on hover */
+}
+
 
 /* Status Section specific styles */
 .status-section {
-    margin-top: 15px;
-    padding-top: 10px;
-    border-top: 1px solid #eee;
+    margin-top: 20px; /* More margin */
+    padding-top: 15px;
+    border-top: 1px solid var(--border-light);
 }
 
 .status-section p {
-    font-weight: bold;
-    margin-bottom: 10px;
-    display: block; /* Override flex from general 'p' for this label */
+    font-weight: 700; /* Bolder status heading */
+    margin-bottom: 12px;
+    font-size: 1.15em;
+    color: var(--text-dark);
 }
 
 .status-section label {
-    display: block;
-    margin-bottom: 5px;
-    font-size: 1em;
+    display: flex; /* Flexbox for checkbox and text alignment */
+    align-items: center;
+    margin-bottom: 8px; /* More space between checkboxes */
+    font-size: 1.05em;
     cursor: pointer;
-    padding: 2px 0;
+    color: var(--text-dark);
 }
 
 .status-section input[type="checkbox"] {
-    margin-right: 8px;
-    transform: scale(1.2);
+    margin-right: 10px; /* More space */
+    transform: scale(1.3); /* Slightly larger checkboxes */
     cursor: pointer;
+    accent-color: var(--btn-primary); /* Accent color for checked state */
 }
+
 
 /* Notes Section Styles */
 .notes-section {
-    margin-top: 15px;
-    padding-top: 10px;
-    border-top: 1px solid #eee;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-light);
 }
 
 .notes-section p {
-    font-weight: bold;
-    margin-bottom: 5px;
-    display: block; /* Override flex from general 'p' for this label */
+    font-weight: 700;
+    margin-bottom: 8px;
+    font-size: 1.15em;
+    color: var(--text-dark);
 }
 
 #sheet-notes {
-    display: block; /* Make it block to take full width */
-    width: calc(100% - 18px); /* Account for padding + border (15px padding, 1px border on each side = 18px) */
-    min-height: 80px; /* Make it behave like a textarea */
-    border: 1px solid #c0c0c0;
-    border-radius: 6px;
-    padding: 8px;
+    display: block;
+    width: 100%; /* Take full width of parent padding */
+    min-height: 100px; /* Taller notes area */
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 10px;
     font-size: 1em;
-    line-height: 1.4;
-    overflow-y: auto; /* Allow scrolling for long notes */
+    line-height: 1.5;
+    overflow-y: auto;
     cursor: text;
-    white-space: pre-wrap; /* Preserve line breaks */
-    word-wrap: break-word; /* Wrap long words */
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.08); /* Consistent inset shadow */
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    color: var(--text-dark);
+}
+#sheet-notes:focus {
+    border-color: var(--editable-outline);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1), 0 0 0 3px rgba(60, 150, 250, 0.2);
+    outline: none;
 }
 
-/* --- STYLES FOR EDITABLE CHARACTER SHEET FIELDS --- */
-#character-sheet #sheet-current-hp[contenteditable="true"],
-#character-sheet #sheet-max-hp[contenteditable="true"],
-#character-sheet #sheet-ac[contenteditable="true"],
-#character-sheet #sheet-speed[contenteditable="true"],
+/* Styles for when character sheet fields are in editable mode */
+#character-sheet .editable-hp[contenteditable="true"],
+#character-sheet .editable-stat[contenteditable="true"],
 #character-sheet #sheet-notes[contenteditable="true"]
 {
-    outline: 2px dashed #007bff;
-    background: #fffacd !important;
-    color: #333;
+    outline: 2px dashed var(--editable-outline);
+    background: var(--editable-bg) !important;
+    color: var(--text-dark);
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-    padding: 0 2px; /* Adjust padding for editing visual */
-    border-radius: 3px;
+    padding: 2px 4px; /* Consistent padding when editable */
+    border-radius: 4px;
 }
+
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 600px) {
+    body {
+        padding: 15px; /* Reduce overall body padding on small screens */
+    }
+
+    h2 {
+        font-size: 2em;
+        margin-bottom: 20px;
+    }
+
+    .container {
+        gap: 20px; /* Slightly less gap between sections */
+    }
+
+    .card {
+        padding: 15px; /* Reduce card padding */
+        border-radius: 10px; /* Slightly less rounded corners */
+        box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+    }
+
+    /* Input fields stack vertically on very small screens */
+    .add-item-inputs {
+        flex-direction: column;
+        gap: 12px;
+    }
+    #newItemText, #newItemInitiative {
+        width: 100%; /* Full width */
+        min-width: unset;
+        max-width: unset;
+        text-align: left; /* Align text left for full-width inputs */
+    }
+    #newItemInitiative {
+        text-align: center; /* Keep initiative centered */
+    }
+
+
+    /* Buttons stack vertically on smaller screens */
+    .buttons-row {
+        flex-direction: column;
+        gap: 12px;
+    }
+    button {
+        width: 100%; /* Full width for buttons */
+        min-width: unset;
+        font-size: 16px;
+        padding: 10px 15px;
+    }
+
+    /* Turn controls adjustments */
+    .turn-controls {
+        flex-wrap: wrap; /* Allow wrapping */
+        gap: 12px;
+        padding: 12px 15px;
+    }
+    #prevTurnButton, #nextTurnButton {
+        width: calc(50% - 6px); /* Two buttons per row */
+        min-width: unset;
+    }
+    #roundCounter {
+        width: 100%; /* Full width for round counter */
+        order: -1; /* Place round counter at the top of the flex container */
+        font-size: 1.2em;
+        margin-bottom: 5px;
+    }
+
+    /* List item adjustments */
+    #sortable-list li {
+        flex-wrap: wrap; /* Allow contents to wrap */
+        padding: 10px 15px;
+        gap: 8px 10px; /* Vertical and horizontal gap */
+    }
+    #sortable-list li .handle { order: 1; }
+    #sortable-list li .initiative-score { order: 2; width: auto; min-width: 40px; }
+    #sortable-list li .list-item-hp { order: 3; width: auto; min-width: 60px; }
+    #sortable-list li .item-text { order: 4; flex-basis: 100%; margin-right: 0;} /* Name takes full row below */
+    #sortable-list li .lock-button { order: 5; }
+    #sortable-list li .edit-button { order: 6; }
+    #sortable-list li .remove-button { order: 7; }
+
+    /* Character sheet adjustments */
+    #character-sheet {
+        padding: 20px;
+    }
+    #character-sheet p {
+        font-size: 1em;
+        flex-direction: column; /* Labels and values stack */
+        align-items: flex-start;
+        gap: 2px;
+    }
+    #character-sheet p strong {
+        min-width: unset;
+    }
+
+    .status-section label {
+        font-size: 0.95em;
+    }
+    .status-section input[type="checkbox"] {
+        transform: scale(1.1);
+    }
+
+    #sheet-notes {
+        min-height: 80px;
+    }
+}
+
+/* Ensure the main container element is correctly setup in HTML */
+/* <div class="container"> */
+/* ... all your sections ... */
+/* </div> */
