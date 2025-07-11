@@ -22,13 +22,13 @@
     --btn-reset-turns-hover: #eab308;
     --btn-reset-turns-active: #d97706;
 
-    --btn-edit: #3b82f6; /* Blue for Edit button */
-    --btn-edit-hover: #2563eb;
-    --btn-edit-active: #1d4ed8;
+    /* --btn-edit: #3b82f6; */ /* REMOVED - no more explicit edit button */
+    /* --btn-edit-hover: #2563eb; */
+    /* --btn-edit-active: #1d4ed8; */
 
-    --btn-lock: #0ea5e9; /* Sky blue for Lock button */
-    --btn-lock-hover: #0284c7;
-    --btn-lock-active: #0369a1;
+    /* --btn-lock: #0ea5e9; */ /* REMOVED - replaced by icon button with locked/unlocked states */
+    /* --btn-lock-hover: #0284c7; */
+    /* --btn-lock-active: #0369a1; */
     --btn-locked: #22c55e; /* Green when locked */
     --btn-locked-hover: #16a34a;
     --btn-locked-active: #15803d;
@@ -52,18 +52,25 @@
     --hp-mid: #ffc107;
     --hp-low: #dc3545;
     --hp-zero: #6c757d;
+
+    /* New colors for the new gray remove button and lock/unlock icons */
+    --icon-btn-neutral: #cbd5e1; /* Light gray for icons */
+    --icon-btn-neutral-hover: #94a3b8; /* Medium gray on hover */
+    --icon-btn-neutral-active: #64748b; /* Darker gray on active */
+    --icon-btn-locked-color: #22c55e; /* Green for locked icon */
+    --icon-btn-locked-hover: #16a34a; /* Darker green for locked icon hover */
 }
 
 /* General body and heading styling */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-    padding: 20px; /* Overall body padding */
+    padding: 20px;
     background-color: var(--bg-primary);
     color: var(--text-dark);
     display: flex;
     flex-direction: column;
-    align-items: center; /* Center content horizontally */
+    align-items: center;
     min-height: 100vh;
     box-sizing: border-box;
 }
@@ -71,7 +78,7 @@ body {
 h2 {
     color: var(--text-dark);
     text-align: center;
-    margin-bottom: 30px; /* Space below main title */
+    margin-bottom: 30px;
     font-size: 2.5em;
     letter-spacing: -0.02em;
 }
@@ -79,12 +86,12 @@ h2 {
 /* Main container for the two columns (Tracker and Character Sheet) */
 .main-content-wrapper {
     display: flex;
-    flex-direction: row; /* Default to row for desktop */
-    gap: 25px; /* Space between the two main cards */
+    flex-direction: row;
+    gap: 25px;
     width: 100%;
-    max-width: 1000px; /* Max width for the entire layout on desktop */
-    margin: 0 auto; /* Center the wrapper */
-    align-items: flex-start; /* Align items to the top */
+    max-width: 1000px;
+    margin: 0 auto;
+    align-items: flex-start;
 }
 
 /* Base styles for cards/sections */
@@ -93,21 +100,20 @@ h2 {
     border: 1px solid var(--border-light);
     border-radius: 12px;
     box-shadow: 0 6px 12px rgba(0,0,0,0.08);
-    padding: 20px; /* Default card padding */
+    padding: 20px;
     box-sizing: border-box;
 }
 
 /* The primary Encounter Tracker Card that contains most elements */
 .encounter-tracker-card {
-    flex-grow: 1; /* Allows it to grow and fill space */
-    flex-basis: 55%; /* Give it a larger base width */
-    min-width: 320px; /* Minimum width before wrapping */
-    
+    flex-grow: 1;
+    flex-basis: 55%;
+    min-width: 320px;
+
     display: flex;
     flex-direction: column;
-    gap: 20px; /* Space between sections within this card */
+    gap: 20px;
 
-    /* Inherit .card styles */
     background-color: var(--bg-card);
     border: 1px solid var(--border-light);
     border-radius: 12px;
@@ -118,16 +124,15 @@ h2 {
 
 /* The Character Sheet Card */
 #character-sheet {
-    flex-grow: 1; /* Allows it to grow and fill space */
-    flex-basis: 45%; /* Give it a smaller base width */
-    min-width: 300px; /* Minimum width before wrapping */
+    flex-grow: 1;
+    flex-basis: 45%;
+    min-width: 300px;
 
-    /* Inherit .card styles */
     background-color: var(--bg-card);
     border: 1px solid var(--border-light);
     border-radius: 12px;
     box-shadow: 0 6px 12px rgba(0,0,0,0.08);
-    padding: 25px; /* Slightly more internal padding for the sheet */
+    padding: 25px;
     box-sizing: border-box;
 }
 
@@ -136,8 +141,8 @@ h2 {
 .action-controls {
     display: flex;
     flex-direction: column;
-    gap: 12px; /* Slightly reduced gap */
-    padding: 0; /* Remove card-level padding, already in parent .encounter-tracker-card */
+    gap: 12px;
+    padding: 0;
 }
 
 .add-item-inputs {
@@ -148,11 +153,11 @@ h2 {
 }
 
 #newItemText, #newItemInitiative {
-    padding: 10px 12px; /* Smaller padding for inputs */
+    padding: 10px 12px;
     border: 1px solid var(--border-light);
     border-radius: 8px;
-    font-size: 16px; /* Smaller font */
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.07); /* Lighter inset shadow */
+    font-size: 16px;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.07);
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 #newItemText:focus, #newItemInitiative:focus {
@@ -166,7 +171,7 @@ h2 {
 }
 #newItemInitiative {
     flex-grow: 1;
-    max-width: 100px; /* Slightly smaller width */
+    max-width: 100px;
     text-align: center;
     -moz-appearance: textfield;
 }
@@ -178,23 +183,23 @@ h2 {
 
 .buttons-row {
     display: flex;
-    gap: 10px; /* Reduced gap */
+    gap: 10px;
     flex-wrap: wrap;
     justify-content: center;
 }
 
-/* General Button Styling (Made smaller) */
+/* General Button Styling */
 button {
-    padding: 10px 18px; /* Smaller padding */
+    padding: 10px 18px;
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    font-size: 16px; /* Smaller font */
+    font-size: 16px;
     font-weight: 600;
     transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
     flex-grow: 1;
-    min-width: 120px; /* Adjusted min-width for smaller buttons */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.08); /* Slightly lighter button shadow */
+    min-width: 120px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
 }
 button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
 
@@ -218,14 +223,14 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 15px; /* Reduced gap */
-    padding: 0; /* Remove card-level padding */
+    gap: 15px;
+    padding: 0;
 }
 
 #prevTurnButton, #nextTurnButton {
     background-color: var(--btn-turn);
     color: white;
-    min-width: 100px; /* Adjusted min-width */
+    min-width: 100px;
 }
 #prevTurnButton:hover { background-color: var(--btn-turn-hover); }
 #prevTurnButton:active { background-color: var(--btn-turn-active); }
@@ -233,7 +238,7 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
 #nextTurnButton:active { background-color: var(--btn-turn-active); }
 
 #roundCounter {
-    font-size: 1.3em; /* Slightly smaller */
+    font-size: 1.3em;
     font-weight: 700;
     color: var(--text-dark);
     flex-shrink: 0;
@@ -247,21 +252,20 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
     list-style: none;
     padding: 0;
     width: 100%;
-    margin: 0; /* No external margin for the list */
-    /* No border/shadow here; the parent .encounter-tracker-card will provide it */
-    border-radius: 0; /* Ensure no residual border-radius conflicts with parent */
+    margin: 0;
+    border-radius: 0;
 }
 
 /* Default List Item Styles */
 #sortable-list li {
     margin: 0;
-    padding: 10px 15px; /* Smaller padding for list items */
+    padding: 10px 15px;
     border-bottom: 1px solid var(--border-light);
-    font-size: 15px; /* Slightly smaller font */
+    font-size: 15px;
     line-height: 1.5;
     display: flex;
     align-items: center;
-    gap: 10px; /* Reduced gap */
+    gap: 10px;
     justify-content: space-between;
 
     background-color: var(--bg-card);
@@ -270,7 +274,6 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
     cursor: pointer;
     border-left: 5px solid transparent;
 }
-/* No border-radius on list items themselves to maintain the parent card's rounded corners */
 #sortable-list li:first-child { border-top-left-radius: 0; border-top-right-radius: 0; }
 #sortable-list li:last-child { border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom: none; }
 
@@ -295,7 +298,7 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
 
 /* Dragging Styles (SortableJS specific classes) */
 #sortable-list li.sortable-chosen {
-    padding: 12px 18px; /* Slightly larger padding when chosen */
+    padding: 12px 18px;
     background-color: var(--drag-chosen-bg);
     border: 1px solid var(--drag-chosen-border);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
@@ -309,22 +312,22 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
     opacity: 0.3;
     background-color: var(--border-light);
     border: 2px dashed var(--text-subtle);
-    padding: 10px 15px; /* Match normal list item padding */
+    padding: 10px 15px;
     box-sizing: border-box;
 }
 
 /* Styling for the Drag Handle */
 #sortable-list li .handle {
     flex-shrink: 0;
-    width: 26px; /* Slightly smaller handle */
+    width: 26px;
     height: 26px;
     background-color: var(--text-subtle);
     color: white;
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 5px; /* Slightly less rounded */
-    font-size: 1.2em; /* Smaller icon */
+    border-radius: 5px;
+    font-size: 1.2em;
     font-weight: bold;
     cursor: grab;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
@@ -340,15 +343,15 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
 /* Styling for the Initiative Score span */
 #sortable-list li .initiative-score {
     flex-shrink: 0;
-    width: 40px; /* Slightly narrower */
+    width: 40px;
     text-align: center;
     font-weight: bold;
     background-color: rgba(0, 0, 0, 0.04);
     color: var(--text-dark);
-    padding: 4px 0; /* Smaller padding */
+    padding: 4px 0;
     border-radius: 5px;
     cursor: text;
-    font-size: 0.95em; /* Smaller font */
+    font-size: 0.95em;
 }
 
 /* Styling for the Character Name span */
@@ -356,7 +359,7 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
     flex-grow: 1;
     min-height: 1.5em;
     cursor: text;
-    padding: 0 4px; /* Smaller padding */
+    padding: 0 4px;
     border-radius: 4px;
     color: var(--text-dark);
 }
@@ -364,13 +367,13 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
 /* HP display within the list item */
 .list-item-hp {
     flex-shrink: 0;
-    font-weight: 600; /* Slightly less bold */
-    padding: 3px 7px; /* Smaller padding */
+    font-weight: 600;
+    padding: 3px 7px;
     border-radius: 5px;
-    min-width: 55px; /* Adjusted min-width */
+    min-width: 55px;
     text-align: center;
-    text-shadow: 0 1px 1px rgba(0,0,0,0.15); /* Lighter shadow */
-    font-size: 0.9em; /* Smaller font */
+    text-shadow: 0 1px 1px rgba(0,0,0,0.15);
+    font-size: 0.9em;
 }
 
 /* HP color coding (using variables) */
@@ -380,58 +383,72 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
 .list-item-hp.hp-zero { background-color: var(--hp-zero); color: white; }
 
 
-/* Styling for the Edit Button */
-.edit-button {
-    background-color: var(--btn-edit);
-    color: white;
-    border-radius: 5px; /* Consistent smaller radius */
-    padding: 5px 10px; /* Adjusted padding */
-    font-size: 0.75em; /* Smaller font for control buttons */
-    font-weight: 500;
-    min-width: unset;
-    flex-grow: 0;
-    box-shadow: none;
-}
-.edit-button:hover { background-color: var(--btn-edit-hover); }
-.edit-button:active { background-color: var(--btn-edit-active); }
-
-
-/* Styling for the Lock Button */
+/* Styling for the Lock/Unlock Icon Button */
 .lock-button {
-    background-color: var(--btn-lock);
-    color: white;
-    border-radius: 5px;
-    padding: 5px 10px;
-    font-size: 0.75em;
-    font-weight: 500;
-    min-width: unset;
+    background-color: transparent; /* No background */
+    color: var(--icon-btn-neutral); /* Default gray color for icon */
+    border-radius: 50%; /* Make it round */
+    width: 28px; /* Fixed width/height */
+    height: 28px;
+    padding: 0;
+    font-size: 1.1em; /* Icon size */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: unset; /* Override button defaults */
     flex-grow: 0;
     box-shadow: none;
+    transition: color 0.2s ease, transform 0.1s ease;
+}
+.lock-button i {
+    pointer-events: none; /* Make icon clicks pass through to parent button */
+}
+.lock-button:hover {
+    background-color: rgba(0,0,0,0.05); /* Light hover background */
+    color: var(--icon-btn-neutral-hover);
+}
+.lock-button:active {
+    background-color: rgba(0,0,0,0.1);
+    color: var(--icon-btn-neutral-active);
+    transform: translateY(0); /* Remove button active effect */
 }
 .lock-button.locked {
-    background-color: var(--btn-locked);
+    color: var(--icon-btn-locked-color); /* Green when locked */
 }
-.lock-button:hover { background-color: var(--btn-lock-hover); }
-.lock-button:active { background-color: var(--btn-lock-active); }
-.lock-button.locked:hover { background-color: var(--btn-locked-hover); }
-.lock-button.locked:active { background-color: var(--btn-locked-active); }
+.lock-button.locked:hover {
+    color: var(--icon-btn-locked-hover);
+}
 
 
-/* Styling for the Remove Button */
+/* Styling for the Remove (X) Icon Button */
 .remove-button {
-    background-color: var(--btn-remove);
-    color: white;
+    background-color: transparent; /* No background */
+    color: var(--icon-btn-neutral); /* Gray color for icon */
     border-radius: 50%;
-    width: 26px; /* Consistent size with handle */
-    height: 26px;
-    font-size: 0.8em; /* Slightly smaller X */
-    font-weight: bold;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    font-size: 1.1em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     min-width: unset;
     flex-grow: 0;
     box-shadow: none;
+    transition: color 0.2s ease, background-color 0.2s ease, transform 0.1s ease;
 }
-.remove-button:hover { background-color: var(--btn-remove-hover); transform: scale(1.1); } /* Slightly less prominent hover */
-.remove-button:active { background-color: var(--btn-remove-active); transform: scale(1.0); }
+.remove-button i {
+    pointer-events: none;
+}
+.remove-button:hover {
+    background-color: rgba(255, 0, 0, 0.1); /* Subtle red hover background */
+    color: var(--btn-remove); /* Red 'X' on hover */
+}
+.remove-button:active {
+    background-color: rgba(255, 0, 0, 0.2);
+    color: var(--btn-remove-active);
+    transform: translateY(0);
+}
 
 
 /* Styling for when text/initiative spans are in editable mode (for list items) */
@@ -445,13 +462,17 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
     border-radius: 4px;
 }
 
-/* Reset Controls */
+/* Reset Controls (Now side-by-side) */
 .reset-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 10px; /* Reduced gap */
-    padding: 0; /* Remove card-level padding */
+    display: flex; /* Make them a flex container */
+    flex-direction: row; /* Arrange horizontally */
+    gap: 10px;
+    padding: 0;
 }
+.reset-controls button {
+    flex-grow: 1; /* Allow them to grow and share space */
+}
+
 
 #resetListButton {
     background-color: var(--btn-reset-list);
@@ -475,23 +496,23 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
     text-align: center;
     color: var(--text-dark);
     margin-top: 0;
-    margin-bottom: 18px; /* Slightly less space */
-    font-size: 1.8em; /* Slightly smaller */
+    margin-bottom: 18px;
+    font-size: 1.8em;
     border-bottom: 1px solid var(--border-light);
     padding-bottom: 10px;
 }
 
 #character-sheet p {
-    margin-bottom: 8px; /* Reduced space between lines */
-    font-size: 1.05em; /* Slightly smaller font */
+    margin-bottom: 8px;
+    font-size: 1.05em;
     display: flex;
     align-items: baseline;
-    gap: 8px; /* Reduced space */
+    gap: 8px;
 }
 
 #character-sheet p strong {
     color: var(--text-subtle);
-    min-width: 70px; /* Adjusted min-width */
+    min-width: 70px;
     flex-shrink: 0;
 }
 
@@ -505,11 +526,11 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
 #character-sheet .editable-hp,
 #character-sheet .editable-stat {
     cursor: pointer;
-    min-width: 35px; /* Adjusted clickable area */
+    min-width: 35px;
     display: inline-block;
-    padding: 1px 3px; /* Smaller padding */
+    padding: 1px 3px;
     border-radius: 4px;
-    background-color: rgba(0,0,0,0.015); /* More subtle background */
+    background-color: rgba(0,0,0,0.015);
 }
 #character-sheet .editable-hp:hover,
 #character-sheet .editable-stat:hover {
@@ -519,13 +540,13 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
 
 /* Status Section specific styles */
 .status-section {
-    margin-top: 18px; /* Reduced margin */
-    padding-top: 12px; /* Reduced padding */
+    margin-top: 18px;
+    padding-top: 12px;
     border-top: 1px solid var(--border-light);
 }
 
 .status-section p {
-    font-weight: 600; /* Slightly less bold */
+    font-weight: 600;
     margin-bottom: 10px;
     font-size: 1.05em;
     color: var(--text-dark);
@@ -534,15 +555,15 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
 .status-section label {
     display: flex;
     align-items: center;
-    margin-bottom: 6px; /* Reduced space */
-    font-size: 1em; /* Slightly smaller */
+    margin-bottom: 6px;
+    font-size: 1em;
     cursor: pointer;
     color: var(--text-dark);
 }
 
 .status-section input[type="checkbox"] {
-    margin-right: 8px; /* Reduced space */
-    transform: scale(1.2); /* Slightly smaller checkboxes */
+    margin-right: 8px;
+    transform: scale(1.2);
     cursor: pointer;
     accent-color: var(--btn-primary);
 }
@@ -552,4 +573,192 @@ button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.1
 .notes-section {
     margin-top: 18px;
     padding-top: 12px;
-    border
+    border-top: 1px solid var(--border-light);
+}
+
+.notes-section p {
+    font-weight: 600;
+    margin-bottom: 6px;
+    font-size: 1.05em;
+    color: var(--text-dark);
+}
+
+#sheet-notes {
+    display: block;
+    width: 100%;
+    min-height: 80px;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 8px;
+    font-size: 0.95em;
+    line-height: 1.4;
+    overflow-y: auto;
+    cursor: text;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.06);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    color: var(--text-dark);
+}
+#sheet-notes:focus {
+    border-color: var(--editable-outline);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.08), 0 0 0 3px rgba(60, 150, 250, 0.2);
+    outline: none;
+}
+
+/* Styles for when character sheet fields are in editable mode */
+#character-sheet .editable-hp[contenteditable="true"],
+#character-sheet .editable-stat[contenteditable="true"],
+#character-sheet #sheet-notes[contenteditable="true"]
+{
+    outline: 2px dashed var(--editable-outline);
+    background: var(--editable-bg) !important;
+    color: var(--text-dark);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    padding: 1px 3px;
+    border-radius: 4px;
+}
+
+/* Horizontal Rule for visual separation */
+hr.list-separator {
+    border: none;
+    border-top: 1px solid var(--border-light);
+    margin: 15px 0; /* Adjust spacing as needed */
+}
+
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 860px) {
+    .main-content-wrapper {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        max-width: 480px;
+    }
+
+    .encounter-tracker-card,
+    #character-sheet {
+        width: 100%;
+        flex-basis: auto;
+        min-width: unset;
+    }
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 15px;
+    }
+
+    h2 {
+        font-size: 2em;
+        margin-bottom: 20px;
+    }
+
+    .card {
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+    }
+
+    .encounter-tracker-card {
+        gap: 15px;
+    }
+
+    .add-item-inputs {
+        flex-direction: column;
+        gap: 10px;
+    }
+    #newItemText, #newItemInitiative {
+        width: 100%;
+        min-width: unset;
+        max-width: unset;
+        text-align: left;
+        font-size: 15px;
+        padding: 8px 10px;
+    }
+    #newItemInitiative {
+        text-align: center;
+    }
+
+    .buttons-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+    button {
+        width: 100%;
+        min-width: unset;
+        font-size: 15px;
+        padding: 8px 12px;
+    }
+
+    .turn-controls {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    #prevTurnButton, #nextTurnButton {
+        width: calc(50% - 5px);
+        min-width: unset;
+    }
+    #roundCounter {
+        width: 100%;
+        order: -1;
+        font-size: 1.1em;
+        margin-bottom: 5px;
+    }
+
+    /* Reset buttons stack vertically again on very small screens */
+    .reset-controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .reset-controls button {
+        width: 100%;
+    }
+
+
+    /* List item adjustments */
+    #sortable-list li {
+        flex-wrap: wrap;
+        padding: 8px 12px;
+        gap: 6px 8px;
+        font-size: 14px;
+    }
+    #sortable-list li .handle { order: 1; width: 24px; height: 24px; font-size: 1.1em;}
+    #sortable-list li .initiative-score { order: 2; width: auto; min-width: 35px; font-size: 0.9em; }
+    #sortable-list li .list-item-hp { order: 3; width: auto; min-width: 50px; font-size: 0.85em; }
+    #sortable-list li .item-text { order: 4; flex-basis: 100%; margin-right: 0;}
+    #sortable-list li .lock-button { order: 5; font-size: 1em; width: 26px; height: 26px;} /* Adjusted icon button size */
+    #sortable-list li .remove-button { order: 7; width: 26px; height: 26px; font-size: 1em; } /* Adjusted icon button size */
+
+
+    /* Character sheet adjustments */
+    #character-sheet {
+        padding: 18px;
+    }
+    #character-sheet h3 {
+        font-size: 1.6em;
+        margin-bottom: 15px;
+    }
+    #character-sheet p {
+        font-size: 0.95em;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+    }
+    #character-sheet p strong {
+        min-width: unset;
+    }
+
+    .status-section label {
+        font-size: 0.9em;
+    }
+    .status-section input[type="checkbox"] {
+        transform: scale(1.0);
+    }
+
+    #sheet-notes {
+        min-height: 70px;
+        font-size: 0.9em;
+        padding: 6px;
+    }
+}
