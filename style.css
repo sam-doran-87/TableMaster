@@ -49,11 +49,11 @@ h2 {
     max-width: 100px; /* Adjusted max-width to better fit "Initiative" */
     text-align: center;
     box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
-    -moz-appearance: textfield;
+    -moz-appearance: textfield; /* Firefox spinner removal */
 }
 #newItemInitiative::-webkit-outer-spin-button,
 #newItemInitiative::-webkit-inner-spin-button {
-    -webkit-appearance: none;
+    -webkit-appearance: none; /* Webkit/Blink spinner removal */
     margin: 0;
 }
 
@@ -94,6 +94,45 @@ h2 {
 #sortInitiativeButton:hover { background-color: #0056b3; transform: translateY(-1px); }
 #sortInitiativeButton:active { background-color: #004085; transform: translateY(0); }
 
+/* Turn Controls */
+.turn-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin: 20px auto;
+    max-width: 400px;
+    padding: 10px 15px;
+    background-color: #e9ecef;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+#prevTurnButton,
+#nextTurnButton {
+    padding: 10px 18px;
+    background-color: #6f42c1; /* Purple-ish */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    flex-grow: 1;
+    min-width: 120px;
+}
+#prevTurnButton:hover,
+#nextTurnButton:hover { background-color: #59359e; transform: translateY(-1px); }
+#prevTurnButton:active,
+#nextTurnButton:active { background-color: #4c2d82; transform: translateY(0); }
+
+#roundCounter {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #2c3e50;
+    flex-shrink: 0; /* Prevents it from shrinking */
+}
 
 /* Sortable List Container */
 #sortable-list {
@@ -118,7 +157,8 @@ h2 {
     position: relative;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 10px; /* Space between flex items */
+    justify-content: space-between; /* Distribute items with space */
 
     background: linear-gradient(to bottom, #333333, #000000);
     color: #ffffff;
@@ -187,6 +227,7 @@ h2 {
     cursor: grab;
     box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     transition: background-color 0.2s ease, transform 0.1s ease;
+    order: 1; /* First element in flex order */
 }
 
 #sortable-list li .handle:hover {
@@ -196,42 +237,6 @@ h2 {
 
 #sortable-list li .handle:active {
     cursor: grabbing;
-}
-
-
-/* Styling for the Character Name span */
-#sortable-list li .item-text {
-    flex-grow: 1;
-    min-height: 1.5em;
-    cursor: text;
-    padding: 0 5px;
-    border-radius: 3px;
-    margin-right: 10px;
-}
-
-/* Styling for the Edit Button */
-.edit-button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 5px 10px;
-    font-size: 0.85em;
-    cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-    flex-shrink: 0;
-    margin-left: auto;
-    margin-right: 5px;
-}
-
-.edit-button:hover {
-    background-color: #0056b3;
-    transform: translateY(-1px);
-}
-
-.edit-button:active {
-    background-color: #004085;
-    transform: translateY(0);
 }
 
 
@@ -245,13 +250,94 @@ h2 {
     padding: 5px 0;
     border-radius: 4px;
     cursor: text;
+    order: 2; /* Second element */
 }
+
+/* Styling for the Character Name span */
+#sortable-list li .item-text {
+    flex-grow: 1; /* Allows it to take up remaining space */
+    min-height: 1.5em;
+    cursor: text;
+    padding: 0 5px;
+    border-radius: 3px;
+    margin-right: 10px; /* Space between name and HP */
+    order: 3; /* Third element */
+}
+
+/* HP display within the list item */
+.list-item-hp {
+    flex-shrink: 0;
+    font-weight: bold;
+    margin-left: 10px;
+    padding: 3px 6px;
+    border-radius: 4px;
+    min-width: 50px; /* Ensure enough space for "HP: XX" */
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.2);
+    order: 4; /* Fourth element */
+}
+
+/* HP color coding */
+.list-item-hp.hp-full { background-color: #28a745; color: white; } /* Green */
+.list-item-hp.hp-mid { background-color: #ffc107; color: #333; } /* Yellow */
+.list-item-hp.hp-low { background-color: #dc3545; color: white; } /* Red */
+.list-item-hp.hp-zero { background-color: #6c757d; color: white; } /* Gray for KO/Dead */
+
+
+/* Styling for the Lock Button */
+.lock-button {
+    background-color: #17a2b8; /* Info blue */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 8px;
+    font-size: 0.85em;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    flex-shrink: 0;
+    margin-left: 5px; /* Space between HP and lock */
+    order: 5; /* Fifth element */
+}
+
+.lock-button.locked {
+    background-color: #28a745; /* Success green when locked */
+}
+
+.lock-button:hover { background-color: #138496; transform: translateY(-1px); }
+.lock-button:active { background-color: #117a8b; transform: translateY(0); }
+
+
+/* Styling for the Edit Button */
+.edit-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 0.85em;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    flex-shrink: 0;
+    margin-left: 5px; /* Space between lock and edit */
+    order: 6; /* Sixth element */
+}
+
+.edit-button:hover {
+    background-color: #0056b3;
+    transform: translateY(-1px);
+}
+
+.edit-button:active {
+    background-color: #004085;
+    transform: translateY(0);
+}
+
 
 /* Styling for when text/initiative spans are in editable mode (for list items) */
 #sortable-list li .item-text[contenteditable="true"],
 #sortable-list li .initiative-score[contenteditable="true"] {
     outline: 2px dashed #007bff;
-    background: #fffacd !important;
+    background: #fffacd !important; /* Light yellow background to indicate editing */
     color: #333;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
     cursor: text;
@@ -275,6 +361,7 @@ h2 {
     display: flex;
     justify-content: center;
     align-items: center;
+    order: 7; /* Last element */
 }
 
 .remove-button:hover {
@@ -289,15 +376,19 @@ h2 {
 
 /* Reset Controls */
 .reset-controls {
-    text-align: center;
+    display: flex;
+    flex-direction: column; /* Stack buttons vertically */
+    align-items: center;
+    gap: 10px; /* Space between buttons */
     margin: 20px auto;
     max-width: 400px;
     padding: 0 10px;
 }
 
-#resetListButton {
+#resetListButton,
+#resetTurnButton { /* Combined styling for both reset buttons */
     padding: 10px 20px;
-    background-color: #6c757d; /* A neutral gray */
+    background-color: #6c757d; /* A neutral gray for reset list */
     color: white;
     border: none;
     border-radius: 6px;
@@ -308,8 +399,19 @@ h2 {
     max-width: 200px; /* Limit its max width */
 }
 
-#resetListButton:hover { background-color: #5a6268; transform: translateY(-1px); }
-#resetListButton:active { background-color: #4e555b; transform: translateY(0); }
+#resetListButton:hover,
+#resetTurnButton:hover { background-color: #5a6268; transform: translateY(-1px); }
+#resetListButton:active,
+#resetTurnButton:active { background-color: #4e555b; transform: translateY(0); }
+
+/* Specific style for Reset Turns to make it yellow */
+#resetTurnButton {
+    background-color: #ffc107; /* Yellow for attention */
+    color: #333; /* Dark text on yellow */
+}
+
+#resetTurnButton:hover { background-color: #e0a800; }
+#resetTurnButton:active { background-color: #cc9900; }
 
 
 /* Character Sheet Styles */
@@ -323,7 +425,7 @@ h2 {
     box-shadow: 0 4px 8px rgba(0,0,0,0.05);
     color: #333;
     /* Ensure it's always block by default, content will be populated by JS */
-    display: block; /* Important: Ensures the sheet is always visible */
+    display: block;
 }
 
 #character-sheet h3 {
@@ -339,17 +441,29 @@ h2 {
 #character-sheet p {
     margin-bottom: 8px;
     font-size: 1.1em;
+    display: flex; /* For aligning labels and values */
+    align-items: baseline;
 }
 
 #character-sheet p strong {
     color: #555;
-    min-width: 70px;
+    min-width: 70px; /* Give space for labels */
     display: inline-block;
+    flex-shrink: 0; /* Prevent label from shrinking */
 }
 
 #character-sheet span {
     font-weight: normal;
     color: #000;
+    flex-grow: 1; /* Allow editable spans to grow and fill space */
+}
+
+/* Add pointer cursor to character sheet editable HP/stat spans */
+#character-sheet .editable-hp,
+#character-sheet .editable-stat {
+    cursor: pointer;
+    min-width: 30px; /* Ensure some clickable area */
+    display: inline-block;
 }
 
 /* Status Section specific styles */
@@ -362,6 +476,7 @@ h2 {
 .status-section p {
     font-weight: bold;
     margin-bottom: 10px;
+    display: block; /* Override flex from general 'p' for this label */
 }
 
 .status-section label {
@@ -378,135 +493,6 @@ h2 {
     cursor: pointer;
 }
 
-
-/* --- STYLES FOR EDITABLE CHARACTER SHEET FIELDS --- */
-
-/* Styling for when character sheet HP spans are in editable mode */
-#character-sheet #sheet-current-hp[contenteditable="true"],
-#character-sheet #sheet-max-hp[contenteditable="true"]
-{
-    outline: 2px dashed #007bff;
-    background: #fffacd !important;
-    color: #333;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-    cursor: text;
-    padding: 0 2px;
-    border-radius: 3px;
-}
-
-/* Add pointer cursor to character sheet editable HP spans */
-#character-sheet .editable-hp { /* Use the class to apply cursor */
-    cursor: pointer;
-}
-/* Turn Controls */
-.turn-controls {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-    margin: 20px auto;
-    max-width: 400px;
-    padding: 10px 15px;
-    background-color: #e9ecef;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-#prevTurnButton,
-#nextTurnButton {
-    padding: 10px 18px;
-    background-color: #6f42c1; /* Purple-ish */
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-    flex-grow: 1;
-    min-width: 120px;
-}
-#prevTurnButton:hover,
-#nextTurnButton:hover { background-color: #59359e; transform: translateY(-1px); }
-#prevTurnButton:active,
-#nextTurnButton:active { background-color: #4c2d82; transform: translateY(0); }
-
-#roundCounter {
-    font-size: 1.3em;
-    font-weight: bold;
-    color: #2c3e50;
-    flex-shrink: 0;
-}
-
-/* Add style for the new reset turn button */
-#resetTurnButton {
-    padding: 10px 20px;
-    background-color: #ffc107; /* Yellow for attention */
-    color: #333;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-    width: 100%;
-    max-width: 200px;
-    margin-top: 10px; /* Space from reset list button */
-}
-
-#resetTurnButton:hover { background-color: #e0a800; transform: translateY(-1px); }
-#resetTurnButton:active { background-color: #cc9900; transform: translateY(0); }
-
-/* Update reset-controls to allow for multiple buttons */
-.reset-controls {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px; /* Space between buttons */
-    margin: 20px auto;
-    max-width: 400px;
-    padding: 0 10px;
-}
-/* Character Sheet Styles (add new sections/editable styles) */
-#character-sheet {
-    /* ... existing styles ... */
-}
-
-#character-sheet p {
-    margin-bottom: 8px;
-    font-size: 1.1em;
-    display: flex; /* For aligning labels and values */
-    align-items: baseline;
-}
-
-#character-sheet p strong {
-    color: #555;
-    min-width: 70px; /* Give space for labels */
-    display: inline-block;
-    flex-shrink: 0;
-}
-
-#character-sheet span {
-    font-weight: normal;
-    color: #000;
-    flex-grow: 1; /* Allow editable spans to grow */
-}
-
-/* New: Editable stat fields (AC, Speed) */
-#character-sheet .editable-stat {
-    cursor: pointer;
-    min-width: 30px; /* Ensure some clickable area */
-    display: inline-block;
-}
-
-#character-sheet .editable-stat[contenteditable="true"] {
-    outline: 2px dashed #007bff;
-    background: #fffacd !important;
-    color: #333;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-    padding: 0 2px;
-    border-radius: 3px;
-}
-
 /* Notes Section Styles */
 .notes-section {
     margin-top: 15px;
@@ -517,12 +503,12 @@ h2 {
 .notes-section p {
     font-weight: bold;
     margin-bottom: 5px;
-    display: block; /* Override flex for the label */
+    display: block; /* Override flex from general 'p' for this label */
 }
 
 #sheet-notes {
     display: block; /* Make it block to take full width */
-    width: calc(100% - 4px); /* Account for padding/border */
+    width: calc(100% - 18px); /* Account for padding + border (15px padding, 1px border on each side = 18px) */
     min-height: 80px; /* Make it behave like a textarea */
     border: 1px solid #c0c0c0;
     border-radius: 6px;
@@ -535,85 +521,17 @@ h2 {
     word-wrap: break-word; /* Wrap long words */
 }
 
-#sheet-notes[contenteditable="true"] {
+/* --- STYLES FOR EDITABLE CHARACTER SHEET FIELDS --- */
+#character-sheet #sheet-current-hp[contenteditable="true"],
+#character-sheet #sheet-max-hp[contenteditable="true"],
+#character-sheet #sheet-ac[contenteditable="true"],
+#character-sheet #sheet-speed[contenteditable="true"],
+#character-sheet #sheet-notes[contenteditable="true"]
+{
     outline: 2px dashed #007bff;
     background: #fffacd !important;
     color: #333;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-}
-
-/* List Item Visuals and HP Display */
-#sortable-list li {
-    /* ... existing styles ... */
-    justify-content: space-between; /* Distribute items with space */
-    position: relative;
-    padding-right: 40px; /* Make space for HP */
-}
-
-#sortable-list li .item-text {
-    flex-grow: 1;
-    min-height: 1.5em;
-    cursor: text;
-    padding: 0 5px;
+    padding: 0 2px; /* Adjust padding for editing visual */
     border-radius: 3px;
-    /* Remove margin-right: 10px; */
 }
-
-/* HP display within the list item */
-.list-item-hp {
-    flex-shrink: 0;
-    font-weight: bold;
-    margin-left: 10px;
-    padding: 3px 6px;
-    border-radius: 4px;
-    min-width: 45px;
-    text-align: center;
-    background-color: rgba(255, 255, 255, 0.2);
-}
-
-/* HP color coding (example colors, adjust as needed) */
-.list-item-hp.hp-full { background-color: #28a745; color: white; } /* Green */
-.list-item-hp.hp-mid { background-color: #ffc107; color: #333; } /* Yellow */
-.list-item-hp.hp-low { background-color: #dc3545; color: white; } /* Red */
-.list-item-hp.hp-zero { background-color: #6c757d; color: white; } /* Gray for KO/Dead */
-
-/* Ensure buttons are properly aligned */
-#sortable-list li .edit-button {
-    margin-left: 0; /* Remove auto margin to keep it next to name */
-    order: 3; /* Order it after item-text */
-}
-
-#sortable-list li .initiative-score {
-    order: 2; /* Order it after handle, before name */
-    margin-right: 10px;
-    background-color: rgba(255, 255, 255, 0.1); /* Match list item background */
-}
-
-#sortable-list li .item-text {
-    order: 4; /* Order it after initiative */
-}
-
-.remove-button {
-    order: 6; /* Place it at the very end */
-}
-
-.lock-button {
-    background-color: #17a2b8; /* Info blue */
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 5px 8px;
-    font-size: 0.85em;
-    cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-    flex-shrink: 0;
-    margin-right: 5px; /* Space between lock and edit */
-    order: 5; /* Order it before remove button */
-}
-
-.lock-button.locked {
-    background-color: #28a745; /* Success green when locked */
-}
-
-.lock-button:hover { background-color: #138496; transform: translateY(-1px); }
-.lock-button:active { background-color: #117a8b; transform: translateY(0); }
