@@ -18,9 +18,8 @@
                 <div class="add-item-inputs">
                     <input type="text" id="newItemText" placeholder="Character Name" autocomplete="off">
                     <input type="number" id="newItemInitiative" placeholder="Initiative" autocomplete="off">
-                </div>
+                    <button id="addItemButton">Add Character</button> </div>
                 <div class="buttons-row">
-                    <button id="addItemButton">Add Character</button>
                     <button id="sortInitiativeButton">Sort by Initiative</button>
                 </div>
             </div>
@@ -42,7 +41,7 @@
             <h3 id="sheet-title">Selected Character</h3>
             <p><strong>HP:</strong> <span id="sheet-current-hp" class="editable-hp">--</span> / <span id="sheet-max-hp" class="editable-hp">--</span></p>
             <p><strong>AC:</strong> <span id="sheet-ac" class="editable-stat">--</span></p>
-            <p><strong>Speed:</strong> <span id="sheet-speed" class="editable-stat">--</span></p>
+            <p><strong>Speed:</b> <span id="sheet-speed" class="editable-stat">--</span></p>
 
             <div class="status-section">
                 <p><strong>Status:</strong></p>
@@ -130,7 +129,6 @@
             }
             listItem.setAttribute('data-status', JSON.stringify(statusObj));
 
-            // Updated innerHTML for new buttons/icons and directly editable text
             listItem.innerHTML = `
                 <span class="handle"><i class="fa-solid fa-grip-lines-vertical"></i></span>
                 <span class="initiative-score" contenteditable="true">${initiativeValue}</span>
@@ -249,4 +247,471 @@
                 updateHighlight(null);
             }
 
-            if (highlight
+            if (highlightedIndex === -1 && sortableList.children.length > 0) {
+                 updateHighlight(sortableList.querySelector('li'));
+            }
+        }
+
+
+        // --- Function to Start Editing a Span ---
+        function startEditingSpan(spanElement) {
+            // Disable sortable if editing an item in the list
+            if (spanElement.closest('#sortable-list')) {
+                sortable.option('disabled', true);
+            }
+
+            spanElement.setAttribute('contenteditable', 'true');
+            spanElement.focus();
+
+            // Place cursor at the end of the text
+            const range = document.createRange();
+            range.selectNodeContents(spanElement);
+            range.collapse(false);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }
+
+        // --- Function to Add a New List Item ---
+        function addListItem() {
+            const nameText = newItemText.value.trim();
+            const initiativeValue = parseInt(newItemInitiative.value.trim(), 10) || 0;
+
+            if (nameText) {
+                const listItem = createListItemElement(nameText, initiativeValue, 30, 30, 10, '30ft', 'No notes.', null, false);
+                sortableList.appendChild(listItem);
+                newItemText.value = '';
+                newItemInitiative.value = '';
+                newItemText.focus();
+                saveState();
+                if (sortableList.children.length === 1 || highlightedIndex === -1) {
+                    updateHighlight(listItem);
+                }
+            }
+        }
+
+        // --- Event Listeners for Adding Items ---
+        addItemButton.addEventListener('click', addListItem);
+        newItemText.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') { addListItem(); }
+        });
+        newItemInitiative.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') { addListItem(); }
+        });
+
+        // --- Function to populate the character sheet ---
+        function populateCharacterSheet(listItem) {
+            if (!listItem) {
+                clearCharacterSheet();
+                return;
+            }
+            const name = listItem.querySelector('.item-text').textContent;
+            const currentHp = listItem.getAttribute('data-current-hp');
+            const maxHp = listItem.getAttribute('data-max-hp');
+            const ac = listItem.getAttribute('data-ac');
+            const speed = listItem.getAttribute('data-speed');
+            const notes = listItem.getAttribute('data-notes');
+            const statusString = listItem.getAttribute('data-status');
+            const locked = listItem.classList.contains('locked');
+
+            let statusObj;
+            try {
+                statusObj = JSON.parse(statusString);
+            } catch (e) {
+                console.error("Error parsing status JSON for", name, ":", e);
+                statusObj = {};
+            }
+
+            sheetTitle.textContent = name;
+            sheetCurrentHp.textContent = currentHp;
+            sheetMaxHp.textContent = maxHp;
+            sheetAC.textContent = ac;
+            sheetSpeed.textContent = speed;
+            sheetNotes.textContent = notes;
+            characterSheet.style.display = 'block';
+
+            statusCheckboxes.forEach(checkbox => {
+                const statusKey = checkbox.id.replace('status-', '');
+                if (statusObj.hasOwnProperty(statusKey)) {
+                    checkbox.checked = statusObj[statusKey];
+                } else {
+                    checkbox.checked = false;
+                }
+            });
+
+            // Update lock icon based on locked status
+            const lockButton = listItem.querySelector('.lock-button i');
+            if (lockButton) {
+                if (locked) {
+                    lockButton.classList.remove('fa-lock-open');
+                    lockButton.classList.add('fa-lock');
+                } else {
+                    lockButton.classList.remove('fa-lock');
+                    lockButton.classList.add('fa-lock-open');
+                }
+            }
+        }
+
+        // --- Function to clear the character sheet ---
+        function clearCharacterSheet() {
+            sheetTitle.textContent = 'Selected Character';
+            sheetCurrentHp.textContent = '--';
+            sheetMaxHp.textContent = '--';
+            sheetAC.textContent = '--';
+            sheetSpeed.textContent = '--';
+            sheetNotes.textContent = 'No notes.';
+            statusCheckboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+        }
+
+        // --- CENTRALIZED Event Listener for List Item Clicks ---
+        sortableList.addEventListener('click', function(event) {
+            const clickedItem = event.target.closest('li');
+
+            if (!clickedItem) return;
+
+            // Handle remove button click
+            if (event.target.closest('.remove-button')) {
+                if (clickedItem.classList.contains('locked')) {
+                    alert("This character is locked and cannot be removed. Unlock them first.");
+                    return;
+                }
+                if (confirm(`Are you sure you want to remove "${clickedItem.querySelector('.item-text').textContent}"?`)) {
+                    const wasHighlighted = clickedItem.classList.contains('highlighted');
+                    sortableList.removeChild(clickedItem);
+                    saveState();
+
+                    if (wasHighlighted) {
+                        const newFirstItem = sortableList.querySelector('li');
+                        if (newFirstItem) {
+                            updateHighlight(newFirstItem);
+                        } else {
+                            updateHighlight(null);
+                        }
+                    } else {
+                        const currentHighlighted = document.querySelector('.highlighted');
+                        if (currentHighlighted) {
+                            highlightedIndex = Array.from(sortableList.children).indexOf(currentHighlighted);
+                        } else {
+                            highlightedIndex = -1;
+                        }
+                    }
+                }
+                return;
+            }
+
+            // Handle lock/unlock button click
+            if (event.target.closest('.lock-button')) {
+                clickedItem.classList.toggle('locked');
+                const lockIcon = event.target.closest('.lock-button').querySelector('i');
+                if (clickedItem.classList.contains('locked')) {
+                    lockIcon.classList.remove('fa-lock-open');
+                    lockIcon.classList.add('fa-lock');
+                    clickedItem.setAttribute('data-name', clickedItem.querySelector('.item-text').textContent);
+                } else {
+                    lockIcon.classList.remove('fa-lock');
+                    lockIcon.classList.add('fa-lock-open');
+                    clickedItem.removeAttribute('data-name');
+                }
+                saveState();
+                if (clickedItem.classList.contains('highlighted')) {
+                    populateCharacterSheet(clickedItem);
+                }
+                return;
+            }
+
+            // Prevent highlighting when clicking the handle
+            if (event.target.closest('.handle')) {
+                return;
+            }
+
+            // Handle clicking on the list item itself to highlight/populate sheet
+            // but not if it's an editable span that just got clicked (blur handles save)
+            if (!event.target.closest('[contenteditable="true"]')) {
+                if (!clickedItem.classList.contains('highlighted')) {
+                    updateHighlight(clickedItem);
+                }
+            }
+        });
+
+
+        // --- Handle Editing Completion (on blur or Enter key) for contenteditable spans ---
+        document.addEventListener('blur', function(event) {
+            const targetElement = event.target;
+
+            if (targetElement.getAttribute('contenteditable') === 'true') {
+                // Re-enable sortable if editing an item in the list
+                if (targetElement.closest('#sortable-list')) {
+                    sortable.option('disabled', false);
+                }
+
+                targetElement.removeAttribute('contenteditable');
+
+                let newContent = targetElement.textContent.trim();
+                const listItem = targetElement.closest('li');
+                const highlightedListItem = document.querySelector('.highlighted');
+
+                if (targetElement.classList.contains('initiative-score')) {
+                    let numValue = parseInt(newContent, 10);
+                    if (isNaN(numValue)) { numValue = 0; }
+                    targetElement.textContent = numValue;
+                    if (listItem) { listItem.setAttribute('data-initiative', numValue); }
+                } else if (targetElement.classList.contains('item-text')) {
+                    if (newContent === '' && listItem && listItem.classList.contains('locked')) {
+                        alert("Locked characters cannot be removed by emptying their name. Please unlock them first.");
+                        targetElement.textContent = listItem.getAttribute('data-name') || '';
+                        newContent = targetElement.textContent;
+                    } else if (newContent === '' && listItem && !listItem.classList.contains('locked')) {
+                        const wasHighlighted = listItem.classList.contains('highlighted');
+                        sortableList.removeChild(listItem);
+                        saveState();
+                        if (wasHighlighted) {
+                            const newFirstItem = sortableList.querySelector('li');
+                            if (newFirstItem) {
+                                updateHighlight(newFirstItem);
+                            } else {
+                                updateHighlight(null);
+                            }
+                        }
+                        return;
+                    }
+                    targetElement.textContent = newContent;
+                } else if (targetElement.id === 'sheet-current-hp') {
+                    let numValue = parseInt(newContent, 10);
+                    if (isNaN(numValue)) { numValue = 0; }
+                    targetElement.textContent = numValue;
+                    if (highlightedListItem) {
+                        highlightedListItem.setAttribute('data-current-hp', numValue);
+                        applyHpColor(highlightedListItem);
+                    }
+                } else if (targetElement.id === 'sheet-max-hp') {
+                    let numValue = parseInt(newContent, 10);
+                    if (isNaN(numValue)) { numValue = 0; }
+                    targetElement.textContent = numValue;
+                    if (highlightedListItem) { highlightedListItem.setAttribute('data-max-hp', numValue); }
+                } else if (targetElement.id === 'sheet-ac') {
+                    let numValue = parseInt(newContent, 10);
+                    if (isNaN(numValue)) { numValue = 0; }
+                    targetElement.textContent = numValue;
+                    if (highlightedListItem) { highlightedListItem.setAttribute('data-ac', numValue); }
+                } else if (targetElement.id === 'sheet-speed') {
+                    targetElement.textContent = newContent;
+                    if (highlightedListItem) { highlightedListItem.setAttribute('data-speed', newContent); }
+                } else if (targetElement.id === 'sheet-notes') {
+                    targetElement.textContent = newContent;
+                    if (highlightedListItem) { highlightedListItem.setAttribute('data-notes', newContent); }
+                }
+
+                saveState();
+                if (highlightedListItem && targetElement.classList.contains('item-text')) {
+                    populateCharacterSheet(highlightedListItem);
+                }
+            }
+        }, true);
+
+        document.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter' && event.target.getAttribute('contenteditable') === 'true') {
+                event.preventDefault();
+                event.target.blur();
+            }
+        });
+
+
+        // --- Event Listeners for Character Sheet HP/AC/Speed/Notes Clicks to Start Editing ---
+        sheetCurrentHp.addEventListener('click', function() {
+            if (document.querySelector('.highlighted')) {
+                startEditingSpan(sheetCurrentHp);
+            }
+        });
+
+        sheetMaxHp.addEventListener('click', function() {
+            if (document.querySelector('.highlighted')) {
+                startEditingSpan(sheetMaxHp);
+            }
+        });
+
+        sheetAC.addEventListener('click', function() {
+            if (document.querySelector('.highlighted')) {
+                startEditingSpan(sheetAC);
+            }
+        });
+
+        sheetSpeed.addEventListener('click', function() {
+            if (document.querySelector('.highlighted')) {
+                startEditingSpan(sheetSpeed);
+            }
+        });
+
+        sheetNotes.addEventListener('click', function() {
+            if (document.querySelector('.highlighted')) {
+                startEditingSpan(sheetNotes);
+            }
+        });
+
+
+        // --- Event Listeners for Status Checkbox Changes ---
+        statusCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const highlightedListItem = document.querySelector('.highlighted');
+                if (highlightedListItem) {
+                    const statusString = highlightedListItem.getAttribute('data-status');
+                    let statusObj;
+                    try {
+                        statusObj = JSON.parse(statusString);
+                    } catch (e) {
+                        console.error("Error parsing status JSON on checkbox change:", e);
+                        statusObj = {};
+                    }
+
+                    const statusKey = this.id.replace('status-', '');
+
+                    if (statusKey === 'ko' && this.checked) {
+                        statusObj.dead = false;
+                        const deadCheckbox = document.getElementById('status-dead');
+                        if (deadCheckbox) deadCheckbox.checked = false;
+                    } else if (statusKey === 'dead' && this.checked) {
+                        statusObj.ko = false;
+                        const koCheckbox = document.getElementById('status-ko');
+                        if (koCheckbox) koCheckbox.checked = false;
+                    }
+
+                    statusObj[statusKey] = this.checked;
+
+                    highlightedListItem.setAttribute('data-status', JSON.stringify(statusObj));
+                    saveState();
+                    populateCharacterSheet(highlightedListItem);
+                }
+            });
+        });
+
+
+        // --- Function to Sort the List by Initiative Score ---
+        sortInitiativeButton.addEventListener('click', function() {
+            const listItems = Array.from(sortableList.children);
+            const previouslySelectedName = document.querySelector('.highlighted .item-text')?.textContent;
+
+            listItems.sort((a, b) => {
+                const initiativeA = parseInt(a.getAttribute('data-initiative'), 10) || 0;
+                const initiativeB = parseInt(b.getAttribute('data-initiative'), 10) || 0;
+                return initiativeB - initiativeA;
+            });
+
+            listItems.forEach(item => {
+                sortableList.appendChild(item);
+            });
+            saveState();
+
+            if (previouslySelectedName) {
+                const newHighlightedItem = Array.from(sortableList.children).find(item =>
+                    item.querySelector('.item-text').textContent === previouslySelectedName
+                );
+                updateHighlight(newHighlightedItem);
+            } else {
+                updateHighlight(null);
+            }
+        });
+
+        // --- Event Listeners for Turn Navigation ---
+        nextTurnButton.addEventListener('click', function() {
+            const listItems = Array.from(sortableList.children);
+            if (listItems.length === 0) {
+                return;
+            }
+
+            const currentHighlighted = document.querySelector('.highlighted');
+            let currentIndex = -1;
+            if (currentHighlighted) {
+                currentIndex = listItems.indexOf(currentHighlighted);
+            }
+
+            let nextIndex = currentIndex + 1;
+
+            if (nextIndex >= listItems.length) {
+                nextIndex = 0;
+                currentRound++;
+            } else if (currentIndex === -1) {
+                nextIndex = 0;
+            }
+
+            updateRoundCounter();
+            updateHighlight(listItems[nextIndex]);
+        });
+
+        prevTurnButton.addEventListener('click', function() {
+            const listItems = Array.from(sortableList.children);
+            if (listItems.length === 0) {
+                return;
+            }
+
+            const currentHighlighted = document.querySelector('.highlighted');
+            let currentIndex = -1;
+            if (currentHighlighted) {
+                currentIndex = listItems.indexOf(currentHighlighted);
+            }
+
+            let prevIndex = currentIndex - 1;
+
+            if (prevIndex < 0) {
+                if (currentRound > 1) {
+                    currentRound--;
+                }
+                prevIndex = listItems.length - 1;
+            }
+
+            updateRoundCounter();
+            updateHighlight(listItems[prevIndex]);
+        });
+
+
+        // --- Reset List Functionality ---
+        resetListButton.addEventListener('click', function() {
+            if (confirm('Are you sure you want to clear ALL characters from the list? Only locked characters will remain. This cannot be undone.')) {
+                const lockedItems = Array.from(sortableList.children).filter(item => item.classList.contains('locked'));
+
+                sortableList.innerHTML = '';
+                lockedItems.forEach(item => sortableList.appendChild(item));
+
+                localStorage.removeItem('rpgEncounterList');
+
+                currentRound = 1;
+                highlightedIndex = -1;
+                updateRoundCounter();
+                updateHighlight(null);
+
+                saveState();
+                console.log('List reset, only locked items remain. Local storage updated.');
+            }
+        });
+
+        // --- Reset Turns Functionality ---
+        resetTurnButton.addEventListener('click', function() {
+            if (confirm('Are you sure you want to reset the current turn and round?')) {
+                currentRound = 1;
+                highlightedIndex = -1;
+                updateRoundCounter();
+                updateHighlight(null);
+            }
+        });
+
+
+        // --- Clear highlight and sheet when clicking outside the list/sheet/controls ---
+        document.addEventListener('click', function(event) {
+            const isClickInsideTrackerCard = event.target.closest('.encounter-tracker-card');
+            const isClickInsideSheet = event.target.closest('#character-sheet');
+            const isStatusCheckbox = event.target.classList.contains('status-checkbox');
+
+            if (!isClickInsideTrackerCard && !isClickInsideSheet && !isStatusCheckbox) {
+                updateHighlight(null);
+            }
+        });
+
+
+        // --- Load state and initialize sheet when the page finishes loading ---
+        window.addEventListener('load', () => {
+            loadState();
+        });
+    </script>
+
+</body>
+</html>
