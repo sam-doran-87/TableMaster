@@ -10,53 +10,53 @@
 
     <h2>RPG Encounter List</h2>
 
-    <div class="action-controls">
-        <div class="add-item-inputs">
-            <input type="text" id="newItemText" placeholder="Character Name" autocomplete="off">
-            <input type="number" id="newItemInitiative" placeholder="Initiative" autocomplete="off">
-        </div>
-        <div class="buttons-row">
-            <button id="addItemButton">Add Character</button>
-            <button id="sortInitiativeButton">Sort by Initiative</button>
-        </div>
-    </div>
-
-    <div class="turn-controls">
-        <button id="prevTurnButton">Previous Turn</button>
-        <button id="nextTurnButton">Next Turn</button>
-        <div id="roundCounter">Round: 1</div>
-    </div>
-
-    <ul id="sortable-list">
-        </ul>
-
-    <div class="reset-controls">
-        <button id="resetListButton">Reset List</button>
-        <button id="resetTurnButton">Reset Turns</button>
-    </div>
-
-    <div id="character-sheet">
-        <h3 id="sheet-title">Selected Character</h3>
-        <p><strong>HP:</strong> <span id="sheet-current-hp" class="editable-hp">--</span> / <span id="sheet-max-hp" class="editable-hp">--</span></p>
-        <p><strong>AC:</strong> <span id="sheet-ac" class="editable-stat">--</span></p>
-        <p><strong>Speed:</strong> <span id="sheet-speed" class="editable-stat">--</span></p>
-
-        <div class="status-section">
-            <p><strong>Status:</strong></p>
-            <label><input type="checkbox" class="status-checkbox" id="status-advantage"> Advantage</label>
-            <label><input type="checkbox" class="status-checkbox" id="status-disadvantage"> Disadvantage</label>
-            <label><input type="checkbox" class="status-checkbox" id="status-poisoned"> Poisoned</label>
-            <label><input type="checkbox" class="status-checkbox" id="status-ko"> K.O.</label>
-            <label><input type="checkbox" class="status-checkbox" id="status-dead"> Dead</label>
+    <div class="container">
+        <div class="action-controls card">
+            <div class="add-item-inputs">
+                <input type="text" id="newItemText" placeholder="Character Name" autocomplete="off">
+                <input type="number" id="newItemInitiative" placeholder="Initiative" autocomplete="off">
+            </div>
+            <div class="buttons-row">
+                <button id="addItemButton">Add Character</button>
+                <button id="sortInitiativeButton">Sort by Initiative</button>
+            </div>
         </div>
 
-        <div class="notes-section">
-            <p><strong>Notes:</strong></p>
-            <span id="sheet-notes" class="editable-notes" contenteditable="true" role="textbox">No notes.</span>
+        <div class="turn-controls card">
+            <button id="prevTurnButton">Previous Turn</button>
+            <button id="nextTurnButton">Next Turn</button>
+            <div id="roundCounter">Round: 1</div>
         </div>
-    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+        <ul id="sortable-list" class="card">
+            </ul>
+
+        <div class="reset-controls card">
+            <button id="resetListButton">Reset List</button>
+            <button id="resetTurnButton">Reset Turns</button>
+        </div>
+
+        <div id="character-sheet" class="card">
+            <h3 id="sheet-title">Selected Character</h3>
+            <p><strong>HP:</strong> <span id="sheet-current-hp" class="editable-hp">--</span> / <span id="sheet-max-hp" class="editable-hp">--</span></p>
+            <p><strong>AC:</strong> <span id="sheet-ac" class="editable-stat">--</span></p>
+            <p><strong>Speed:</strong> <span id="sheet-speed" class="editable-stat">--</span></p>
+
+            <div class="status-section">
+                <p><strong>Status:</strong></p>
+                <label><input type="checkbox" class="status-checkbox" id="status-advantage"> Advantage</label>
+                <label><input type="checkbox" class="status-checkbox" id="status-disadvantage"> Disadvantage</label>
+                <label><input type="checkbox" class="status-checkbox" id="status-poisoned"> Poisoned</label>
+                <label><input type="checkbox" class="status-checkbox" id="status-ko"> K.O.</label>
+                <label><input type="checkbox" class="status-checkbox" id="status-dead"> Dead</label>
+            </div>
+
+            <div class="notes-section">
+                <p><strong>Notes:</strong></p>
+                <span id="sheet-notes" class="editable-notes" contenteditable="true" role="textbox">No notes.</span>
+            </div>
+        </div>
+    </div> <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script>
         // Get references to all necessary HTML elements
         const sortableList = document.getElementById('sortable-list');
@@ -136,8 +136,8 @@
             listItem.innerHTML = `
                 <span class="handle">⋮</span>
                 <span class="initiative-score">${initiativeValue}</span>
-                <span class="item-text">${nameText}</span>
                 <span class="list-item-hp">HP: ${currentHp}</span>
+                <span class="item-text">${nameText}</span>
                 <button class="lock-button">${locked ? 'Locked' : 'Lock'}</button>
                 <button class="edit-button">Edit</button>
                 <button class="remove-button">X</button>
@@ -555,9 +555,9 @@
                  event.target.classList.contains('initiative-score') ||
                  event.target.id === 'sheet-current-hp' ||
                  event.target.id === 'sheet-max-hp' ||
-                 event.target.id === 'sheet-ac' ||
-                 event.target.id === 'sheet-speed' ||
-                 event.target.id === 'sheet-notes'))
+                 event.id === 'sheet-ac' ||
+                 event.id === 'sheet-speed' ||
+                 event.id === 'sheet-notes'))
             {
                 event.preventDefault(); // Prevent new line in contenteditable
                 event.target.blur();    // Trigger blur to save changes
