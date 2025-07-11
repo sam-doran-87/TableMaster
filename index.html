@@ -98,7 +98,8 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
-// Get references to all necessary HTML elements
+
+    <script src="script.js">// Get references to all necessary HTML elements
 const sortableList = document.getElementById('sortable-list');
 const newItemText = document.getElementById('newItemText');
 const newItemInitiative = document.getElementById('newItemInitiative');
@@ -795,7 +796,6 @@ document.addEventListener('click', function(event) {
 // --- Load state and initialize sheet when the page finishes loading ---
 window.addEventListener('load', () => {
     loadState();
-});
-    <script src="script.js"></script>
+});</script>
 </body>
 </html>
