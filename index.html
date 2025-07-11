@@ -10,33 +10,34 @@
 
     <h2>RPG Encounter List</h2>
 
-    <div class="container">
-        <div class="action-controls card">
-            <div class="add-item-inputs">
-                <input type="text" id="newItemText" placeholder="Character Name" autocomplete="off">
-                <input type="number" id="newItemInitiative" placeholder="Initiative" autocomplete="off">
+    <div class="main-content-wrapper">
+
+        <div class="encounter-tracker-card card">
+            <div class="action-controls">
+                <div class="add-item-inputs">
+                    <input type="text" id="newItemText" placeholder="Character Name" autocomplete="off">
+                    <input type="number" id="newItemInitiative" placeholder="Initiative" autocomplete="off">
+                </div>
+                <div class="buttons-row">
+                    <button id="addItemButton">Add Character</button>
+                    <button id="sortInitiativeButton">Sort by Initiative</button>
+                </div>
             </div>
-            <div class="buttons-row">
-                <button id="addItemButton">Add Character</button>
-                <button id="sortInitiativeButton">Sort by Initiative</button>
+
+            <div class="turn-controls">
+                <button id="prevTurnButton">Previous Turn</button>
+                <button id="nextTurnButton">Next Turn</button>
+                <div id="roundCounter">Round: 1</div>
             </div>
-        </div>
 
-        <div class="turn-controls card">
-            <button id="prevTurnButton">Previous Turn</button>
-            <button id="nextTurnButton">Next Turn</button>
-            <div id="roundCounter">Round: 1</div>
-        </div>
+            <ul id="sortable-list">
+                </ul>
 
-        <ul id="sortable-list" class="card">
-            </ul>
-
-        <div class="reset-controls card">
-            <button id="resetListButton">Reset List</button>
-            <button id="resetTurnButton">Reset Turns</button>
-        </div>
-
-        <div id="character-sheet" class="card">
+            <div class="reset-controls">
+                <button id="resetListButton">Reset List</button>
+                <button id="resetTurnButton">Reset Turns</button>
+            </div>
+        </div> <div id="character-sheet" class="card">
             <h3 id="sheet-title">Selected Character</h3>
             <p><strong>HP:</strong> <span id="sheet-current-hp" class="editable-hp">--</span> / <span id="sheet-max-hp" class="editable-hp">--</span></p>
             <p><strong>AC:</strong> <span id="sheet-ac" class="editable-stat">--</span></p>
@@ -55,8 +56,7 @@
                 <p><strong>Notes:</strong></p>
                 <span id="sheet-notes" class="editable-notes" contenteditable="true" role="textbox">No notes.</span>
             </div>
-        </div>
-    </div> <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+        </div> </div> <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script>
         // Get references to all necessary HTML elements
         const sortableList = document.getElementById('sortable-list');
@@ -753,16 +753,12 @@
 
         // --- Clear highlight and sheet when clicking outside the list/sheet/controls ---
         document.addEventListener('click', function(event) {
-            const isClickInsideList = sortableList.contains(event.target);
-            const isClickInsideSheet = characterSheet.contains(event.target);
-            const isClickInsideActionControls = document.querySelector('.action-controls').contains(event.target);
-            const isClickInsideTurnControls = document.querySelector('.turn-controls').contains(event.target);
-            const isClickInsideResetControls = document.querySelector('.reset-controls').contains(event.target);
+            const isClickInsideTrackerCard = event.target.closest('.encounter-tracker-card');
+            const isClickInsideSheet = event.target.closest('#character-sheet');
             const isStatusCheckbox = event.target.classList.contains('status-checkbox'); // Keep this check
 
             // Don't clear if click is inside any of the main interactive areas or on a status checkbox
-            if (!isClickInsideList && !isClickInsideSheet && !isClickInsideActionControls &&
-                !isClickInsideTurnControls && !isClickInsideResetControls && !isStatusCheckbox) {
+            if (!isClickInsideTrackerCard && !isClickInsideSheet && !isStatusCheckbox) {
                 updateHighlight(null); // Clear highlight and sheet
             }
         });
