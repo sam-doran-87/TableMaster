@@ -18,45 +18,69 @@
                 <div class="add-item-inputs">
                     <input type="text" id="newItemText" placeholder="Character Name" autocomplete="off">
                     <input type="number" id="newItemInitiative" placeholder="Initiative" autocomplete="off">
-                    <button id="addItemButton">Add Character</button> </div>
-                <div class="buttons-row">
+                    <button id="addItemButton">Add Character</button>
                     <button id="sortInitiativeButton">Sort by Initiative</button>
                 </div>
             </div>
 
-            <hr class="list-separator"> <div class="turn-controls">
+            <hr class="list-separator">
+            <div class="turn-controls">
                 <button id="prevTurnButton">Previous Turn</button>
                 <button id="nextTurnButton">Next Turn</button>
                 <div id="roundCounter">Round: 1</div>
             </div>
 
             <ul id="sortable-list">
-                </ul>
+            </ul>
 
-            <hr class="list-separator"> <div class="reset-controls">
+            <hr class="list-separator">
+            <div class="reset-controls">
                 <button id="resetListButton">Reset List</button>
                 <button id="resetTurnButton">Reset Turns</button>
             </div>
-        </div> <div id="character-sheet" class="card">
+        </div>
+
+        <div id="character-sheet" class="card">
             <h3 id="sheet-title">Selected Character</h3>
-            <p><strong>HP:</strong> <span id="sheet-current-hp" class="editable-hp">--</span> / <span id="sheet-max-hp" class="editable-hp">--</span></p>
-            <p><strong>AC:</strong> <span id="sheet-ac" class="editable-stat">--</span></p>
-            <p><strong>Speed:</b> <span id="sheet-speed" class="editable-stat">--</span></p>
+            <p><strong>HP:</strong>
+                <input type="number" id="sheet-current-hp-input" class="sheet-hp-input"> /
+                <input type="number" id="sheet-max-hp-input" class="sheet-hp-input">
+            </p>
+            <p><strong>AC:</strong> <input type="number" id="sheet-ac-input" class="sheet-stat-input"></p>
+            <p><strong>Speed:</strong> <input type="text" id="sheet-speed-input" class="sheet-stat-input"></p>
 
             <div class="status-section">
                 <p><strong>Status:</strong></p>
-                <label><input type="checkbox" class="status-checkbox" id="status-advantage"> Advantage</label>
-                <label><input type="checkbox" class="status-checkbox" id="status-disadvantage"> Disadvantage</label>
-                <label><input type="checkbox" class="status-checkbox" id="status-poisoned"> Poisoned</label>
-                <label><input type="checkbox" class="status-checkbox" id="status-ko"> K.O.</label>
-                <label><input type="checkbox" class="status-checkbox" id="status-dead"> Dead</label>
+                <label>
+                    <input type="checkbox" class="status-checkbox" id="status-advantage"> Advantage
+                    <input type="number" class="status-bonus-input" data-status-type="advantage" placeholder="+/-">
+                </label>
+                <label>
+                    <input type="checkbox" class="status-checkbox" id="status-disadvantage"> Disadvantage
+                    <input type="number" class="status-bonus-input" data-status-type="disadvantage" placeholder="+/-">
+                </label>
+                <label>
+                    <input type="checkbox" class="status-checkbox" id="status-poisoned"> Poisoned
+                    <input type="number" class="status-bonus-input" data-status-type="poisoned" placeholder="+/-">
+                </label>
+                <label>
+                    <input type="checkbox" class="status-checkbox" id="status-ko"> K.O.
+                    <input type="number" class="status-bonus-input" data-status-type="ko" placeholder="+/-">
+                </label>
+                <label>
+                    <input type="checkbox" class="status-checkbox" id="status-dead"> Dead
+                    <input type="number" class="status-bonus-input" data-status-type="dead" placeholder="+/-">
+                </label>
             </div>
 
             <div class="notes-section">
                 <p><strong>Notes:</strong></p>
                 <span id="sheet-notes" class="editable-notes" contenteditable="true" role="textbox">No notes.</span>
             </div>
-        </div> </div> <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script>
         // Get references to all necessary HTML elements
         const sortableList = document.getElementById('sortable-list');
@@ -75,12 +99,14 @@
         // Get references to character sheet elements
         const characterSheet = document.getElementById('character-sheet');
         const sheetTitle = document.getElementById('sheet-title');
-        const sheetCurrentHp = document.getElementById('sheet-current-hp');
-        const sheetMaxHp = document.getElementById('sheet-max-hp');
-        const sheetAC = document.getElementById('sheet-ac');
-        const sheetSpeed = document.getElementById('sheet-speed');
+        const sheetCurrentHpInput = document.getElementById('sheet-current-hp-input');
+        const sheetMaxHpInput = document.getElementById('sheet-max-hp-input');
+        const sheetACInput = document.getElementById('sheet-ac-input');
+        const sheetSpeedInput = document.getElementById('sheet-speed-input');
         const sheetNotes = document.getElementById('sheet-notes');
         const statusCheckboxes = document.querySelectorAll('.status-checkbox');
+        const statusBonusInputs = document.querySelectorAll('.status-bonus-input');
+
 
         let currentRound = 1;
         let highlightedIndex = -1;
@@ -120,11 +146,11 @@
 
             if (statusObj === null) {
                 statusObj = {
-                    "advantage": false,
-                    "disadvantage": false,
-                    "poisoned": false,
-                    "ko": false,
-                    "dead": false
+                    "advantage": { checked: false, bonus: 0 },
+                    "disadvantage": { checked: false, bonus: 0 },
+                    "poisoned": { checked: false, bonus: 0 },
+                    "ko": { checked: false, bonus: 0 },
+                    "dead": { checked: false, bonus: 0 }
                 };
             }
             listItem.setAttribute('data-status', JSON.stringify(statusObj));
@@ -132,7 +158,7 @@
             listItem.innerHTML = `
                 <span class="handle"><i class="fa-solid fa-grip-lines-vertical"></i></span>
                 <span class="initiative-score" contenteditable="true">${initiativeValue}</span>
-                <span class="list-item-hp">HP: ${currentHp}</span>
+                <span class="list-item-hp hp-full">HP: ${currentHp}</span>
                 <span class="item-text" contenteditable="true">${nameText}</span>
                 <button class="lock-button">
                     <i class="${locked ? 'fa-solid fa-lock' : 'fa-solid fa-lock-open'}"></i>
@@ -162,6 +188,7 @@
             } else {
                 hpSpan.classList.add('hp-full');
             }
+            hpSpan.textContent = `HP: ${currentHp}`; // Update HP text in list
         }
 
         // --- Helper function to update the round counter display ---
@@ -248,29 +275,10 @@
             }
 
             if (highlightedIndex === -1 && sortableList.children.length > 0) {
-                 updateHighlight(sortableList.querySelector('li'));
+                   updateHighlight(sortableList.querySelector('li'));
             }
         }
 
-
-        // --- Function to Start Editing a Span ---
-        function startEditingSpan(spanElement) {
-            // Disable sortable if editing an item in the list
-            if (spanElement.closest('#sortable-list')) {
-                sortable.option('disabled', true);
-            }
-
-            spanElement.setAttribute('contenteditable', 'true');
-            spanElement.focus();
-
-            // Place cursor at the end of the text
-            const range = document.createRange();
-            range.selectNodeContents(spanElement);
-            range.collapse(false);
-            const sel = window.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(range);
-        }
 
         // --- Function to Add a New List Item ---
         function addListItem() {
@@ -323,19 +331,30 @@
             }
 
             sheetTitle.textContent = name;
-            sheetCurrentHp.textContent = currentHp;
-            sheetMaxHp.textContent = maxHp;
-            sheetAC.textContent = ac;
-            sheetSpeed.textContent = speed;
+            sheetCurrentHpInput.value = currentHp;
+            sheetMaxHpInput.value = maxHp;
+            sheetACInput.value = ac;
+            sheetSpeedInput.value = speed;
             sheetNotes.textContent = notes;
             characterSheet.style.display = 'block';
 
             statusCheckboxes.forEach(checkbox => {
                 const statusKey = checkbox.id.replace('status-', '');
                 if (statusObj.hasOwnProperty(statusKey)) {
-                    checkbox.checked = statusObj[statusKey];
+                    checkbox.checked = statusObj[statusKey].checked;
                 } else {
                     checkbox.checked = false;
+                }
+            });
+
+            statusBonusInputs.forEach(input => {
+                const statusType = input.dataset.statusType;
+                if (statusObj.hasOwnProperty(statusType)) {
+                    input.value = statusObj[statusType].bonus || '';
+                    input.style.display = statusObj[statusType].checked ? 'inline-block' : 'none';
+                } else {
+                    input.value = '';
+                    input.style.display = 'none';
                 }
             });
 
@@ -355,13 +374,17 @@
         // --- Function to clear the character sheet ---
         function clearCharacterSheet() {
             sheetTitle.textContent = 'Selected Character';
-            sheetCurrentHp.textContent = '--';
-            sheetMaxHp.textContent = '--';
-            sheetAC.textContent = '--';
-            sheetSpeed.textContent = '--';
+            sheetCurrentHpInput.value = '';
+            sheetMaxHpInput.value = '';
+            sheetACInput.value = '';
+            sheetSpeedInput.value = '';
             sheetNotes.textContent = 'No notes.';
             statusCheckboxes.forEach(checkbox => {
                 checkbox.checked = false;
+            });
+            statusBonusInputs.forEach(input => {
+                input.value = '';
+                input.style.display = 'none';
             });
         }
 
@@ -436,7 +459,7 @@
         });
 
 
-        // --- Handle Editing Completion (on blur or Enter key) for contenteditable spans ---
+        // --- Handle Editing Completion (on blur or Enter key) for contenteditable spans (Notes) ---
         document.addEventListener('blur', function(event) {
             const targetElement = event.target;
 
@@ -477,27 +500,6 @@
                         return;
                     }
                     targetElement.textContent = newContent;
-                } else if (targetElement.id === 'sheet-current-hp') {
-                    let numValue = parseInt(newContent, 10);
-                    if (isNaN(numValue)) { numValue = 0; }
-                    targetElement.textContent = numValue;
-                    if (highlightedListItem) {
-                        highlightedListItem.setAttribute('data-current-hp', numValue);
-                        applyHpColor(highlightedListItem);
-                    }
-                } else if (targetElement.id === 'sheet-max-hp') {
-                    let numValue = parseInt(newContent, 10);
-                    if (isNaN(numValue)) { numValue = 0; }
-                    targetElement.textContent = numValue;
-                    if (highlightedListItem) { highlightedListItem.setAttribute('data-max-hp', numValue); }
-                } else if (targetElement.id === 'sheet-ac') {
-                    let numValue = parseInt(newContent, 10);
-                    if (isNaN(numValue)) { numValue = 0; }
-                    targetElement.textContent = numValue;
-                    if (highlightedListItem) { highlightedListItem.setAttribute('data-ac', numValue); }
-                } else if (targetElement.id === 'sheet-speed') {
-                    targetElement.textContent = newContent;
-                    if (highlightedListItem) { highlightedListItem.setAttribute('data-speed', newContent); }
                 } else if (targetElement.id === 'sheet-notes') {
                     targetElement.textContent = newContent;
                     if (highlightedListItem) { highlightedListItem.setAttribute('data-notes', newContent); }
@@ -518,36 +520,32 @@
         });
 
 
-        // --- Event Listeners for Character Sheet HP/AC/Speed/Notes Clicks to Start Editing ---
-        sheetCurrentHp.addEventListener('click', function() {
-            if (document.querySelector('.highlighted')) {
-                startEditingSpan(sheetCurrentHp);
-            }
-        });
+        // --- Event Listeners for Character Sheet INPUT fields (HP, AC, Speed) ---
+        function handleSheetInputChange(event) {
+            const highlightedListItem = document.querySelector('.highlighted');
+            if (!highlightedListItem) return;
 
-        sheetMaxHp.addEventListener('click', function() {
-            if (document.querySelector('.highlighted')) {
-                startEditingSpan(sheetMaxHp);
-            }
-        });
+            let value = event.target.value;
+            let numValue = parseInt(value, 10);
 
-        sheetAC.addEventListener('click', function() {
-            if (document.querySelector('.highlighted')) {
-                startEditingSpan(sheetAC);
+            if (event.target === sheetCurrentHpInput) {
+                highlightedListItem.setAttribute('data-current-hp', isNaN(numValue) ? 0 : numValue);
+                applyHpColor(highlightedListItem); // Update HP color on list item
+            } else if (event.target === sheetMaxHpInput) {
+                highlightedListItem.setAttribute('data-max-hp', isNaN(numValue) ? 0 : numValue);
+                applyHpColor(highlightedListItem); // Update HP color on list item
+            } else if (event.target === sheetACInput) {
+                highlightedListItem.setAttribute('data-ac', isNaN(numValue) ? 0 : numValue);
+            } else if (event.target === sheetSpeedInput) {
+                highlightedListItem.setAttribute('data-speed', value);
             }
-        });
+            saveState();
+        }
 
-        sheetSpeed.addEventListener('click', function() {
-            if (document.querySelector('.highlighted')) {
-                startEditingSpan(sheetSpeed);
-            }
-        });
-
-        sheetNotes.addEventListener('click', function() {
-            if (document.querySelector('.highlighted')) {
-                startEditingSpan(sheetNotes);
-            }
-        });
+        sheetCurrentHpInput.addEventListener('change', handleSheetInputChange);
+        sheetMaxHpInput.addEventListener('change', handleSheetInputChange);
+        sheetACInput.addEventListener('change', handleSheetInputChange);
+        sheetSpeedInput.addEventListener('change', handleSheetInputChange);
 
 
         // --- Event Listeners for Status Checkbox Changes ---
@@ -565,22 +563,59 @@
                     }
 
                     const statusKey = this.id.replace('status-', '');
+                    const bonusInput = this.nextElementSibling; // Get the associated bonus input
 
                     if (statusKey === 'ko' && this.checked) {
-                        statusObj.dead = false;
+                        statusObj.dead.checked = false;
                         const deadCheckbox = document.getElementById('status-dead');
                         if (deadCheckbox) deadCheckbox.checked = false;
+                        document.querySelector('.status-bonus-input[data-status-type="dead"]').style.display = 'none';
                     } else if (statusKey === 'dead' && this.checked) {
-                        statusObj.ko = false;
+                        statusObj.ko.checked = false;
                         const koCheckbox = document.getElementById('status-ko');
                         if (koCheckbox) koCheckbox.checked = false;
+                        document.querySelector('.status-bonus-input[data-status-type="ko"]').style.display = 'none';
                     }
-
-                    statusObj[statusKey] = this.checked;
+                    
+                    if (!statusObj[statusKey]) { // Ensure the status key exists with proper structure
+                        statusObj[statusKey] = { checked: false, bonus: 0 };
+                    }
+                    statusObj[statusKey].checked = this.checked;
+                    bonusInput.style.display = this.checked ? 'inline-block' : 'none';
 
                     highlightedListItem.setAttribute('data-status', JSON.stringify(statusObj));
                     saveState();
-                    populateCharacterSheet(highlightedListItem);
+                    // No need to call populateCharacterSheet here as values are directly updated and saved.
+                }
+            });
+        });
+
+        // --- Event Listeners for Status Bonus/Penalty Input Changes ---
+        statusBonusInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                const highlightedListItem = document.querySelector('.highlighted');
+                if (highlightedListItem) {
+                    const statusString = highlightedListItem.getAttribute('data-status');
+                    let statusObj;
+                    try {
+                        statusObj = JSON.parse(statusString);
+                    } catch (e) {
+                        console.error("Error parsing status JSON on bonus input change:", e);
+                        statusObj = {};
+                    }
+
+                    const statusType = this.dataset.statusType;
+                    let numValue = parseInt(this.value, 10);
+                    if (isNaN(numValue)) numValue = 0; // Default to 0 if not a number
+
+                    if (statusObj[statusType]) {
+                        statusObj[statusType].bonus = numValue;
+                    } else { // Should not happen if checkbox logic is correct, but for safety
+                        statusObj[statusType] = { checked: false, bonus: numValue };
+                    }
+                    
+                    highlightedListItem.setAttribute('data-status', JSON.stringify(statusObj));
+                    saveState();
                 }
             });
         });
@@ -700,8 +735,10 @@
             const isClickInsideTrackerCard = event.target.closest('.encounter-tracker-card');
             const isClickInsideSheet = event.target.closest('#character-sheet');
             const isStatusCheckbox = event.target.classList.contains('status-checkbox');
+            const isStatusBonusInput = event.target.classList.contains('status-bonus-input');
 
-            if (!isClickInsideTrackerCard && !isClickInsideSheet && !isStatusCheckbox) {
+
+            if (!isClickInsideTrackerCard && !isClickInsideSheet && !isStatusCheckbox && !isStatusBonusInput) {
                 updateHighlight(null);
             }
         });
