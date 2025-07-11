@@ -466,3 +466,154 @@ h2 {
     max-width: 400px;
     padding: 0 10px;
 }
+/* Character Sheet Styles (add new sections/editable styles) */
+#character-sheet {
+    /* ... existing styles ... */
+}
+
+#character-sheet p {
+    margin-bottom: 8px;
+    font-size: 1.1em;
+    display: flex; /* For aligning labels and values */
+    align-items: baseline;
+}
+
+#character-sheet p strong {
+    color: #555;
+    min-width: 70px; /* Give space for labels */
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+#character-sheet span {
+    font-weight: normal;
+    color: #000;
+    flex-grow: 1; /* Allow editable spans to grow */
+}
+
+/* New: Editable stat fields (AC, Speed) */
+#character-sheet .editable-stat {
+    cursor: pointer;
+    min-width: 30px; /* Ensure some clickable area */
+    display: inline-block;
+}
+
+#character-sheet .editable-stat[contenteditable="true"] {
+    outline: 2px dashed #007bff;
+    background: #fffacd !important;
+    color: #333;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    padding: 0 2px;
+    border-radius: 3px;
+}
+
+/* Notes Section Styles */
+.notes-section {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+.notes-section p {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block; /* Override flex for the label */
+}
+
+#sheet-notes {
+    display: block; /* Make it block to take full width */
+    width: calc(100% - 4px); /* Account for padding/border */
+    min-height: 80px; /* Make it behave like a textarea */
+    border: 1px solid #c0c0c0;
+    border-radius: 6px;
+    padding: 8px;
+    font-size: 1em;
+    line-height: 1.4;
+    overflow-y: auto; /* Allow scrolling for long notes */
+    cursor: text;
+    white-space: pre-wrap; /* Preserve line breaks */
+    word-wrap: break-word; /* Wrap long words */
+}
+
+#sheet-notes[contenteditable="true"] {
+    outline: 2px dashed #007bff;
+    background: #fffacd !important;
+    color: #333;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+/* List Item Visuals and HP Display */
+#sortable-list li {
+    /* ... existing styles ... */
+    justify-content: space-between; /* Distribute items with space */
+    position: relative;
+    padding-right: 40px; /* Make space for HP */
+}
+
+#sortable-list li .item-text {
+    flex-grow: 1;
+    min-height: 1.5em;
+    cursor: text;
+    padding: 0 5px;
+    border-radius: 3px;
+    /* Remove margin-right: 10px; */
+}
+
+/* HP display within the list item */
+.list-item-hp {
+    flex-shrink: 0;
+    font-weight: bold;
+    margin-left: 10px;
+    padding: 3px 6px;
+    border-radius: 4px;
+    min-width: 45px;
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* HP color coding (example colors, adjust as needed) */
+.list-item-hp.hp-full { background-color: #28a745; color: white; } /* Green */
+.list-item-hp.hp-mid { background-color: #ffc107; color: #333; } /* Yellow */
+.list-item-hp.hp-low { background-color: #dc3545; color: white; } /* Red */
+.list-item-hp.hp-zero { background-color: #6c757d; color: white; } /* Gray for KO/Dead */
+
+/* Ensure buttons are properly aligned */
+#sortable-list li .edit-button {
+    margin-left: 0; /* Remove auto margin to keep it next to name */
+    order: 3; /* Order it after item-text */
+}
+
+#sortable-list li .initiative-score {
+    order: 2; /* Order it after handle, before name */
+    margin-right: 10px;
+    background-color: rgba(255, 255, 255, 0.1); /* Match list item background */
+}
+
+#sortable-list li .item-text {
+    order: 4; /* Order it after initiative */
+}
+
+.remove-button {
+    order: 6; /* Place it at the very end */
+}
+
+.lock-button {
+    background-color: #17a2b8; /* Info blue */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 8px;
+    font-size: 0.85em;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    flex-shrink: 0;
+    margin-right: 5px; /* Space between lock and edit */
+    order: 5; /* Order it before remove button */
+}
+
+.lock-button.locked {
+    background-color: #28a745; /* Success green when locked */
+}
+
+.lock-button:hover { background-color: #138496; transform: translateY(-1px); }
+.lock-button:active { background-color: #117a8b; transform: translateY(0); }
