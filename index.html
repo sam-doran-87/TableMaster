@@ -500,6 +500,368 @@
                 clearCharacterSheet(); // If list is empty, ensure sheet is clear
             }
         });
+
+ const resetListButton = document.getElementById('resetListButton');
+        const prevTurnButton = document.getElementById('prevTurnButton'); // New reference
+        const nextTurnButton = document.getElementById('nextTurnButton'); // New reference
+        const roundCounter = document.getElementById('roundCounter');     // New reference
+        const resetTurnButton = document.getElementById('resetTurnButton'); // New reference
+
+        // ... existing character sheet elements ...
+
+        let currentRound = 1; // Initialize round counter
+        let highlightedIndex = -1; // To keep track of the currently highlighted item's index
+
+        // --- Helper function to update the round counter display ---
+        function updateRoundCounter() {
+            roundCounter.textContent = `Round: ${currentRound}`;
+            saveState(); // Save state whenever round changes
+        }
+
+        // --- Helper function to update the highlight ---
+        function updateHighlight(newlyHighlightedItem) {
+            sortableList.querySelectorAll('li').forEach(item => {
+                item.classList.remove('highlighted');
+            });
+            if (newlyHighlightedItem) {
+                newlyHighlightedItem.classList.add('highlighted');
+                populateCharacterSheet(newlyHighlightedItem);
+                // Update highlightedIndex
+                highlightedIndex = Array.from(sortableList.children).indexOf(newlyHighlightedItem);
+            } else {
+                clearCharacterSheet();
+                highlightedIndex = -1;
+            }
+            saveState(); // Save state after highlight changes
+        }
+
+        // --- Event Listener for Next Turn Button ---
+        nextTurnButton.addEventListener('click', function() {
+            const listItems = Array.from(sortableList.children);
+            if (listItems.length === 0) {
+                return; // No characters to advance
+            }
+
+            // If no item is currently highlighted, highlight the first one
+            if (highlightedIndex === -1 || highlightedIndex >= listItems.length - 1) {
+                // If it's the last character or no character is selected, move to the first character and increment round
+                currentRound++;
+                highlightedIndex = 0;
+            } else {
+                // Move to the next character
+                highlightedIndex++;
+            }
+
+            updateRoundCounter();
+            updateHighlight(listItems[highlightedIndex]);
+        });
+
+        // --- Event Listener for Previous Turn Button ---
+        prevTurnButton.addEventListener('click', function() {
+            const listItems = Array.from(sortableList.children);
+            if (listItems.length === 0) {
+                return; // No characters
+            }
+
+            if (highlightedIndex <= 0) {
+                // If it's the first character or none selected, go to the last character and decrement round
+                if (currentRound > 1) {
+                    currentRound--;
+                }
+                highlightedIndex = listItems.length - 1;
+            } else {
+                // Move to the previous character
+                highlightedIndex--;
+            }
+
+            updateRoundCounter();
+            updateHighlight(listItems[highlightedIndex]);
+        });
+
+        // --- Event Listener for Reset Turns Button ---
+        resetTurnButton.addEventListener('click', function() {
+            if (confirm('Are you sure you want to reset the current turn and round?')) {
+                currentRound = 1;
+                highlightedIndex = -1; // No character highlighted
+                updateRoundCounter();
+                updateHighlight(null); // Clear highlight and character sheet
+            }
+        });
+
+        // Modify saveState to include round and highlightedIndex
+        function saveState() {
+            const items = [];
+            sortableList.querySelectorAll('li').forEach(listItem => {
+                const name = listItem.querySelector('.item-text').textContent;
+                const initiative = listItem.querySelector('.initiative-score').textContent;
+                const currentHp = listItem.getAttribute('data-current-hp');
+                const maxHp = listItem.getAttribute('data-max-hp');
+                const ac = listItem.getAttribute('data-ac'); // New
+                const speed = listItem.getAttribute('data-speed'); // New
+                const notes = listItem.getAttribute('data-notes'); // New
+                const status = listItem.getAttribute('data-status');
+                const locked = listItem.classList.contains('locked'); // New: Check for locked class
+                items.push({ name: name, initiative: initiative, currentHp: currentHp, maxHp: maxHp, ac: ac, speed: speed, notes: notes, status: status, locked: locked });
+            });
+            localStorage.setItem('rpgEncounterList', JSON.stringify(items));
+            localStorage.setItem('rpgEncounterRound', currentRound); // Save current round
+            localStorage.setItem('rpgEncounterHighlightedIndex', highlightedIndex); // Save highlighted index
+            console.log('List state, round, and highlight saved.');
+        }
+
+        // Modify loadState to include round and highlightedIndex
+        function loadState() {
+            const savedList = localStorage.getItem('rpgEncounterList');
+            const savedRound = localStorage.getItem('rpgEncounterRound');
+            const savedHighlightedIndex = localStorage.getItem('rpgEncounterHighlightedIndex');
+
+            sortableList.innerHTML = ''; // Always clear current HTML to prevent duplicates
+
+            if (savedList) {
+                const items = JSON.parse(savedList);
+                items.forEach(item => {
+                    const statusObj = item.status ? JSON.parse(item.status) : null;
+                    const listItem = createListItemElement(item.name, item.initiative, item.currentHp, item.maxHp, item.ac, item.speed, item.notes, statusObj, item.locked); // Pass new attributes
+                    sortableList.appendChild(listItem);
+                });
+                console.log('List state loaded from localStorage.');
+            } else {
+                console.log('No saved list found.');
+            }
+
+            if (savedRound) {
+                currentRound = parseInt(savedRound, 10);
+            } else {
+                currentRound = 1; // Default if not found
+            }
+            updateRoundCounter(); // Update display on load
+
+            if (savedHighlightedIndex !== null) {
+                highlightedIndex = parseInt(savedHighlightedIndex, 10);
+                const listItems = Array.from(sortableList.children);
+                if (listItems[highlightedIndex]) {
+                    updateHighlight(listItems[highlightedIndex]);
+                } else {
+                    highlightedIndex = -1; // Reset if index is out of bounds
+                    updateHighlight(null);
+                }
+            } else {
+                highlightedIndex = -1; // Default if not found
+                updateHighlight(null); // Clear sheet if no index
+            }
+
+            // Initial highlight for the first item if nothing else is highlighted
+            if (highlightedIndex === -1 && sortableList.children.length > 0) {
+                 updateHighlight(sortableList.querySelector('li'));
+            }
+        }
+
+        // ... existing event listeners ...
+
+        // Update the CENTRALIZED Event Listener for List Item Clicks
+        sortableList.addEventListener('click', function(event) {
+            const clickedItem = event.target.closest('li');
+
+            if (event.target.classList.contains('remove-button')) {
+                if (clickedItem) {
+                    const wasHighlighted = clickedItem.classList.contains('highlighted');
+                    if (confirm(`Are you sure you want to remove "${clickedItem.querySelector('.item-text').textContent}"?`)) {
+                        sortableList.removeChild(clickedItem);
+                        saveState();
+                        if (wasHighlighted) {
+                            // If the removed item was highlighted, try to highlight the next one or clear
+                            const newFirstItem = sortableList.querySelector('li');
+                            if (newFirstItem) {
+                                updateHighlight(newFirstItem);
+                            } else {
+                                updateHighlight(null); // Clear sheet if list is empty
+                            }
+                        } else {
+                            // If a non-highlighted item was removed, ensure the highlighted index is still valid
+                            const currentHighlighted = document.querySelector('.highlighted');
+                            if (currentHighlighted) {
+                                highlightedIndex = Array.from(sortableList.children).indexOf(currentHighlighted);
+                            } else {
+                                highlightedIndex = -1;
+                            }
+                        }
+                    }
+                }
+                return;
+            }
+            // ... existing edit-button and handle logic ...
+
+            if (clickedItem) {
+                // Only change highlight if a different item is clicked
+                if (!clickedItem.classList.contains('highlighted')) {
+                    updateHighlight(clickedItem);
+                }
+            }
+        });
+
+        // Modify the blur/keypress event listener for contenteditable to include new fields
+        document.addEventListener('blur', function(event) {
+            const targetElement = event.target;
+
+            if (targetElement.getAttribute('contenteditable') === 'true' &&
+                (targetElement.classList.contains('item-text') ||
+                 targetElement.classList.contains('initiative-score') ||
+                 targetElement.id === 'sheet-current-hp' ||
+                 targetElement.id === 'sheet-max-hp' ||
+                 targetElement.id === 'sheet-ac' ||         // New
+                 targetElement.id === 'sheet-speed' ||      // New
+                 targetElement.id === 'sheet-notes'))       // New
+            {
+                if (targetElement.closest('#sortable-list')) {
+                    sortable.option('disabled', false);
+                }
+
+                targetElement.removeAttribute('contenteditable');
+
+                let newContent = targetElement.textContent.trim();
+                const listItem = targetElement.closest('li');
+                const highlightedListItem = document.querySelector('.highlighted');
+
+                if (targetElement.classList.contains('initiative-score')) {
+                    let numValue = parseInt(newContent, 10);
+                    if (isNaN(numValue)) { numValue = 0; }
+                    targetElement.textContent = numValue;
+                    if (listItem) { listItem.setAttribute('data-initiative', numValue); }
+                } else if (targetElement.classList.contains('item-text')) {
+                    targetElement.textContent = newContent;
+                    if (targetElement.textContent === '') {
+                        if (listItem && !listItem.classList.contains('locked')) { // Prevent removal if locked
+                            const wasHighlighted = listItem.classList.contains('highlighted');
+                            sortableList.removeChild(listItem);
+                            if (wasHighlighted) {
+                                const newFirstItem = sortableList.querySelector('li');
+                                if (newFirstItem) {
+                                    updateHighlight(newFirstItem);
+                                } else {
+                                    updateHighlight(null);
+                                }
+                            }
+                        } else if (listItem && listItem.classList.contains('locked')) {
+                            alert("Locked characters cannot be removed by emptying their name. Please unlock them first.");
+                            targetElement.textContent = listItem.getAttribute('data-name'); // Revert name
+                        }
+                    }
+                } else if (targetElement.id === 'sheet-current-hp') {
+                    let numValue = parseInt(newContent, 10);
+                    if (isNaN(numValue)) { numValue = 0; }
+                    targetElement.textContent = numValue;
+                    if (highlightedListItem) {
+                        highlightedListItem.setAttribute('data-current-hp', numValue);
+                        // Apply HP coloring directly here for immediate feedback
+                        applyHpColor(highlightedListItem);
+                    }
+                } else if (targetElement.id === 'sheet-max-hp') {
+                    let numValue = parseInt(newContent, 10);
+                    if (isNaN(numValue)) { numValue = 0; }
+                    targetElement.textContent = numValue;
+                    if (highlightedListItem) { highlightedListItem.setAttribute('data-max-hp', numValue); }
+                } else if (targetElement.id === 'sheet-ac') { // New HP Field
+                    let numValue = parseInt(newContent, 10);
+                    if (isNaN(numValue)) { numValue = 0; }
+                    targetElement.textContent = numValue;
+                    if (highlightedListItem) { highlightedListItem.setAttribute('data-ac', numValue); }
+                } else if (targetElement.id === 'sheet-speed') { // New Speed Field
+                    targetElement.textContent = newContent;
+                    if (highlightedListItem) { highlightedListItem.setAttribute('data-speed', newContent); }
+                } else if (targetElement.id === 'sheet-notes') { // New Notes Field
+                    targetElement.textContent = newContent;
+                    if (highlightedListItem) { highlightedListItem.setAttribute('data-notes', newContent); }
+                }
+
+                saveState();
+                // Re-populate the sheet if the edited item is the currently highlighted one
+                if (highlightedListItem) {
+                    populateCharacterSheet(highlightedListItem);
+                }
+            }
+        }, true);
+
+        document.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter' &&
+                event.target.getAttribute('contenteditable') === 'true' &&
+                (event.target.classList.contains('item-text') ||
+                 event.target.classList.contains('initiative-score') ||
+                 event.target.id === 'sheet-current-hp' ||
+                 event.target.id === 'sheet-max-hp' ||
+                 event.target.id === 'sheet-ac' ||         // New
+                 event.target.id === 'sheet-speed' ||      // New
+                 event.target.id === 'sheet-notes'))       // New
+            {
+                event.preventDefault();
+                event.target.blur();
+            }
+        });
+
+        // Modify sortInitiativeButton event listener
+        sortInitiativeButton.addEventListener('click', function() {
+            const listItems = Array.from(sortableList.children);
+            const previouslySelectedName = document.querySelector('.highlighted .item-text')?.textContent;
+
+            // Sort logic remains the same
+            listItems.sort((a, b) => {
+                const initiativeA = parseInt(a.getAttribute('data-initiative'), 10) || 0;
+                const initiativeB = parseInt(b.getAttribute('data-initiative'), 10) || 0;
+                return initiativeB - initiativeA;
+            });
+
+            // Append sorted items back to the list
+            listItems.forEach(item => {
+                sortableList.appendChild(item);
+            });
+            saveState();
+
+            // Re-highlight and re-populate if a character was selected before sort
+            if (previouslySelectedName) {
+                const newHighlightedItem = Array.from(sortableList.children).find(item =>
+                    item.querySelector('.item-text').textContent === previouslySelectedName
+                );
+                updateHighlight(newHighlightedItem); // Use the new helper
+            } else {
+                updateHighlight(null); // Clear sheet if no previous selection
+            }
+        });
+
+        // Modify resetListButton event listener
+        resetListButton.addEventListener('click', function() {
+            if (confirm('Are you sure you want to clear ALL characters from the list? Only locked characters will remain. This cannot be undone.')) {
+                const lockedItems = Array.from(sortableList.children).filter(item => item.classList.contains('locked'));
+
+                sortableList.innerHTML = ''; // Clear all items first
+                lockedItems.forEach(item => sortableList.appendChild(item)); // Add locked items back
+
+                localStorage.removeItem('rpgEncounterList'); // Remove from local storage
+
+                currentRound = 1; // Reset round
+                highlightedIndex = -1; // Clear highlight
+                updateRoundCounter();
+                updateHighlight(null); // Clear the character sheet
+
+                saveState(); // Save the state with only locked items
+                console.log('List reset, only locked items remain. Local storage updated.');
+            }
+        });
+
+
+        // --- Load state and initialize sheet when the page finishes loading ---
+        window.addEventListener('load', () => {
+            loadState(); // Load existing data, round, and highlighted index
+
+            // Re-apply highlight and populate sheet based on loaded highlightedIndex
+            const listItems = Array.from(sortableList.children);
+            if (highlightedIndex !== -1 && listItems[highlightedIndex]) {
+                updateHighlight(listItems[highlightedIndex]);
+            } else if (listItems.length > 0) {
+                 // If no specific item was highlighted (or it was removed), highlight the first one
+                updateHighlight(listItems[0]);
+            } else {
+                updateHighlight(null); // Clear sheet if list is empty
+            }
+        });
     </script>
 
 </body>
