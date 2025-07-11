@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RPG Encounter List</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -17,8 +18,9 @@
                     <input type="text" id="newItemText" placeholder="Character Name">
                     <input type="number" id="newItemInitiative" placeholder="Initiative">
                     <button id="addItemButton">Add Character</button>
+                    <!-- Moved Sort by Initiative button here -->
+                    <button id="sortInitiativeButton" class="sort-button">Sort by Initiative</button>
                 </div>
-                <button id="sortInitiativeButton" class="sort-button">Sort by Initiative</button>
 
                 <div class="turn-controls">
                     <button id="prevTurnButton" class="turn-button">Previous Turn</button>
@@ -31,24 +33,24 @@
                 </ul>
 
                 <button id="resetListButton" class="reset-button">Reset List</button>
-                <button id="resetTurnButton" class="reset-button yellow-button">Reset Turns</button>
+                <button id="resetTurnButton" class="reset-button turn-button">Reset Turns</button>
             </div>
 
             <div id="character-sheet" class="character-sheet-card">
                 <h2 id="sheet-title">Selected Character</h2>
                 <div class="sheet-section">
                     <label for="sheet-current-hp-input">HP:</label>
-                    <input type="number" id="sheet-current-hp-input" class="sheet-input">
+                    <input type="number" id="sheet-current-hp-input" class="sheet-input hp-input">
                     <span>/</span>
-                    <input type="number" id="sheet-max-hp-input" class="sheet-input">
+                    <input type="number" id="sheet-max-hp-input" class="sheet-input hp-input">
                 </div>
                 <div class="sheet-section">
                     <label for="sheet-ac-input">AC:</label>
-                    <input type="number" id="sheet-ac-input" class="sheet-input">
+                    <input type="number" id="sheet-ac-input" class="sheet-input ac-input">
                 </div>
                 <div class="sheet-section">
                     <label for="sheet-speed-input">Speed:</label>
-                    <input type="text" id="sheet-speed-input" class="sheet-input">
+                    <input type="text" id="sheet-speed-input" class="sheet-input speed-input">
                 </div>
 
                 <div class="sheet-section">
