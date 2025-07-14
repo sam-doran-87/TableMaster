@@ -39,36 +39,39 @@
 
             <div id="character-sheet" class="character-sheet-card">
                 <h2 id="sheet-title">Selected Character</h2>
-                <button id="lockButton" class="lock-button"><i class="fa-solid fa-lock-open"></i></button>
+                
+                <div class="sheet-group">
+                    <div class="sheet-section hp-section">
+                        <p class="sheet-label">Current HP</p>
+                        <div class="number-control-group">
+                            <button class="number-btn decrement" data-target="sheet-current-hp">-</button>
+                            <span id="sheet-current-hp" class="editable-field">--</span>
+                            <button class="number-btn increment" data-target="sheet-current-hp">+</button>
+                        </div>
+                    </div>
 
-                <div class="sheet-section hp-section">
-                    <p class="sheet-label">Current HP</p>
-                    <div class="number-control-group">
-                        <button class="number-btn decrement" data-target="sheet-current-hp">-</button>
-                        <span id="sheet-current-hp" class="editable-field">--</span>
-                        <button class="number-btn increment" data-target="sheet-current-hp">+</button>
+                    <div class="sheet-section mp-section">
+                        <p class="sheet-label">MP</p>
+                        <div class="number-control-group">
+                            <button class="number-btn decrement" data-target="sheet-mp">-</button>
+                            <span id="sheet-mp" class="editable-field">--</span>
+                            <button class="number-btn increment" data-target="sheet-mp">+</button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="sheet-section mp-section">
-                    <p class="sheet-label">MP</p>
-                    <div class="number-control-group">
-                        <button class="number-btn decrement" data-target="sheet-mp">-</button>
-                        <span id="sheet-mp" class="editable-field">--</span>
-                        <button class="number-btn increment" data-target="sheet-mp">+</button>
+                <div class="sheet-group">
+                    <div class="sheet-section ac-section">
+                        <p class="sheet-label">Armor</p>
+                        <span id="sheet-ac" class="editable-field">--</span>
+                    </div>
+
+                    <div class="sheet-section speed-section">
+                        <p class="sheet-label">Speed</p>
+                        <span id="sheet-speed" class="editable-field">--</span>
                     </div>
                 </div>
                 
-                <div class="sheet-section ac-section">
-                    <p class="sheet-label">AC</p>
-                    <span id="sheet-ac" class="editable-field">--</span>
-                </div>
-
-                <div class="sheet-section speed-section">
-                    <p class="sheet-label">Speed</p>
-                    <span id="sheet-speed" class="editable-field">--</span>
-                </div>
-
                 <div class="sheet-section modifier-section">
                     <p class="sheet-label">Modifiers</p>
                     <div class="modifiers-list">
@@ -96,20 +99,20 @@
                             Poisoned
                         </label>
                         <label>
-                            <input type="checkbox" class="status-checkbox" id="status-ko">
-                            K.O.
-                        </label>
-                        <label>
-                            <input type="checkbox" class="status-checkbox" id="status-dead">
-                            Dead
-                        </label>
-                        <label>
                             <input type="checkbox" class="status-checkbox" id="status-burning">
                             Burning
                         </label>
                         <label>
                             <input type="checkbox" class="status-checkbox" id="status-immobile">
                             Immobile
+                        </label>
+                        <label>
+                            <input type="checkbox" class="status-checkbox" id="status-ko">
+                            K.O.
+                        </label>
+                        <label>
+                            <input type="checkbox" class="status-checkbox" id="status-dead">
+                            Dead
                         </label>
                     </div>
                 </div>
@@ -130,23 +133,10 @@
         const roundCounter = document.getElementById('roundCounter');
         const turnCounter = document.getElementById('turnCounter');
         const resetTurnButton = document.getElementById('resetTurnButton');
-        const lockButton = document.getElementById('lockButton');
+        const lockButton = document.getElementById('lockButton'); // This will no longer be used
 
-        // Get references to character sheet elements
-        const characterSheet = document.getElementById('character-sheet');
-        const sheetTitle = document.getElementById('sheet-title');
-        const sheetCurrentHp = document.getElementById('sheet-current-hp');
-        const sheetMp = document.getElementById('sheet-mp');
-        const sheetAc = document.getElementById('sheet-ac');
-        const sheetSpeed = document.getElementById('sheet-speed');
-        const sheetModifier = document.getElementById('sheet-modifier');
-        const statusCheckboxes = document.querySelectorAll('.status-checkbox');
-        const modifierCheckboxes = document.querySelectorAll('.modifier-checkbox');
-        const lockIcon = lockButton.querySelector('i');
-        
         let currentRound = 1;
         let highlightedIndex = -1;
-        let isLocked = false;
         
         // --- Initialize SortableJS ---
         const sortable = Sortable.create(sortableList, {
@@ -161,7 +151,7 @@
         });
 
         // --- Helper function to create a new list item HTML element ---
-        function createListItemElement(nameText, initiativeValue, currentHp = 30, mp = 10, ac = 10, speed = 30, modifier = 0, statusObj = null) {
+        function createListItemElement(nameText, initiativeValue, currentHp = 30, mp = 10, ac = 0, speed = 0, modifier = 0, statusObj = null, isLocked = false) {
             const listItem = document.createElement('li');
             listItem.setAttribute('data-initiative', initiativeValue);
             listItem.setAttribute('data-current-hp', currentHp);
@@ -169,26 +159,30 @@
             listItem.setAttribute('data-ac', ac);
             listItem.setAttribute('data-speed', speed);
             listItem.setAttribute('data-modifier', modifier);
+            listItem.setAttribute('data-locked', isLocked ? 'true' : 'false');
             
             if (statusObj === null) {
                 statusObj = {
                     "poisoned": false,
-                    "ko": false,
-                    "dead": false,
                     "burning": false,
                     "immobile": false,
+                    "ko": false,
+                    "dead": false,
                     "advantage": false,
                     "disadvantage": false
                 };
             }
             listItem.setAttribute('data-status', JSON.stringify(statusObj));
 
+            const lockIcon = isLocked ? 'fa-lock' : 'fa-lock-open';
+
             listItem.innerHTML = `
                 <span class="handle"><i class="fa-solid fa-grip-lines"></i></span>
+                <button class="item-lock-button"><i class="fa-solid ${lockIcon}"></i></button>
                 <span class="item-text">${nameText}</span>
                 <span class="initiative-score">${initiativeValue}</span>
                 <span class="list-item-hp">${currentHp} HP</span>
-                <button class="remove-button"><i class="fa-solid fa-trash-can"></i></button>
+                <button class="remove-button">X</button>
             `;
             return listItem;
         }
@@ -204,8 +198,9 @@
                 const ac = listItem.getAttribute('data-ac');
                 const speed = listItem.getAttribute('data-speed');
                 const modifier = listItem.getAttribute('data-modifier');
-                const status = listItem.getAttribute('data-status'); // Already JSON string
-                items.push({ name, initiative, currentHp, mp, ac, speed, modifier, status });
+                const status = listItem.getAttribute('data-status');
+                const isLocked = listItem.getAttribute('data-locked');
+                items.push({ name, initiative, currentHp, mp, ac, speed, modifier, status, isLocked });
             });
             localStorage.setItem('rpgEncounterList', JSON.stringify(items));
             console.log('List state saved.');
@@ -219,7 +214,7 @@
                 sortableList.innerHTML = '';
                 items.forEach(item => {
                     const statusObj = item.status ? JSON.parse(item.status) : null;
-                    const listItem = createListItemElement(item.name, item.initiative, item.currentHp, item.mp, item.ac, item.speed, item.modifier, statusObj);
+                    const listItem = createListItemElement(item.name, item.initiative, item.currentHp, item.mp, item.ac, item.speed, item.modifier, statusObj, item.isLocked === 'true');
                     sortableList.appendChild(listItem);
                 });
                 console.log('List state loaded from localStorage.');
@@ -233,7 +228,8 @@
 
         // --- Function to Start Editing a Span ---
         function startEditing(element) {
-            if (isLocked) {
+            const listItem = document.querySelector('.highlighted');
+            if (!listItem || listItem.getAttribute('data-locked') === 'true') {
                 return;
             }
             element.setAttribute('contenteditable', 'true');
@@ -321,9 +317,6 @@
             sheetModifier.value = '';
             statusCheckboxes.forEach(checkbox => checkbox.checked = false);
             modifierCheckboxes.forEach(checkbox => checkbox.checked = false);
-            isLocked = false;
-            lockIcon.classList.remove('fa-lock');
-            lockIcon.classList.add('fa-lock-open');
         }
 
         // --- Update the highlighted list item and character sheet ---
@@ -409,6 +402,23 @@
                 }
                 return;
             }
+            
+            if (event.target.classList.contains('item-lock-button') || event.target.closest('.item-lock-button')) {
+                const isLocked = clickedItem.getAttribute('data-locked') === 'true';
+                const lockIcon = event.target.closest('.item-lock-button').querySelector('i');
+                
+                clickedItem.setAttribute('data-locked', !isLocked);
+
+                if (isLocked) {
+                    lockIcon.classList.remove('fa-lock');
+                    lockIcon.classList.add('fa-lock-open');
+                } else {
+                    lockIcon.classList.remove('fa-lock-open');
+                    lockIcon.classList.add('fa-lock');
+                }
+                saveState();
+                return;
+            }
 
             if (clickedItem) {
                 const newIndex = Array.from(sortableList.children).indexOf(clickedItem);
@@ -423,6 +433,12 @@
 
             if (targetElement.getAttribute('contenteditable') === 'true' && listItem) {
                 let newValue = targetElement.textContent.trim();
+
+                if (listItem.getAttribute('data-locked') === 'true') {
+                     // Reset content if locked
+                    populateCharacterSheet(listItem);
+                    return;
+                }
 
                 if (targetElement.id === 'sheet-current-hp') {
                     listItem.setAttribute('data-current-hp', parseInt(newValue) || 0);
@@ -450,11 +466,13 @@
         // --- Event Listeners for Number Button Clicks (+/-) ---
         document.querySelectorAll('.number-control-group .number-btn').forEach(button => {
             button.addEventListener('click', function() {
+                const highlightedItem = document.querySelector('.highlighted');
+                if (!highlightedItem || highlightedItem.getAttribute('data-locked') === 'true') {
+                    return;
+                }
+                
                 const targetId = this.getAttribute('data-target');
                 const targetElement = document.getElementById(targetId);
-                const highlightedItem = document.querySelector('.highlighted');
-
-                if (!highlightedItem || !targetElement) return;
 
                 let currentValue;
                 if (targetElement.tagName === 'SPAN') {
@@ -502,20 +520,22 @@
         document.querySelectorAll('.status-checkbox, .modifier-checkbox').forEach(checkbox => {
             checkbox.addEventListener('change', function() {
                 const highlightedListItem = document.querySelector('.highlighted');
-                if (highlightedListItem) {
-                    const statusString = highlightedListItem.getAttribute('data-status');
-                    let statusObj;
-                    try {
-                        statusObj = JSON.parse(statusString);
-                    } catch (e) {
-                        console.error("Error parsing status JSON on checkbox change:", e);
-                        statusObj = {};
-                    }
-                    const statusKey = this.id.replace(/(status|modifier)-/, '');
-                    statusObj[statusKey] = this.checked;
-                    highlightedListItem.setAttribute('data-status', JSON.stringify(statusObj));
-                    saveState();
+                if (!highlightedListItem || highlightedListItem.getAttribute('data-locked') === 'true') {
+                    this.checked = !this.checked; // Revert change if locked
+                    return;
                 }
+                const statusString = highlightedListItem.getAttribute('data-status');
+                let statusObj;
+                try {
+                    statusObj = JSON.parse(statusString);
+                } catch (e) {
+                    console.error("Error parsing status JSON on checkbox change:", e);
+                    statusObj = {};
+                }
+                const statusKey = this.id.replace(/(status|modifier)-/, '');
+                statusObj[statusKey] = this.checked;
+                highlightedListItem.setAttribute('data-status', JSON.stringify(statusObj));
+                saveState();
             });
         });
 
@@ -559,18 +579,6 @@
             }
         });
 
-        // --- Lock Button Functionality ---
-        lockButton.addEventListener('click', () => {
-            isLocked = !isLocked;
-            if (isLocked) {
-                lockIcon.classList.remove('fa-lock-open');
-                lockIcon.classList.add('fa-lock');
-            } else {
-                lockIcon.classList.remove('fa-lock');
-                lockIcon.classList.add('fa-lock-open');
-            }
-        });
-
         // --- Clear highlight and sheet when clicking outside the list/sheet/controls ---
         document.addEventListener('click', function(event) {
             const isClickInsideTrackerCard = event.target.closest('.encounter-tracker-card');
@@ -582,7 +590,6 @@
                 updateHighlight(null);
             }
         });
-
 
         // --- Load state and initialize sheet when the page finishes loading ---
         window.addEventListener('load', () => {
