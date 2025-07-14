@@ -42,7 +42,7 @@
                 
                 <div class="sheet-group">
                     <div class="sheet-section hp-section">
-                        <p class="sheet-label">Current HP</p>
+                        <p class="sheet-label">HP</p>
                         <div class="number-control-group">
                             <button class="number-btn decrement" data-target="sheet-current-hp">-</button>
                             <span id="sheet-current-hp" class="editable-field">--</span>
@@ -161,7 +161,7 @@
         });
 
         // --- Helper function to create a new list item HTML element ---
-        function createListItemElement(nameText, initiativeValue, currentHp = 30, mp = 10, ac = 0, speed = 0, modifier = 0, statusObj = null, isLocked = false) {
+        function createListItemElement(nameText, initiativeValue, currentHp = 10, mp = 10, ac = 0, speed = 0, modifier = 0, statusObj = null, isLocked = false) {
             const listItem = document.createElement('li');
             listItem.setAttribute('data-initiative', initiativeValue);
             listItem.setAttribute('data-current-hp', currentHp);
