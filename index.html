@@ -133,8 +133,18 @@
         const roundCounter = document.getElementById('roundCounter');
         const turnCounter = document.getElementById('turnCounter');
         const resetTurnButton = document.getElementById('resetTurnButton');
-        const lockButton = document.getElementById('lockButton'); // This will no longer be used
 
+        // Get references to character sheet elements
+        const characterSheet = document.getElementById('character-sheet');
+        const sheetTitle = document.getElementById('sheet-title');
+        const sheetCurrentHp = document.getElementById('sheet-current-hp');
+        const sheetMp = document.getElementById('sheet-mp');
+        const sheetAc = document.getElementById('sheet-ac');
+        const sheetSpeed = document.getElementById('sheet-speed');
+        const sheetModifier = document.getElementById('sheet-modifier');
+        const statusCheckboxes = document.querySelectorAll('.status-checkbox');
+        const modifierCheckboxes = document.querySelectorAll('.modifier-checkbox');
+        
         let currentRound = 1;
         let highlightedIndex = -1;
         
@@ -267,8 +277,10 @@
 
         // --- Function to populate the character sheet ---
         function populateCharacterSheet(listItem) {
+            console.log("Populating character sheet for:", listItem);
             if (!listItem) {
                 clearCharacterSheet();
+                console.log("No list item provided, clearing sheet.");
                 return;
             }
 
@@ -279,6 +291,8 @@
             const speed = listItem.getAttribute('data-speed');
             const modifier = listItem.getAttribute('data-modifier');
             const statusString = listItem.getAttribute('data-status');
+            
+            console.log("Character data:", { name, currentHp, mp, ac, speed, modifier, statusString });
 
             let statusObj;
             try {
@@ -382,32 +396,37 @@
 
         // --- CENTRALIZED Event Listener for List Item Clicks ---
         sortableList.addEventListener('click', function(event) {
-            const clickedItem = event.target.closest('li');
-
-            if (event.target.classList.contains('remove-button') || event.target.closest('.remove-button')) {
-                if (clickedItem) {
-                    const wasHighlighted = clickedItem.classList.contains('highlighted');
-                    const indexToRemove = Array.from(sortableList.children).indexOf(clickedItem);
-                    sortableList.removeChild(clickedItem);
-
-                    if (wasHighlighted) {
-                        if (indexToRemove < highlightedIndex) {
-                            highlightedIndex--;
-                        } else if (indexToRemove === highlightedIndex) {
-                            highlightedIndex = -1;
-                        }
-                    }
-                    saveState();
-                    updateHighlight(highlightedIndex);
-                }
+            const clickedListItem = event.target.closest('li');
+            
+            if (!clickedListItem) {
+                console.log("Click did not land on a list item.");
                 return;
             }
             
-            if (event.target.classList.contains('item-lock-button') || event.target.closest('.item-lock-button')) {
-                const isLocked = clickedItem.getAttribute('data-locked') === 'true';
+            if (event.target.closest('.remove-button')) {
+                console.log("Remove button clicked.");
+                const wasHighlighted = clickedListItem.classList.contains('highlighted');
+                const indexToRemove = Array.from(sortableList.children).indexOf(clickedListItem);
+                sortableList.removeChild(clickedListItem);
+
+                if (wasHighlighted) {
+                    if (indexToRemove < highlightedIndex) {
+                        highlightedIndex--;
+                    } else if (indexToRemove === highlightedIndex) {
+                        highlightedIndex = -1;
+                    }
+                }
+                saveState();
+                updateHighlight(highlightedIndex);
+                return;
+            }
+            
+            if (event.target.closest('.item-lock-button')) {
+                console.log("Lock button clicked.");
+                const isLocked = clickedListItem.getAttribute('data-locked') === 'true';
                 const lockIcon = event.target.closest('.item-lock-button').querySelector('i');
                 
-                clickedItem.setAttribute('data-locked', !isLocked);
+                clickedListItem.setAttribute('data-locked', !isLocked);
 
                 if (isLocked) {
                     lockIcon.classList.remove('fa-lock');
@@ -420,10 +439,9 @@
                 return;
             }
 
-            if (clickedItem) {
-                const newIndex = Array.from(sortableList.children).indexOf(clickedItem);
-                updateHighlight(newIndex);
-            }
+            console.log("List item selected. Populating sheet.");
+            const newIndex = Array.from(sortableList.children).indexOf(clickedListItem);
+            updateHighlight(newIndex);
         });
 
         // --- Handle Editing Completion (on blur or Enter key) ---
