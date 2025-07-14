@@ -172,13 +172,13 @@
             
             if (statusObj === null) {
                 statusObj = {
-                    "Poisoned": false,
-                    "KO": false,
-                    "Dead": false,
-                    "Burning": false,
-                    "Immobile": false,
-                    "Advantage": false,
-                    "Disadvantage": false
+                    "poisoned": false,
+                    "ko": false,
+                    "dead": false,
+                    "burning": false,
+                    "immobile": false,
+                    "advantage": false,
+                    "disadvantage": false
                 };
             }
             listItem.setAttribute('data-status', JSON.stringify(statusObj));
@@ -219,7 +219,6 @@
                 sortableList.innerHTML = '';
                 items.forEach(item => {
                     const statusObj = item.status ? JSON.parse(item.status) : null;
-                    // Ensure all attributes are correctly passed to createListItemElement
                     const listItem = createListItemElement(item.name, item.initiative, item.currentHp, item.mp, item.ac, item.speed, item.modifier, statusObj);
                     sortableList.appendChild(listItem);
                 });
@@ -244,6 +243,7 @@
 
         // --- Function to Add a New List Item ---
         function addListItem() {
+            console.log("Add Character button clicked.");
             const nameText = newItemText.value.trim();
             const initiativeValue = newItemInitiative.value.trim();
 
@@ -254,6 +254,9 @@
                 newItemInitiative.value = '';
                 newItemText.focus();
                 saveState();
+                console.log("New character added and state saved.");
+            } else {
+                console.log("Name or Initiative is missing. Character not added.");
             }
         }
 
@@ -420,3 +423,171 @@
 
             if (targetElement.getAttribute('contenteditable') === 'true' && listItem) {
                 let newValue = targetElement.textContent.trim();
+
+                if (targetElement.id === 'sheet-current-hp') {
+                    listItem.setAttribute('data-current-hp', parseInt(newValue) || 0);
+                    listItem.querySelector('.list-item-hp').textContent = `${listItem.getAttribute('data-current-hp')} HP`;
+                } else if (targetElement.id === 'sheet-mp') {
+                    listItem.setAttribute('data-mp', parseInt(newValue) || 0);
+                } else if (targetElement.id === 'sheet-ac') {
+                    listItem.setAttribute('data-ac', parseInt(newValue) || 0);
+                } else if (targetElement.id === 'sheet-speed') {
+                    listItem.setAttribute('data-speed', parseInt(newValue) || 0);
+                }
+
+                targetElement.removeAttribute('contenteditable');
+                saveState();
+            }
+        }, true);
+
+        document.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter' && event.target.getAttribute('contenteditable') === 'true') {
+                event.preventDefault();
+                event.target.blur();
+            }
+        });
+
+        // --- Event Listeners for Number Button Clicks (+/-) ---
+        document.querySelectorAll('.number-control-group .number-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const targetElement = document.getElementById(targetId);
+                const highlightedItem = document.querySelector('.highlighted');
+
+                if (!highlightedItem || !targetElement) return;
+
+                let currentValue;
+                if (targetElement.tagName === 'SPAN') {
+                    currentValue = parseInt(targetElement.textContent);
+                } else if (targetElement.tagName === 'INPUT') {
+                    currentValue = parseInt(targetElement.value);
+                }
+
+                if (isNaN(currentValue)) {
+                    currentValue = 0;
+                }
+
+                if (this.classList.contains('increment')) {
+                    currentValue++;
+                } else if (this.classList.contains('decrement')) {
+                    currentValue--;
+                }
+
+                if (targetElement.tagName === 'SPAN') {
+                    targetElement.textContent = currentValue;
+                } else if (targetElement.tagName === 'INPUT') {
+                    targetElement.value = currentValue;
+                }
+                
+                if (targetId === 'sheet-current-hp') {
+                    highlightedItem.setAttribute('data-current-hp', currentValue);
+                    highlightedItem.querySelector('.list-item-hp').textContent = `${currentValue} HP`;
+                } else if (targetId === 'sheet-mp') {
+                    highlightedItem.setAttribute('data-mp', currentValue);
+                } else if (targetId === 'sheet-modifier') {
+                    highlightedItem.setAttribute('data-modifier', currentValue);
+                }
+
+                saveState();
+            });
+        });
+        
+        // --- Event Listeners for Character Sheet Field Clicks to Start Editing ---
+        sheetCurrentHp.addEventListener('click', () => startEditing(sheetCurrentHp));
+        sheetMp.addEventListener('click', () => startEditing(sheetMp));
+        sheetAc.addEventListener('click', () => startEditing(sheetAc));
+        sheetSpeed.addEventListener('click', () => startEditing(sheetSpeed));
+
+        // --- Event Listeners for Checkbox Changes ---
+        document.querySelectorAll('.status-checkbox, .modifier-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const highlightedListItem = document.querySelector('.highlighted');
+                if (highlightedListItem) {
+                    const statusString = highlightedListItem.getAttribute('data-status');
+                    let statusObj;
+                    try {
+                        statusObj = JSON.parse(statusString);
+                    } catch (e) {
+                        console.error("Error parsing status JSON on checkbox change:", e);
+                        statusObj = {};
+                    }
+                    const statusKey = this.id.replace(/(status|modifier)-/, '');
+                    statusObj[statusKey] = this.checked;
+                    highlightedListItem.setAttribute('data-status', JSON.stringify(statusObj));
+                    saveState();
+                }
+            });
+        });
+
+        // --- Function to Sort the List by Initiative Score ---
+        sortInitiativeButton.addEventListener('click', function() {
+            const listItems = Array.from(sortableList.children);
+            const previouslySelectedName = document.querySelector('.highlighted .item-text')?.textContent;
+            
+            listItems.sort((a, b) => {
+                const initiativeA = parseInt(a.getAttribute('data-initiative'), 10) || 0;
+                const initiativeB = parseInt(b.getAttribute('data-initiative'), 10) || 0;
+                return initiativeB - initiativeA;
+            });
+
+            listItems.forEach(item => {
+                sortableList.appendChild(item);
+            });
+            saveState();
+
+            if (previouslySelectedName) {
+                const newHighlightedItem = Array.from(sortableList.children).find(item =>
+                    item.querySelector('.item-text').textContent === previouslySelectedName
+                );
+                if (newHighlightedItem) {
+                    updateHighlight(Array.from(sortableList.children).indexOf(newHighlightedItem));
+                } else {
+                    updateHighlight(null);
+                }
+            } else {
+                updateHighlight(0);
+            }
+        });
+
+        // --- Reset Turns Functionality ---
+        resetTurnButton.addEventListener('click', function() {
+            if (confirm('Are you sure you want to reset the current turn and round?')) {
+                currentRound = 1;
+                highlightedIndex = -1;
+                updateRoundCounter();
+                updateHighlight(null);
+            }
+        });
+
+        // --- Lock Button Functionality ---
+        lockButton.addEventListener('click', () => {
+            isLocked = !isLocked;
+            if (isLocked) {
+                lockIcon.classList.remove('fa-lock-open');
+                lockIcon.classList.add('fa-lock');
+            } else {
+                lockIcon.classList.remove('fa-lock');
+                lockIcon.classList.add('fa-lock-open');
+            }
+        });
+
+        // --- Clear highlight and sheet when clicking outside the list/sheet/controls ---
+        document.addEventListener('click', function(event) {
+            const isClickInsideTrackerCard = event.target.closest('.encounter-tracker-card');
+            const isClickInsideSheet = event.target.closest('.character-sheet-card');
+
+            const isInteractiveElement = event.target.tagName === 'BUTTON' || event.target.tagName === 'INPUT' || event.target.closest('label');
+
+            if (!isClickInsideTrackerCard && !isClickInsideSheet && !isInteractiveElement) {
+                updateHighlight(null);
+            }
+        });
+
+
+        // --- Load state and initialize sheet when the page finishes loading ---
+        window.addEventListener('load', () => {
+            loadState();
+        });
+    </script>
+</body>
+</html>
