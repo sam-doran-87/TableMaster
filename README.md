@@ -6,7 +6,7 @@ Click a character to highlight, or advance the turn, to populate a character she
 
 This tool is meant to be 'system-agnostic' meaning its core functions can be used for any game system or rule set.
 
-AI Disclosure:
+AI Use Disclosure:
 This project is 'vibe coded' using Google Gemini, which has allowed me as a hobbyist and solo developer to create a tool that I've wanted for a long time, but didn't have the coding knowledge to make it happen. The layout and features are my own design,
 and Gemini generates and debugs the code. I am aware that using AI in creativity is controversial, and I strive to use this technology in an ethical way, to the best of my abilities. I am releasing this project for free and open-source so that other gamers can use
 and enjoy it, even expand on the tool to make it more useful for their own games.
