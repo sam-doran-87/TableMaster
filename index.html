@@ -261,13 +261,16 @@
             const nameText = newItemText.value.trim();
             const initiativeValue = newItemInitiative.value.trim();
 
-            if (nameText && initiativeValue) {
+            if (nameText.length > 0 && initiativeValue.length > 0) {
+                console.log("Adding new character:", nameText, "with initiative:", initiativeValue);
                 const listItem = createListItemElement(nameText, initiativeValue);
                 sortableList.appendChild(listItem);
                 newItemText.value = '';
                 newItemInitiative.value = '';
                 newItemText.focus();
                 saveState();
+            } else {
+                console.error("Failed to add character: Name or Initiative is missing.");
             }
         }
 
