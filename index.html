@@ -258,7 +258,6 @@
 
         // --- Function to Add a New List Item ---
         function addListItem() {
-            console.log("Add Character button clicked.");
             const nameText = newItemText.value.trim();
             const initiativeValue = newItemInitiative.value.trim();
 
@@ -269,18 +268,22 @@
                 newItemInitiative.value = '';
                 newItemText.focus();
                 saveState();
-                console.log("New character added and state saved.");
-            } else {
-                console.log("Name or Initiative is missing. Character not added.");
             }
         }
 
+        // --- Event listeners for adding items ---
+        addItemButton.addEventListener('click', addListItem);
+        newItemText.addEventListener('keypress', function (event) {
+            if (event.key === 'Enter') addListItem();
+        });
+        newItemInitiative.addEventListener('keypress', function (event) {
+            if (event.key === 'Enter') addListItem();
+        });
+
         // --- Function to populate the character sheet ---
         function populateCharacterSheet(listItem) {
-            console.log("Populating character sheet for:", listItem);
             if (!listItem) {
                 clearCharacterSheet();
-                console.log("No list item provided, clearing sheet.");
                 return;
             }
 
@@ -291,8 +294,6 @@
             const speed = listItem.getAttribute('data-speed');
             const modifier = listItem.getAttribute('data-modifier');
             const statusString = listItem.getAttribute('data-status');
-
-            console.log("Character data:", { name, currentHp, mp, ac, speed, modifier, statusString });
 
             let statusObj;
             try {
@@ -473,61 +474,6 @@
             saveState();
         }
 
-        // --- Event listeners for adding items ---
-        addItemButton.addEventListener('click', addListItem);
-        newItemText.addEventListener('keypress', function (event) {
-            if (event.key === 'Enter') addListItem();
-        });
-        newItemInitiative.addEventListener('keypress', function (event) {
-            if (event.key === 'Enter') addListItem();
-        });
-
-        // --- Event Listeners for Turn Controls ---
-        function nextTurn() {
-            const listItems = sortableList.querySelectorAll('li');
-            if (listItems.length === 0) return;
-            highlightedIndex++;
-            if (highlightedIndex >= listItems.length) {
-                highlightedIndex = 0;
-                currentRound++;
-            }
-            updateHighlight(highlightedIndex);
-            updateRoundCounter();
-        }
-
-        function prevTurn() {
-            const listItems = sortableList.querySelectorAll('li');
-            if (listItems.length === 0) return;
-            highlightedIndex--;
-            if (highlightedIndex < 0) {
-                if (currentRound > 1) {
-                    highlightedIndex = listItems.length - 1;
-                    currentRound--;
-                } else {
-                    highlightedIndex = 0;
-                }
-            }
-            updateHighlight(highlightedIndex);
-            updateRoundCounter();
-        }
-        function updateRoundCounter() {
-            roundCounter.textContent = `Round: ${currentRound}`;
-        }
-        nextTurnButton.addEventListener('click', nextTurn);
-        prevTurnButton.addEventListener('click', prevTurn);
-
-        // --- Centralized Event Listener for List Item Clicks ---
-        sortableList.addEventListener('click', handleListItemClick);
-
-        // --- Handle Editing Completion (on blur or Enter key) ---
-        document.addEventListener('blur', handleEditableBlur, true);
-        document.addEventListener('keypress', function (event) {
-            if (event.key === 'Enter' && event.target.getAttribute('contenteditable') === 'true') {
-                event.preventDefault();
-                event.target.blur();
-            }
-        });
-
         // --- Event Listeners for Character Sheet Field Clicks to Start Editing ---
         sheetCurrentHp.addEventListener('click', () => startEditing(sheetCurrentHp));
         sheetMp.addEventListener('click', () => startEditing(sheetMp));
@@ -606,7 +552,6 @@
         document.addEventListener('click', function (event) {
             const isClickInsideTrackerCard = event.target.closest('.encounter-tracker-card');
             const isClickInsideSheet = event.target.closest('.character-sheet-card');
-
             const isInteractiveElement = event.target.tagName === 'BUTTON' || event.target.tagName === 'INPUT' || event.target.closest('label');
 
             if (!isClickInsideTrackerCard && !isClickInsideSheet && !isInteractiveElement) {
@@ -618,6 +563,7 @@
         window.addEventListener('load', () => {
             loadState();
         });
+
     </script>
 </body>
 </html>
