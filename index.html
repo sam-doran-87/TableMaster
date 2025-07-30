@@ -124,11 +124,11 @@
         <button id="toggle-dice-roller-button" class="toggle-button">Dice Roller <i class="fa-solid fa-dice"></i></button>
 
         <!-- Dice Roller Container -->
-        <div id="dice-roller-container" class="dice-roller-card">
+        <div id="dice-roller-container" class="dice-roller-card hidden">
             <h2>Dice Roller</h2>
             <div class="dice-input-section">
                 <input type="number" id="num-dice-input" value="1" min="1">
-                <span class="dice-x">d</span>
+                <span class="dice-x"></span>
                 <select id="die-type-select">
                     <option value="4">d4</option>
                     <option value="6">d6</option>
@@ -140,6 +140,25 @@
                 </select>
                 <button id="roll-dice-button">Roll</button>
             </div>
+
+            <div class="dice-modifiers-section">
+                <div class="modifier-input-group">
+                    <label for="roll-modifier">Modifier:</label>
+                    <input type="number" id="roll-modifier" value="0">
+                </div>
+                <div class="roll-type-group">
+                    <label>
+                        <input type="radio" name="roll-type" value="normal" checked> Normal
+                    </label>
+                    <label>
+                        <input type="radio" name="roll-type" value="advantage"> Advantage
+                    </label>
+                    <label>
+                        <input type="radio" name="roll-type" value="disadvantage"> Disadvantage
+                    </label>
+                </div>
+            </div>
+
             <div id="dice-roll-output" class="dice-output">
                 <!-- Roll results will be displayed here -->
             </div>
@@ -178,6 +197,8 @@
         const dieTypeSelect = document.getElementById('die-type-select');
         const rollDiceButton = document.getElementById('roll-dice-button');
         const diceRollOutput = document.getElementById('dice-roll-output');
+        const rollModifierInput = document.getElementById('roll-modifier'); // New modifier input
+        const rollTypeRadios = document.querySelectorAll('input[name="roll-type"]'); // New radio buttons
 
 
         let currentRound = 1;
@@ -670,6 +691,8 @@
         });
 
         // --- Dice Roller Functions ---
+
+        // Toggles the visibility of the dice roller container
         function toggleDiceRoller() {
             diceRollerContainer.classList.toggle('hidden');
             if (diceRollerContainer.classList.contains('hidden')) {
@@ -679,15 +702,8 @@
             }
         }
 
-        function rollDice() {
-            const numDice = parseInt(numDiceInput.value);
-            const dieType = parseInt(dieTypeSelect.value);
-
-            if (isNaN(numDice) || numDice < 1 || isNaN(dieType)) {
-                diceRollOutput.textContent = "Please enter valid numbers for dice and type.";
-                return { rolls: [], total: 0 };
-            }
-
+        // Helper function to perform a single set of dice rolls
+        function _singleRollSet(numDice, dieType) {
             let rolls = [];
             let total = 0;
             for (let i = 0; i < numDice; i++) {
@@ -695,13 +711,64 @@
                 rolls.push(roll);
                 total += roll;
             }
+            return { rolls, total };
+        }
 
-            diceRollOutput.innerHTML = `
-                <p>Rolls: ${rolls.join(', ')}</p>
-                <p>Total: <strong>${total}</strong></p>
-            `;
+        // Main function to roll dice based on user input and modifiers
+        function rollDice() {
+            const numDice = parseInt(numDiceInput.value);
+            const dieType = parseInt(dieTypeSelect.value);
+            const modifier = parseInt(rollModifierInput.value) || 0; // Get modifier, default to 0
+            let rollType = 'normal';
+            for (const radio of rollTypeRadios) {
+                if (radio.checked) {
+                    rollType = radio.value;
+                    break;
+                }
+            }
 
-            return { rolls, total }; // Return structured result for future interaction
+            if (isNaN(numDice) || numDice < 1 || isNaN(dieType)) {
+                diceRollOutput.textContent = "Please enter valid numbers for dice and type.";
+                return { rolls: [], total: 0, finalTotal: 0, modifierUsed: modifier, rollTypeUsed: rollType };
+            }
+
+            let result1 = _singleRollSet(numDice, dieType);
+            let result2 = null;
+            let chosenResult = result1;
+            let rollDescription = `${numDice}d${dieType}`;
+
+            if (rollType === 'advantage') {
+                result2 = _singleRollSet(numDice, dieType);
+                chosenResult = (result1.total >= result2.total) ? result1 : result2;
+                rollDescription += " (Advantage)";
+            } else if (rollType === 'disadvantage') {
+                result2 = _singleRollSet(numDice, dieType);
+                chosenResult = (result1.total <= result2.total) ? result1 : result2;
+                rollDescription += " (Disadvantage)";
+            }
+
+            const finalTotal = chosenResult.total + modifier;
+
+            let outputHTML = `<p>${rollDescription}</p>`;
+            outputHTML += `<p>Rolls: ${chosenResult.rolls.join(', ')}</p>`;
+            if (rollType !== 'normal') {
+                outputHTML += `<p>Other Roll: ${rollType === 'advantage' ? result2.rolls.join(', ') : result1.rolls.join(', ')}</p>`;
+            }
+            if (modifier !== 0) {
+                outputHTML += `<p>Modifier: ${modifier > 0 ? '+' : ''}${modifier}</p>`;
+            }
+            outputHTML += `<p>Total: <strong>${finalTotal}</strong></p>`;
+
+            diceRollOutput.innerHTML = outputHTML;
+
+            // Return structured result for future interaction
+            return {
+                rolls: chosenResult.rolls,
+                total: chosenResult.total, // raw total before modifier
+                finalTotal: finalTotal, // total after modifier
+                modifierUsed: modifier,
+                rollTypeUsed: rollType
+            };
         }
 
         // --- Dice Roller Event Listeners ---
