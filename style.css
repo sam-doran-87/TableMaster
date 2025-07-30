@@ -471,19 +471,84 @@ button {
     color: var(--button-accent);
 }
 
+/* New Dice Modifier Section Styles */
+.dice-modifiers-section {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+    width: 100%;
+    align-items: center;
+}
+
+.modifier-input-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.modifier-input-group label {
+    font-weight: 600;
+    color: var(--text-medium);
+}
+#roll-modifier {
+    width: 70px;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.roll-type-group {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.roll-type-group label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    font-weight: 400;
+    color: var(--text-dark);
+}
+.roll-type-group input[type="radio"] {
+    transform: scale(1.1);
+    cursor: pointer;
+    accent-color: var(--button-primary);
+}
+
 /* Responsive adjustments for dice roller */
 @media (max-width: 500px) {
-    .dice-input-section {
+    .dice-input-section,
+    .dice-modifiers-section,
+    .roll-type-group {
         flex-direction: column;
         width: 100%;
     }
     #num-dice-input,
     #die-type-select,
-    #roll-dice-button {
+    #roll-dice-button,
+    #roll-modifier {
         width: 100%;
-        box-sizing: border-box; /* Include padding and border in the element's total width and height */
+        box-sizing: border-box;
     }
     .dice-x {
-        margin: 10px 0; /* Add space between stacked inputs */
+        margin: 10px 0;
+    }
+    .modifier-input-group {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+    }
+    .modifier-input-group label {
+        width: 100%;
+        text-align: center;
+    }
+    #roll-modifier {
+        width: 100%;
     }
 }
