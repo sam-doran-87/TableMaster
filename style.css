@@ -64,7 +64,8 @@ h1 {
 
 /* Card Styling */
 .encounter-tracker-card,
-.character-sheet-card {
+.character-sheet-card,
+.dice-roller-card { /* Added dice-roller-card */
     background-color: #ffffff;
     border-radius: 12px;
     box-shadow: var(--card-shadow);
@@ -367,5 +368,122 @@ button {
     .encounter-tracker-card,
     .character-sheet-card {
         flex: 1;
+    }
+}
+
+
+/* --- Dice Roller Specific Styles --- */
+.toggle-button {
+    background-color: var(--button-primary);
+    color: white;
+    margin-top: 20px;
+    width: fit-content; /* Adjust width to content */
+    align-self: center; /* Center the button if container is flex column */
+    display: flex; /* Allow icon and text to align */
+    align-items: center;
+    gap: 8px;
+    padding: 12px 25px;
+}
+.toggle-button:hover {
+    background-color: var(--button-primary-hover);
+}
+
+.dice-roller-card {
+    margin-top: 20px; /* Space from the toggle button */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center content horizontally */
+    gap: 20px;
+}
+
+.dice-roller-card.hidden {
+    display: none; /* Hide the roller by default */
+}
+
+.dice-roller-card h2 {
+    font-size: 1.8rem;
+    margin-top: 0;
+    margin-bottom: 0;
+    color: var(--text-dark);
+}
+
+.dice-input-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap; /* Allow wrapping on small screens */
+    justify-content: center; /* Center items when wrapped */
+}
+
+#num-dice-input {
+    width: 60px;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.dice-x {
+    font-weight: 600;
+    color: var(--text-medium);
+    font-size: 1.1rem;
+}
+
+#die-type-select {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    background-color: white;
+    cursor: pointer;
+}
+
+#roll-dice-button {
+    background-color: var(--button-success);
+    color: white;
+    padding: 10px 20px;
+}
+#roll-dice-button:hover {
+    background-color: var(--button-success-hover);
+}
+
+.dice-output {
+    background-color: var(--secondary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 15px;
+    min-height: 60px; /* Ensure space for output */
+    width: 90%;
+    max-width: 300px;
+    text-align: center;
+    font-size: 1.1rem;
+    color: var(--text-dark);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.dice-output p {
+    margin: 5px 0;
+}
+.dice-output strong {
+    color: var(--button-accent);
+}
+
+/* Responsive adjustments for dice roller */
+@media (max-width: 500px) {
+    .dice-input-section {
+        flex-direction: column;
+        width: 100%;
+    }
+    #num-dice-input,
+    #die-type-select,
+    #roll-dice-button {
+        width: 100%;
+        box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    }
+    .dice-x {
+        margin: 10px 0; /* Add space between stacked inputs */
     }
 }
