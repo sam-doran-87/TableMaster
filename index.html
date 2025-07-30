@@ -119,6 +119,32 @@
                 </div>
             </div>
         </div>
+
+        <!-- Dice Roller Toggle Button -->
+        <button id="toggle-dice-roller-button" class="toggle-button">Dice Roller <i class="fa-solid fa-dice"></i></button>
+
+        <!-- Dice Roller Container -->
+        <div id="dice-roller-container" class="dice-roller-card">
+            <h2>Dice Roller</h2>
+            <div class="dice-input-section">
+                <input type="number" id="num-dice-input" value="1" min="1">
+                <span class="dice-x">d</span>
+                <select id="die-type-select">
+                    <option value="4">d4</option>
+                    <option value="6">d6</option>
+                    <option value="8">d8</option>
+                    <option value="10">d10</option>
+                    <option value="12">d12</option>
+                    <option value="20">d20</option>
+                    <option value="100">d100</option>
+                </select>
+                <button id="roll-dice-button">Roll</button>
+            </div>
+            <div id="dice-roll-output" class="dice-output">
+                <!-- Roll results will be displayed here -->
+            </div>
+        </div>
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
@@ -144,6 +170,15 @@
         const sheetModifier = document.getElementById('sheet-modifier');
         const statusCheckboxes = document.querySelectorAll('.status-checkbox');
         const modifierCheckboxes = document.querySelectorAll('.modifier-checkbox');
+
+        // Dice Roller elements
+        const toggleDiceRollerButton = document.getElementById('toggle-dice-roller-button');
+        const diceRollerContainer = document.getElementById('dice-roller-container');
+        const numDiceInput = document.getElementById('num-dice-input');
+        const dieTypeSelect = document.getElementById('die-type-select');
+        const rollDiceButton = document.getElementById('roll-dice-button');
+        const diceRollOutput = document.getElementById('dice-roll-output');
+
 
         let currentRound = 1;
         let highlightedIndex = -1;
@@ -257,7 +292,7 @@
         // --- Helper function to create a new list item HTML element ---
         function createListItemElement(nameText, initiativeValue, currentHp = 10, mp = 10, ac = 0, speed = 0, modifier = 0, statusObj = null, isLocked = false) {
             const listItem = document.createElement('li');
-            
+
             // Set innerHTML first so querySelectors can find elements
             const lockIcon = isLocked ? 'fa-lock' : 'fa-lock-open';
             listItem.innerHTML = `
@@ -290,7 +325,7 @@
                 };
             }
             listItem.setAttribute('data-status', JSON.stringify(statusObj));
-            
+
             return listItem;
         }
 
@@ -633,6 +668,48 @@
         window.addEventListener('load', () => {
             loadState();
         });
+
+        // --- Dice Roller Functions ---
+        function toggleDiceRoller() {
+            diceRollerContainer.classList.toggle('hidden');
+            if (diceRollerContainer.classList.contains('hidden')) {
+                toggleDiceRollerButton.innerHTML = 'Dice Roller <i class="fa-solid fa-dice"></i>';
+            } else {
+                toggleDiceRollerButton.innerHTML = 'Hide Roller <i class="fa-solid fa-chevron-up"></i>';
+            }
+        }
+
+        function rollDice() {
+            const numDice = parseInt(numDiceInput.value);
+            const dieType = parseInt(dieTypeSelect.value);
+
+            if (isNaN(numDice) || numDice < 1 || isNaN(dieType)) {
+                diceRollOutput.textContent = "Please enter valid numbers for dice and type.";
+                return { rolls: [], total: 0 };
+            }
+
+            let rolls = [];
+            let total = 0;
+            for (let i = 0; i < numDice; i++) {
+                const roll = Math.floor(Math.random() * dieType) + 1;
+                rolls.push(roll);
+                total += roll;
+            }
+
+            diceRollOutput.innerHTML = `
+                <p>Rolls: ${rolls.join(', ')}</p>
+                <p>Total: <strong>${total}</strong></p>
+            `;
+
+            return { rolls, total }; // Return structured result for future interaction
+        }
+
+        // --- Dice Roller Event Listeners ---
+        toggleDiceRollerButton.addEventListener('click', toggleDiceRoller);
+        rollDiceButton.addEventListener('click', rollDice);
+
+        // Set default die type
+        dieTypeSelect.value = "4"; // Default to d4
     </script>
 </body>
 </html>
