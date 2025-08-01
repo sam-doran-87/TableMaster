@@ -280,10 +280,7 @@
                 maxHp: hp,
                 status: 'normal',
                 locked: false,
-                modifiers: [
-                    { name: "Bless", value: 1, type: "bonus" },
-                    { name: "Wounded", value: -1, type: "penalty" }
-                ]
+                modifiers: []
             };
 
             items.push(newItem);
@@ -505,7 +502,6 @@
             const modifier = parseInt(modifierInput.value, 10);
             const isAdvantage = rollTypeAdvantage.checked;
             const isDisadvantage = rollTypeDisadvantage.checked;
-            // The "Invert for Roll Under" checkbox now applies to all dice types.
             const invertRollUnder = invertRollUnderCheckbox.checked;
 
             if (isNaN(diceCount) || diceCount < 1) {
@@ -517,9 +513,7 @@
             let total = 0;
             let droppedRoll = null;
 
-            // Roll logic for Advantage/Disadvantage
             if (isAdvantage || isDisadvantage) {
-                // For Advantage/Disadvantage, always roll two dice
                 let roll1 = Math.floor(Math.random() * diceType) + 1;
                 let roll2 = Math.floor(Math.random() * diceType) + 1;
                 rolls.push(roll1, roll2);
@@ -531,7 +525,7 @@
                     total = Math.min(roll1, roll2);
                     droppedRoll = Math.max(roll1, roll2);
                 }
-            } else { // Normal roll or multiple dice
+            } else {
                 for (let i = 0; i < diceCount; i++) {
                     const roll = Math.floor(Math.random() * diceType) + 1;
                     rolls.push(roll);
@@ -539,16 +533,10 @@
                 }
             }
             
-            // The invertRollUnder checkbox applies to all rolls now.
-            // When checked, the total is calculated as a subtraction from the highest possible roll.
-            // This displays a "roll under" number that a user would try to hit.
             let finalTotal = total;
             if (invertRollUnder) {
-                // Invert the total for display purposes, e.g., if you roll 18 on a d20, it shows 2.
-                // The actual "roll under" check (roll <= stat) is assumed to be done by the user.
                 finalTotal = diceType - total;
             } else {
-                // Add modifier after all rolls are determined
                 finalTotal += modifier;
             }
 
@@ -564,8 +552,6 @@
             diceOutput.innerHTML = outputHtml;
         });
 
-        // The original toggle function is no longer needed since the checkbox is always enabled
-        // for all dice types as per your request.
     </script>
 </body>
 </html>
