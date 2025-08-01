@@ -1,10 +1,16 @@
+/*
+    This CSS file contains all the styling for the RPG Encounter List.
+    Separating CSS into a dedicated file makes it easier to manage and update styles
+    without changing the HTML structure.
+*/
+
 :root {
     /* Sophisticated Palette */
     --dark-gray: #1a202c;
     --off-white: #f7fafc;
     --light-gray: #e2e8f0;
     --border-gray: #cbd5e0;
-    
+
     /* Accent Colors for Buttons */
     --primary-blue: #4299e1;
     --primary-blue-dark: #3182ce;
@@ -141,6 +147,15 @@ button:hover {
     background-color: var(--danger-red-dark);
 }
 
+#roll-dice-button {
+    background-color: var(--primary-purple);
+    color: var(--off-white);
+}
+#roll-dice-button:hover {
+    background-color: var(--primary-purple-dark);
+}
+
+
 /* List Styling */
 .sortable-list {
     list-style: none;
@@ -188,10 +203,30 @@ button:hover {
     color: var(--dark-gray);
 }
 
-/* Fix lock icon spacing */
+/* Lock Button Styling for better accessibility */
 .item-lock-button {
     margin-right: 10px;
+    padding: 5px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
 }
+.item-lock-button i {
+    color: var(--dark-gray); /* Default unlocked state */
+    font-size: 1.2rem;
+    transition: color 0.2s ease-in-out;
+}
+
+.item-lock-button.locked i {
+    color: var(--primary-blue); /* Clear locked state, not relying on red/green */
+}
+.sortable-list li.highlighted .item-lock-button.locked i {
+    color: var(--off-white);
+}
+.sortable-list li.highlighted .item-lock-button i {
+    color: var(--off-white);
+}
+
 
 .item-text {
     flex-grow: 1;
@@ -308,6 +343,11 @@ label {
     cursor: pointer;
     color: var(--dark-gray);
 }
+.character-sheet-card .modifier-section label,
+.character-sheet-card .status-section label {
+    /* Ensure labels inside character sheet have dark text for contrast */
+    color: var(--dark-gray);
+}
 
 /* Dice Roller */
 .toggle-button {
@@ -370,6 +410,10 @@ label {
 .modifier-input-group input {
     width: 60px;
     text-align: center;
+}
+/* Ensure labels within the dice roller are a high-contrast color */
+.dice-roller-card label {
+    color: var(--off-white);
 }
 
 /* Custom Modal Styling */
