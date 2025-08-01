@@ -30,8 +30,8 @@
                 <h2>Encounter Tracker</h2>
                 <div class="input-section">
                     <input type="text" id="itemName" placeholder="Name">
-                    <input type="number" id="itemInitiative" placeholder="Initiative" value="" onfocus="this.value=''">
-                    <input type="number" id="itemHP" placeholder="HP" value="" onfocus="this.value=''">
+                    <input type="number" id="itemInitiative" placeholder="Initiative">
+                    <input type="number" id="itemHP" placeholder="HP">
                     <button id="addItemButton"><i class="fas fa-plus"></i> Add</button>
                 </div>
                 <div class="turn-controls">
@@ -348,7 +348,7 @@
                     renderList();
                 }
             }
-        });
+        };
 
         // Function to update HP directly from contenteditable span
         sheetHP.addEventListener('input', () => {
