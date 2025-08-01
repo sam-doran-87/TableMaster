@@ -30,9 +30,8 @@
                 <h2>Encounter Tracker</h2>
                 <div class="input-section">
                     <input type="text" id="itemName" placeholder="Name">
-                    <!-- Removed the onfocus attribute to fix the add character bug -->
+                    <!-- The onfocus attribute has been removed to prevent the input from being cleared -->
                     <input type="number" id="itemInitiative" placeholder="Initiative">
-                    <!-- Removed the onfocus attribute to fix the add character bug -->
                     <input type="number" id="itemHP" placeholder="HP">
                     <button id="addItemButton"><i class="fas fa-plus"></i> Add</button>
                 </div>
@@ -166,6 +165,8 @@
         const sheetName = document.getElementById('sheetName');
         const sheetInitiative = document.getElementById('sheetInitiative');
         const sheetHP = document.getElementById('sheetHP');
+        const modifiersList = document.querySelector('.modifiers-list');
+        const statusList = document.querySelector('.status-list');
 
         // Custom Modal elements
         const modalOverlay = document.getElementById('custom-modal-overlay');
@@ -258,7 +259,6 @@
             const initiative = parseInt(itemInitiativeInput.value, 10);
             const hp = parseInt(itemHPInput.value, 10);
 
-            // Corrected validation to check for a number, not just an empty string
             if (!name) {
                 showModal('Name is required.');
                 return;
@@ -279,7 +279,11 @@
                 hp,
                 maxHp: hp,
                 status: 'normal',
-                locked: false
+                locked: false,
+                modifiers: [
+                    { name: "Bless", value: 1, type: "bonus" },
+                    { name: "Wounded", value: -1, type: "penalty" }
+                ]
             };
 
             items.push(newItem);
@@ -314,23 +318,52 @@
             }
         }
 
+        // Function to update the character sheet display
+        function updateCharacterSheet(item) {
+            // Update basic fields
+            sheetName.textContent = item.name;
+            sheetInitiative.textContent = item.initiative;
+            sheetHP.textContent = item.hp;
+            sheetHP.dataset.itemId = item.id;
+
+            // Clear existing modifiers and status
+            modifiersList.innerHTML = '';
+            statusList.innerHTML = '';
+
+            // Display modifiers
+            if (item.modifiers && item.modifiers.length > 0) {
+                item.modifiers.forEach(mod => {
+                    const modElement = document.createElement('div');
+                    modElement.textContent = `${mod.name} (${mod.value > 0 ? '+' : ''}${mod.value})`;
+                    modifiersList.appendChild(modElement);
+                });
+            } else {
+                modifiersList.textContent = 'None';
+            }
+
+            // Display status
+            const statusElement = document.createElement('div');
+            statusElement.textContent = item.status.charAt(0).toUpperCase() + item.status.slice(1);
+            if (item.status === 'down') {
+                statusElement.style.color = '#e53e3e';
+            }
+            statusList.appendChild(statusElement);
+
+            // Highlight the selected item in the list
+            document.querySelectorAll('.sortable-list li').forEach(li => {
+                li.classList.remove('highlighted');
+                if (parseInt(li.dataset.id) === item.id) {
+                    li.classList.add('highlighted');
+                }
+            });
+        }
+
         // Function to select an item and display its details in the character sheet
         function selectItem(id) {
             const selectedItem = items.find(item => item.id === id);
             if (selectedItem) {
                 characterSheetCard.style.display = 'flex';
-                sheetName.textContent = selectedItem.name;
-                sheetInitiative.textContent = selectedItem.initiative;
-                sheetHP.textContent = selectedItem.hp;
-                sheetHP.dataset.itemId = selectedItem.id;
-
-                // Highlight the selected item in the list
-                document.querySelectorAll('.sortable-list li').forEach(li => {
-                    li.classList.remove('highlighted');
-                    if (parseInt(li.dataset.id) === id) {
-                        li.classList.add('highlighted');
-                    }
-                });
+                updateCharacterSheet(selectedItem);
             }
         }
 
@@ -346,7 +379,7 @@
                     } else {
                         item.status = 'normal';
                     }
-                    sheetHP.textContent = item.hp;
+                    updateCharacterSheet(item);
                     renderList();
                 }
             }
@@ -366,6 +399,7 @@
                         } else {
                             item.status = 'normal';
                         }
+                        updateCharacterSheet(item);
                         renderList();
                     }
                 }
