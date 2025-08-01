@@ -1,559 +1,378 @@
-/* Color Palette Variables (Refined for better appeal) */
 :root {
-    --primary-bg: #f8f9fa; /* Light background for cards/sections */
-    --secondary-bg: #e9ecef; /* Slightly darker background for accents/controls */
-    --border-color: #dee2e6; /* Soft border color */
-    --text-dark: #343a40; /* Dark text for main content */
-    --text-medium: #6c757d; /* Medium gray for labels/subtle text */
-    --text-light: #adb5bd; /* Light gray for handles/less prominent text */
+    /* Sophisticated Palette */
+    --dark-gray: #1a202c;
+    --off-white: #f7fafc;
+    --light-gray: #e2e8f0;
+    --border-gray: #cbd5e0;
+    
+    /* Accent Colors for Buttons */
+    --primary-blue: #4299e1;
+    --primary-blue-dark: #3182ce;
+    --primary-purple: #9f7aea;
+    --primary-purple-dark: #805ad5;
+    --danger-red: #e53e3e;
+    --danger-red-dark: #c53030;
 
-    --button-primary: #007bff; /* Blue for main actions */
-    --button-primary-hover: #0056b3;
-    --button-success: #28a745; /* Green for Add Character */
-    --button-success-hover: #218838;
-    --button-danger: #dc3545; /* Red for Remove */
-    --button-danger-hover: #c82333;
-    --button-accent: #6f42c1; /* Purple for Turn controls */
-    --button-accent-hover: #5a2e9e;
-    --button-reset: #6c757d; /* Gray for Reset buttons */
-    --button-reset-hover: #5a6268;
-
-    --highlight-color: #ffc107; /* Bright yellow for highlights */
-    --highlight-bg: #fffbe6;
-    --highlight-border: #ffcc00;
-
-    --card-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    /* Common Styling */
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+    --border-radius: 8px;
+    --font-inter: 'Inter', sans-serif;
 }
 
-/* Base and Layout Styles */
 body {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-inter);
+    background-color: var(--dark-gray);
+    color: var(--off-white);
     margin: 0;
     padding: 20px;
-    background-color: #f0f2f5;
-    color: var(--text-dark);
-    line-height: 1.6;
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    flex-direction: column;
+    align-items: center;
     min-height: 100vh;
+    overflow-y: auto;
+    scroll-behavior: smooth;
 }
 
-h1 {
-    text-align: center;
-    color: var(--text-dark);
-    margin-bottom: 25px;
+h1, h2 {
     font-weight: 700;
-    font-size: 2.5rem;
+    color: var(--off-white);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    margin-bottom: 20px;
+}
+
+/* Specific fix for character sheet title to ensure high contrast */
+.character-sheet-card h2 {
+    color: var(--dark-gray);
 }
 
 .container {
-    display: flex;
-    flex-direction: column;
     width: 100%;
-    max-width: 1000px;
-    gap: 30px;
+    max-width: 1200px;
 }
 
-/* Fix for the main content layout */
+/* Responsive Layout */
 .main-content {
-    display: flex;
-    flex-direction: column; /* Default to column on smaller screens */
-    gap: 30px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+@media (min-width: 768px) {
+    .main-content {
+        grid-template-columns: 1fr 1fr;
+    }
 }
 
 /* Card Styling */
-.encounter-tracker-card,
-.character-sheet-card,
-.dice-roller-card { /* Added dice-roller-card */
-    background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: var(--card-shadow);
-    padding: 25px;
+.encounter-tracker-card, .character-sheet-card, .dice-roller-card {
+    background-color: #fff;
+    border-radius: var(--border-radius);
+    padding: 20px;
+    box-shadow: var(--box-shadow);
+    border: 1px solid var(--light-gray);
+    transition: transform 0.2s ease-in-out;
+    color: var(--dark-gray); /* Important for contrast */
 }
 
-/* Input and Button Styles */
+.encounter-tracker-card:hover, .character-sheet-card:hover, .dice-roller-card:hover {
+    transform: translateY(-2px);
+}
+
+.character-sheet-card {
+    display: none;
+    flex-direction: column;
+}
+
+/* Inputs and Buttons */
 .input-section {
     display: flex;
-    gap: 15px;
-    align-items: center;
     flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
-#newItemText,
-#newItemInitiative {
-    padding: 12px 15px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+.input-section input[type="text"],
+.input-section input[type="number"] {
+    flex: 1;
+    padding: 10px;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-gray);
+    background-color: var(--off-white);
     font-size: 1rem;
-    flex-grow: 1;
-}
-#newItemInitiative {
-    max-width: 120px;
-    text-align: center;
+    min-width: 120px;
+    color: var(--dark-gray); /* High contrast text */
 }
 
 button {
-    padding: 12px 20px;
+    padding: 10px 15px;
     border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1rem;
+    border-radius: var(--border-radius);
     font-weight: 600;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-    flex-shrink: 0;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    color: var(--off-white);
+}
+
+button:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
 }
 
 #addItemButton {
-    background-color: var(--button-success);
-    color: white;
+    background-color: var(--primary-blue);
 }
-#addItemButton:hover { background-color: var(--button-success-hover); }
-
-.sort-button {
-    background-color: var(--button-primary);
-    color: white;
+#addItemButton:hover {
+    background-color: var(--primary-blue-dark);
 }
-.sort-button:hover { background-color: var(--button-primary-hover); }
 
-/* Initiative List Styles */
+.sort-button, .turn-button {
+    background-color: var(--primary-purple);
+}
+.sort-button:hover, .turn-button:hover {
+    background-color: var(--primary-purple-dark);
+}
+
+.reset-button, .remove-button, .turn-button.reset-button {
+    background-color: var(--danger-red);
+}
+.reset-button:hover, .remove-button:hover {
+    background-color: var(--danger-red-dark);
+}
+
+/* List Styling */
 .sortable-list {
     list-style: none;
     padding: 0;
-    margin: 20px 0 0 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-/* Fix for the list item layout */
 .sortable-list li {
-    background-color: var(--secondary-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 10px;
-    display: flex; /* Corrected: use flexbox for horizontal layout */
+    display: flex;
     align-items: center;
-    gap: 15px;
+    background-color: var(--light-gray);
+    border: 1px solid var(--border-gray);
+    border-radius: var(--border-radius);
+    padding: 10px;
     cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
-}
-
-.sortable-list li:hover:not(.highlighted) {
-    background-color: var(--border-color);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    user-select: none;
+    transition: all 0.2s ease-in-out;
 }
 
 .sortable-list li.highlighted {
-    background-color: var(--highlight-bg);
-    border-color: var(--highlight-border);
-    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
-    transform: scale(1.01);
-    z-index: 1;
+    background-color: var(--primary-blue-dark);
+    border-color: var(--primary-blue);
+    color: var(--off-white);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.sortable-list li.highlighted .handle,
+.sortable-list li.highlighted .item-lock-button i,
+.sortable-list li.highlighted .list-item-hp,
+.sortable-list li.highlighted .status-icons i {
+    color: var(--off-white);
 }
 
-/* Drag Handle */
+.sortable-ghost {
+    opacity: 0.5;
+    background-color: var(--light-gray);
+    border: 2px dashed var(--primary-blue);
+}
+
 .handle {
-    font-size: 1.5rem;
-    color: var(--text-medium);
     cursor: grab;
+    margin-right: 10px;
+    color: var(--dark-gray);
 }
 
-/* Text and number fields in the list */
+/* Fix lock icon spacing */
+.item-lock-button {
+    margin-right: 10px;
+}
+
 .item-text {
     flex-grow: 1;
     font-weight: 600;
 }
+
+.status-icons {
+    display: flex;
+    gap: 5px;
+    margin-left: 10px;
+}
+.status-icons i {
+    color: var(--danger-red);
+}
+.sortable-list li.highlighted .status-icons i {
+    color: var(--off-white);
+}
+
 .initiative-score {
     font-weight: 700;
-    color: var(--button-primary);
-    background-color: var(--secondary-bg);
+    background-color: var(--dark-gray);
+    color: var(--off-white);
     padding: 5px 10px;
-    border-radius: 5px;
-    flex-shrink: 0;
+    border-radius: var(--border-radius);
+    margin-left: 10px;
+    min-width: 30px;
+    text-align: center;
 }
 .list-item-hp {
-    font-size: 0.9em;
-    color: var(--text-medium);
-    flex-shrink: 0;
+    margin-left: auto;
+    font-weight: 600;
+    color: var(--primary-blue-dark);
+    min-width: 60px;
+    text-align: right;
 }
-
-/* Delete Button */
 .remove-button {
-    background-color: transparent;
-    color: var(--button-danger);
-    font-weight: 700;
-    font-size: 1rem;
+    background-color: var(--danger-red);
     padding: 5px 10px;
+    font-size: 0.8rem;
+    margin-left: 10px;
 }
-.remove-button:hover { background-color: var(--border-color); }
-
-/* Lock Button */
-.item-lock-button {
-    background-color: transparent;
-    color: var(--text-medium);
-    padding: 0;
-    font-size: 1rem;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.item-lock-button:hover { color: var(--text-dark); }
 
 /* Turn Controls */
 .turn-controls {
+    margin-top: 20px;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 15px;
-    margin-top: 20px;
+    gap: 10px;
+    color: var(--dark-gray);
 }
 .turn-round-info {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
+    justify-content: space-between;
+    font-weight: 700;
+    color: var(--off-white);
 }
 .turn-buttons {
     display: flex;
     gap: 10px;
-    width: 100%;
-    justify-content: center;
-}
-.turn-button {
-    background-color: var(--button-accent);
-    color: white;
-    width: auto;
-    flex-grow: 1;
-}
-.turn-button:hover { background-color: var(--button-accent-hover); }
-
-#roundCounter, #turnCounter {
-    font-weight: 600;
-    font-size: 1.2rem;
-    color: var(--text-dark);
+    flex-wrap: wrap;
 }
 
-/* Reset Button (Consistent Sizing) */
-.reset-button {
-    background-color: var(--button-reset);
-    color: white;
-    flex-grow: 1;
-    width: auto;
-}
-.reset-button:hover { background-color: var(--button-reset-hover); }
-
-/* Character Sheet Styles */
-.character-sheet-card {
-    position: relative;
-    display: none;
-}
-.character-sheet-card h2 {
-    font-size: 2rem;
-    text-align: center;
-    margin-top: 0;
-    margin-bottom: 20px;
-}
-
+/* Character Sheet */
 .sheet-group {
     display: flex;
     gap: 20px;
     margin-bottom: 20px;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 15px;
-}
-.sheet-group > .sheet-section {
-    flex: 1;
-    border-bottom: none;
-    padding-bottom: 0;
 }
 .sheet-section {
-    margin-bottom: 20px;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 15px;
+    flex: 1;
 }
-.sheet-section:last-of-type {
-    border-bottom: none;
-    padding-bottom: 0;
-}
-
 .sheet-label {
-    font-weight: 600;
-    color: var(--text-medium);
-    margin: 0 0 8px 0;
-}
-
-/* Styles for the editable fields */
-.editable-field {
     font-weight: 700;
-    font-size: 1.25rem;
-    color: var(--text-dark);
-    padding: 5px 8px;
-    border-radius: 4px;
-    min-width: 40px;
+    margin-bottom: 5px;
+}
+.editable-field {
+    display: inline-block;
+    padding: 5px 10px;
+    border: 1px solid var(--border-gray);
+    border-radius: var(--border-radius);
+    background-color: var(--light-gray);
+    min-width: 30px;
     text-align: center;
-    background-color: var(--secondary-bg);
-    cursor: pointer;
-    transition: background-color 0.2s ease;
+    cursor: text;
 }
-.editable-field[contenteditable="true"] {
-    background-color: #fffacd;
-    outline: 2px dashed var(--button-primary);
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-}
-
-/* Styles for the new number control buttons */
 .number-control-group {
     display: flex;
     align-items: center;
     gap: 5px;
 }
-.number-control-group .number-btn {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    background-color: transparent;
-    color: var(--text-medium);
-    font-size: 1.2rem;
-    line-height: 1;
-    flex-shrink: 0;
-    padding: 0;
-    border: 1px solid var(--border-color);
+.number-btn {
+    background-color: var(--light-gray);
+    color: var(--dark-gray);
+    padding: 5px 10px;
+    font-size: 1rem;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
-.number-control-group .number-btn:hover { background-color: var(--secondary-bg); }
-
-/* Modifier & Status Sections */
-.modifiers-list,
-.status-list {
+.number-btn:hover {
+    background-color: var(--border-gray);
+}
+.modifier-section, .status-section {
+    margin-bottom: 20px;
+}
+.modifiers-list, .status-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px 20px;
-    margin-top: 10px;
+    gap: 10px;
 }
-
-.modifiers-list label,
-.status-list label {
-    font-weight: 400;
-    color: var(--text-dark);
+label {
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    color: var(--dark-gray);
 }
 
-.modifier-checkbox,
-.status-checkbox {
-    transform: scale(1.2);
-    cursor: pointer;
-    accent-color: var(--button-success);
-}
-
-.modifier-input {
-    padding: 8px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    font-size: 0.9rem;
-    width: 80px;
-    text-align: center;
-}
-
-/* Responsive Design */
-@media (min-width: 768px) {
-    /* Corrected: Re-add desktop layout for side-by-side cards */
-    .main-content {
-        flex-direction: row;
-    }
-    .encounter-tracker-card,
-    .character-sheet-card {
-        flex: 1;
-    }
-}
-
-
-/* --- Dice Roller Specific Styles --- */
+/* Dice Roller */
 .toggle-button {
-    background-color: var(--button-primary);
-    color: white;
-    margin-top: 20px;
-    width: fit-content; /* Adjust width to content */
-    align-self: center; /* Center the button if container is flex column */
-    display: flex; /* Allow icon and text to align */
-    align-items: center;
-    gap: 8px;
-    padding: 12px 25px;
+    /* Adjusting the toggle button to have high contrast text */
+    background-color: var(--dark-gray);
+    color: var(--off-white);
+    padding: 12px 20px;
+    font-size: 1.1rem;
+    border-radius: 50px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+    display: block;
+    margin: 20px auto;
 }
-.toggle-button:hover {
-    background-color: var(--button-primary-hover);
-}
-
 .dice-roller-card {
-    margin-top: 20px; /* Space from the toggle button */
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Center content horizontally */
-    gap: 20px;
+    margin-top: 20px;
 }
-
 .dice-roller-card.hidden {
-    display: none; /* Hide the roller by default */
+    display: none;
 }
-
-.dice-roller-card h2 {
-    font-size: 1.8rem;
-    margin-top: 0;
-    margin-bottom: 0;
-    color: var(--text-dark);
-}
-
 .dice-input-section {
     display: flex;
     align-items: center;
     gap: 10px;
-    flex-wrap: wrap; /* Allow wrapping on small screens */
-    justify-content: center; /* Center items when wrapped */
+    margin-bottom: 10px;
 }
-
-#num-dice-input {
-    width: 60px;
-    padding: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+.dice-input-section input[type="number"], .dice-input-section select {
+    padding: 8px;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-gray);
     font-size: 1rem;
-    text-align: center;
+    background-color: var(--off-white);
+    color: var(--dark-gray);
 }
-
 .dice-x {
-    font-weight: 600;
-    color: var(--text-medium);
-    font-size: 1.1rem;
+    font-size: 1.2rem;
+    font-weight: 700;
 }
-
-#die-type-select {
-    padding: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 1rem;
-    background-color: white;
-    cursor: pointer;
-}
-
-#roll-dice-button {
-    background-color: var(--button-success);
-    color: white;
-    padding: 10px 20px;
-}
-#roll-dice-button:hover {
-    background-color: var(--button-success-hover);
-}
-
 .dice-output {
-    background-color: var(--secondary-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+    background-color: var(--dark-gray);
+    color: var(--off-white);
     padding: 15px;
-    min-height: 60px; /* Ensure space for output */
-    width: 90%;
-    max-width: 300px;
-    text-align: center;
+    border-radius: var(--border-radius);
+    margin-bottom: 15px;
     font-size: 1.1rem;
-    color: var(--text-dark);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    font-weight: 600;
 }
 .dice-output p {
-    margin: 5px 0;
+    margin: 0;
 }
-.dice-output strong {
-    color: var(--button-accent);
-}
-
-/* New Dice Modifier Section Styles */
 .dice-modifiers-section {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px solid var(--border-color);
-    width: 100%;
-    align-items: center;
 }
-
-.modifier-input-group {
+.modifier-input-group, .roll-type-group, .invert-d100-group {
     display: flex;
     align-items: center;
     gap: 10px;
 }
-.modifier-input-group label {
-    font-weight: 600;
-    color: var(--text-medium);
-}
-#roll-modifier {
-    width: 70px;
-    padding: 8px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    font-size: 1rem;
+.modifier-input-group input {
+    width: 60px;
     text-align: center;
 }
 
-.roll-type-group {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-.roll-type-group label {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    cursor: pointer;
-    font-weight: 400;
-    color: var(--text-dark);
-}
-.roll-type-group input[type="radio"] {
-    transform: scale(1.1);
-    cursor: pointer;
-    accent-color: var(--button-primary);
-}
-
-/* Responsive adjustments for dice roller */
-@media (max-width: 500px) {
-    .dice-input-section,
-    .dice-modifiers-section,
-    .roll-type-group {
-        flex-direction: column;
-        width: 100%;
-    }
-    #num-dice-input,
-    #die-type-select,
-    #roll-dice-button,
-    #roll-modifier {
-        width: 100%;
-        box-sizing: border-box;
-    }
-    .dice-x {
-        margin: 10px 0;
-    }
-    .modifier-input-group {
-        flex-direction: column;
-        align-items: flex-start;
-        width: 100%;
-    }
-    .modifier-input-group label {
-        width: 100%;
-        text-align: center;
-    }
-    #roll-modifier {
-        width: 100%;
-    }
-}
-
-/* Custom Modal for Confirmations */
+/* Custom Modal Styling */
 .custom-modal-overlay {
     position: fixed;
     top: 0;
@@ -561,48 +380,36 @@ button {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-    display: none; /* Hidden by default */
+    display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    display: none;
 }
-
 .custom-modal-content {
-    background-color: #ffffff; /* Use your card background color */
+    background-color: #fff;
     padding: 30px;
-    border-radius: 12px;
-    box-shadow: var(--card-shadow);
-    max-width: 400px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
     text-align: center;
-    animation: fadeIn 0.3s ease-out;
+    max-width: 400px;
+    width: 90%;
+    color: var(--dark-gray);
 }
-@keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.9); }
-    to { opacity: 1; transform: scale(1); }
-}
-
-.custom-modal-content h3 {
-    margin-top: 0;
-}
-
 .modal-buttons {
     margin-top: 20px;
     display: flex;
     justify-content: center;
     gap: 10px;
 }
-
-.modal-button-confirm {
-    background-color: var(--button-danger); /* Use your danger color */
-    color: white;
+.modal-button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: 600;
 }
-.modal-button-confirm:hover {
-    background-color: var(--button-danger-hover);
+.modal-button-confirm {
+    background-color: var(--primary-blue);
 }
 .modal-button-cancel {
-    background-color: var(--button-reset); /* Use your reset color */
-    color: white;
-}
-.modal-button-cancel:hover {
-    background-color: var(--button-reset-hover);
+    background-color: var(--danger-red);
 }
