@@ -30,8 +30,10 @@
                 <h2>Encounter Tracker</h2>
                 <div class="input-section">
                     <input type="text" id="itemName" placeholder="Name">
-                    <input type="number" id="itemInitiative" placeholder="Initiative" value="" onfocus="this.value=''">
-                    <input type="number" id="itemHP" placeholder="HP" value="" onfocus="this.value=''">
+                    <!-- Removed the onfocus attribute to fix the add character bug -->
+                    <input type="number" id="itemInitiative" placeholder="Initiative">
+                    <!-- Removed the onfocus attribute to fix the add character bug -->
+                    <input type="number" id="itemHP" placeholder="HP">
                     <button id="addItemButton"><i class="fas fa-plus"></i> Add</button>
                 </div>
                 <div class="turn-controls">
@@ -157,7 +159,6 @@
         const rollTypeNormal = document.getElementById('roll-normal');
         const rollTypeAdvantage = document.getElementById('roll-advantage');
         const rollTypeDisadvantage = document.getElementById('roll-disadvantage');
-        // Renamed the checkbox ID for clarity
         const invertRollUnderCheckbox = document.getElementById('invert-for-roll-under');
 
         // Character Sheet elements
@@ -257,15 +258,16 @@
             const initiative = parseInt(itemInitiativeInput.value, 10);
             const hp = parseInt(itemHPInput.value, 10);
 
+            // Corrected validation to check for a number, not just an empty string
             if (!name) {
                 showModal('Name is required.');
                 return;
             }
-            if (isNaN(initiative)) {
+            if (isNaN(initiative) || itemInitiativeInput.value.trim() === '') {
                 showModal('Initiative must be a number.');
                 return;
             }
-            if (isNaN(hp)) {
+            if (isNaN(hp) || itemHPInput.value.trim() === '') {
                 showModal('HP must be a number.');
                 return;
             }
@@ -348,7 +350,7 @@
                     renderList();
                 }
             }
-        });
+        };
 
         // Function to update HP directly from contenteditable span
         sheetHP.addEventListener('input', () => {
@@ -469,7 +471,7 @@
             const modifier = parseInt(modifierInput.value, 10);
             const isAdvantage = rollTypeAdvantage.checked;
             const isDisadvantage = rollTypeDisadvantage.checked;
-            // Use the new checkbox ID
+            // The "Invert for Roll Under" checkbox now applies to all dice types.
             const invertRollUnder = invertRollUnderCheckbox.checked;
 
             if (isNaN(diceCount) || diceCount < 1) {
@@ -503,16 +505,18 @@
                 }
             }
             
-            // Apply roll under logic
+            // The invertRollUnder checkbox applies to all rolls now.
+            // When checked, the total is calculated as a subtraction from the highest possible roll.
+            // This displays a "roll under" number that a user would try to hit.
+            let finalTotal = total;
             if (invertRollUnder) {
-                // For "roll under" we'll show the roll as a number to beat, and the modifier is applied to the roll
-                // for display purposes. The core roll number itself is not inverted, but the display text can reflect the concept.
-                // Let's just calculate the final total with the modifier.
+                // Invert the total for display purposes, e.g., if you roll 18 on a d20, it shows 2.
                 // The actual "roll under" check (roll <= stat) is assumed to be done by the user.
+                finalTotal = diceType - total;
+            } else {
+                // Add modifier after all rolls are determined
+                finalTotal += modifier;
             }
-
-            // Add modifier after all rolls are determined
-            const finalTotal = total + modifier;
 
             let outputHtml = `<p>Rolls: ${rolls.join(', ')}</p>`;
             if (droppedRoll !== null) {
