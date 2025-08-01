@@ -6,7 +6,8 @@
     <title>RPG Encounter List</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <!-- Link to the custom styles.css file -->
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
@@ -165,6 +166,16 @@
                         Disadvantage
                     </label>
                 </div>
+                <!-- START OF NEW CODE -->
+                <div class="invert-d100-group">
+                    <label for="invert-d100-checkbox">
+                        <input type="checkbox" id="invert-d100-checkbox"> Invert for Roll Under
+                        <span class="help-icon" title="Inverts Advantage/Disadvantage for any roll. Advantage becomes picking the lower roll, Disadvantage becomes picking the higher roll. Useful for systems where you want to roll under a target number.">
+                            <i class="fas fa-question-circle"></i>
+                        </span>
+                    </label>
+                </div>
+                <!-- END OF NEW CODE -->
             </div>
         </div>
 
@@ -214,6 +225,7 @@
         const rollModifierInput = document.getElementById('roll-modifier');
         const rollResults = document.getElementById('roll-results');
         const rollTotal = document.getElementById('roll-total');
+        const invertD100Checkbox = document.getElementById('invert-d100-checkbox');
 
         // Custom Modal elements
         const confirmationModal = document.getElementById('confirmationModal');
@@ -751,6 +763,7 @@
             const dieType = parseInt(dieTypeSelect.value);
             const modifier = parseInt(rollModifierInput.value);
             const rollType = document.querySelector('input[name="roll-type"]:checked').value;
+            const isInverted = invertD100Checkbox.checked;
 
             if (isNaN(numDice) || isNaN(dieType) || numDice < 1) {
                 rollResults.textContent = "Please enter valid dice numbers.";
@@ -764,14 +777,28 @@
             if (rollType === 'advantage') {
                 const roll1 = Math.floor(Math.random() * dieType) + 1;
                 const roll2 = Math.floor(Math.random() * dieType) + 1;
-                const finalRoll = Math.max(roll1, roll2);
-                rolls.push(`(Advantage: ${roll1}, ${roll2}) -> ${finalRoll}`);
+                let finalRoll;
+                // Update: Invert the logic for any roll type if the checkbox is checked.
+                if (isInverted) {
+                    finalRoll = Math.min(roll1, roll2);
+                    rolls.push(`(Inverted Advantage: ${roll1}, ${roll2}) -> ${finalRoll}`);
+                } else {
+                    finalRoll = Math.max(roll1, roll2);
+                    rolls.push(`(Advantage: ${roll1}, ${roll2}) -> ${finalRoll}`);
+                }
                 total = finalRoll;
             } else if (rollType === 'disadvantage') {
                 const roll1 = Math.floor(Math.random() * dieType) + 1;
                 const roll2 = Math.floor(Math.random() * dieType) + 1;
-                const finalRoll = Math.min(roll1, roll2);
-                rolls.push(`(Disadvantage: ${roll1}, ${roll2}) -> ${finalRoll}`);
+                let finalRoll;
+                // Update: Invert the logic for any roll type if the checkbox is checked.
+                if (isInverted) {
+                    finalRoll = Math.max(roll1, roll2);
+                    rolls.push(`(Inverted Disadvantage: ${roll1}, ${roll2}) -> ${finalRoll}`);
+                } else {
+                    finalRoll = Math.min(roll1, roll2);
+                    rolls.push(`(Disadvantage: ${roll1}, ${roll2}) -> ${finalRoll}`);
+                }
                 total = finalRoll;
             } else { // Normal or multiple dice
                 for (let i = 0; i < numDice; i++) {
