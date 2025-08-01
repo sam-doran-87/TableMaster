@@ -6,7 +6,7 @@
     <title>RPG Encounter List</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- Link to the custom styles.css file -->
+    <!-- Link to the custom style.css file -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -20,6 +20,7 @@
                     <input type="number" id="newItemInitiative" placeholder="Initiative">
                     <button id="addItemButton">Add Character</button>
                     <button id="sortInitiativeButton" class="sort-button">Sort by Initiative</button>
+                    <button id="clearAllButton" class="reset-button">Clear All</button>
                 </div>
 
                 <ul id="sortable-list" class="sortable-list">
@@ -166,7 +167,6 @@
                         Disadvantage
                     </label>
                 </div>
-                <!-- START OF NEW CODE -->
                 <div class="invert-d100-group">
                     <label for="invert-d100-checkbox">
                         <input type="checkbox" id="invert-d100-checkbox"> Invert for Roll Under
@@ -175,7 +175,6 @@
                         </span>
                     </label>
                 </div>
-                <!-- END OF NEW CODE -->
             </div>
         </div>
 
@@ -205,6 +204,7 @@
         const roundCounter = document.getElementById('roundCounter');
         const turnCounter = document.getElementById('turnCounter');
         const resetTurnButton = document.getElementById('resetTurnButton');
+        const clearAllButton = document.getElementById('clearAllButton');
 
         const characterSheet = document.getElementById('character-sheet');
         const sheetTitle = document.getElementById('sheet-title');
@@ -235,6 +235,14 @@
 
         let currentRound = 1;
         let highlightedIndex = -1;
+        
+        const statusIcons = {
+            'poisoned': 'fa-solid fa-skull-crossbones',
+            'burning': 'fa-solid fa-fire',
+            'immobile': 'fa-solid fa-ban',
+            'ko': 'fa-solid fa-face-dizzy',
+            'dead': 'fa-solid fa-ghost'
+        };
 
         // --- A simple function to safely sanitize HTML input to prevent XSS ---
         // This creates a temporary div and sets the text, then retrieves the text back
@@ -292,6 +300,27 @@
             } else if (key === 'initiative') {
                 const initiativeElement = listItem.querySelector('.initiative-score');
                 if (initiativeElement) initiativeElement.textContent = value;
+            } else if (key === 'status') {
+                updateStatusIcons(listItem, JSON.parse(value));
+            }
+        }
+
+        // --- Function to update the visual status icons on a list item ---
+        function updateStatusIcons(listItem, statusObj) {
+            let statusContainer = listItem.querySelector('.status-icons');
+            if (!statusContainer) {
+                statusContainer = document.createElement('span');
+                statusContainer.classList.add('status-icons');
+                listItem.querySelector('.item-text').insertAdjacentElement('afterend', statusContainer);
+            }
+            statusContainer.innerHTML = '';
+            for (const status in statusObj) {
+                if (statusObj[status] && statusIcons[status]) {
+                    const icon = document.createElement('i');
+                    icon.classList.add(...statusIcons[status].split(' '));
+                    icon.setAttribute('title', status);
+                    statusContainer.appendChild(icon);
+                }
             }
         }
 
@@ -361,11 +390,12 @@
                 }
             });
 
-            if (newIndex === null || newIndex === -1) {
+            highlightedIndex = newIndex;
+            if (highlightedIndex === null || highlightedIndex === -1) {
                 clearCharacterSheet();
                 turnCounter.textContent = 'Turn: --';
             } else {
-                turnCounter.textContent = `Turn: ${newIndex + 1}`;
+                turnCounter.textContent = `Turn: ${highlightedIndex + 1}`;
             }
 
             saveState();
@@ -386,6 +416,7 @@
                 <span class="handle"><i class="fa-solid fa-grip-lines"></i></span>
                 <button class="item-lock-button"><i class="fa-solid ${isLocked ? 'fa-lock' : 'fa-lock-open'}"></i></button>
                 <span class="item-text"></span>
+                <span class="status-icons"></span>
                 <span class="initiative-score"></span>
                 <span class="list-item-hp"></span>
                 <button class="remove-button">X</button>
@@ -408,7 +439,9 @@
                     "disadvantage": false
                 };
             }
-            listItem.setAttribute('data-status', JSON.stringify(statusObj));
+            const statusJson = JSON.stringify(statusObj);
+            listItem.setAttribute('data-status', statusJson);
+            updateStatusIcons(listItem, statusObj);
             
             return listItem;
         }
@@ -430,11 +463,16 @@
                 items.push({ name: sanitizeInput(name), initiative, currentHp, mp, ac, speed, modifier, status, isLocked });
             });
             localStorage.setItem('rpgEncounterList', JSON.stringify(items));
+            localStorage.setItem('rpgEncounterRound', currentRound);
+            localStorage.setItem('rpgEncounterTurn', highlightedIndex);
         }
 
         // --- Function to Load the State from localStorage ---
         function loadState() {
             const savedList = localStorage.getItem('rpgEncounterList');
+            const savedRound = localStorage.getItem('rpgEncounterRound');
+            const savedTurn = localStorage.getItem('rpgEncounterTurn');
+
             if (savedList) {
                 try {
                     const items = JSON.parse(savedList);
@@ -457,8 +495,24 @@
             } else {
                 sortableList.innerHTML = '';
             }
-            updateHighlight(null);
+
+            if (savedRound) {
+                currentRound = parseInt(savedRound, 10);
+            } else {
+                currentRound = 1;
+            }
+
+            if (savedTurn && savedTurn !== '-1') {
+                highlightedIndex = parseInt(savedTurn, 10);
+                if (highlightedIndex >= sortableList.children.length) {
+                    highlightedIndex = -1;
+                }
+            } else {
+                highlightedIndex = -1;
+            }
+
             updateRoundCounter();
+            updateHighlight(highlightedIndex);
         }
 
         // --- Function to Start Editing a Span (using modern selection API) ---
@@ -559,6 +613,18 @@
             const targetElement = event.target;
             const listItem = document.querySelector('.highlighted');
 
+            if (event.target.closest('li')) { // Handling inline edits
+                const initiativeElement = event.target.closest('.initiative-score');
+                if (initiativeElement) {
+                    const newInitiative = parseInt(initiativeElement.textContent) || 0;
+                    event.target.closest('li').setAttribute('data-initiative', newInitiative);
+                    initiativeElement.removeAttribute('contenteditable');
+                    saveState();
+                    return;
+                }
+            }
+
+
             if (!listItem || listItem.getAttribute('data-locked') === 'true') {
                 populateCharacterSheet(listItem);
                 targetElement.removeAttribute('contenteditable');
@@ -656,6 +722,12 @@
 
         // --- Centralized Event Listener for List Item Clicks ---
         sortableList.addEventListener('click', handleListItemClick);
+        sortableList.addEventListener('dblclick', function(event) {
+            const initiativeElement = event.target.closest('.initiative-score');
+            if (initiativeElement) {
+                startEditing(initiativeElement);
+            }
+        });
 
         // --- Handle Editing Completion (on blur or Enter key) ---
         document.addEventListener('blur', handleEditableBlur, true);
@@ -695,7 +767,9 @@
                 }
                 const statusKey = this.id.replace(/(status|modifier)-/, '');
                 statusObj[statusKey] = this.checked;
-                highlightedListItem.setAttribute('data-status', JSON.stringify(statusObj));
+                const newStatusJson = JSON.stringify(statusObj);
+                highlightedListItem.setAttribute('data-status', newStatusJson);
+                updateStatusIcons(highlightedListItem, statusObj);
                 saveState();
             });
         });
@@ -742,6 +816,19 @@
             }
         });
 
+        // --- Clear All Functionality ---
+        clearAllButton.addEventListener('click', async function() {
+            const confirmed = await showConfirmationModal('Are you sure you want to clear all characters from the list? This cannot be undone.');
+            if (confirmed) {
+                sortableList.innerHTML = '';
+                currentRound = 1;
+                highlightedIndex = -1;
+                updateRoundCounter();
+                updateHighlight(null);
+                saveState();
+            }
+        });
+
         // --- Clear highlight and sheet when clicking outside the list/sheet/controls ---
         document.addEventListener('click', function (event) {
             const isClickInsideTrackerCard = event.target.closest('.encounter-tracker-card');
@@ -778,7 +865,6 @@
                 const roll1 = Math.floor(Math.random() * dieType) + 1;
                 const roll2 = Math.floor(Math.random() * dieType) + 1;
                 let finalRoll;
-                // Update: Invert the logic for any roll type if the checkbox is checked.
                 if (isInverted) {
                     finalRoll = Math.min(roll1, roll2);
                     rolls.push(`(Inverted Advantage: ${roll1}, ${roll2}) -> ${finalRoll}`);
@@ -791,7 +877,6 @@
                 const roll1 = Math.floor(Math.random() * dieType) + 1;
                 const roll2 = Math.floor(Math.random() * dieType) + 1;
                 let finalRoll;
-                // Update: Invert the logic for any roll type if the checkbox is checked.
                 if (isInverted) {
                     finalRoll = Math.max(roll1, roll2);
                     rolls.push(`(Inverted Disadvantage: ${roll1}, ${roll2}) -> ${finalRoll}`);
@@ -808,9 +893,18 @@
                 }
             }
 
-            const modifierText = modifier !== 0 ? ` + ${modifier}` : '';
+            const finalTotal = total + modifier;
             rollResults.textContent = `Rolls: ${rolls.join(', ')}`;
-            rollTotal.textContent = `Total: ${total + modifier}`;
+
+            // Construct a more descriptive string for the total
+            let totalString = `Total: ${total}`;
+            if (modifier !== 0) {
+                const operator = modifier >= 0 ? '+' : '';
+                totalString += ` ${operator} ${modifier}`;
+            }
+            totalString += ` = ${finalTotal}`;
+            
+            rollTotal.textContent = totalString;
         });
 
         // --- Load state and initialize sheet when the page finishes loading ---
