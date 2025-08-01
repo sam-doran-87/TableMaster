@@ -1,80 +1,90 @@
-/* Importing the Inter font */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-
 :root {
-    --primary-bg: #1a202c;
-    --card-bg: #2d3748;
-    --text-color: #f7fafc;
-    --accent-color: #63b3ed;
-    --border-color: #4a5568;
-    --button-bg: #4a5568;
-    --button-hover-bg: #718096;
-    --highlight-color: #ecc94b;
-    --input-bg: #4a5568;
+    /* Sophisticated Palette */
+    --dark-gray: #1a202c;
+    --off-white: #f7fafc;
+    --light-gray: #e2e8f0;
+    --border-gray: #cbd5e0;
+    
+    /* Accent Colors for Buttons */
+    --primary-blue: #4299e1;
+    --primary-blue-dark: #3182ce;
+    --primary-purple: #9f7aea;
+    --primary-purple-dark: #805ad5;
+    --danger-red: #e53e3e;
+    --danger-red-dark: #c53030;
+
+    /* Common Styling */
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+    --border-radius: 8px;
+    --font-inter: 'Inter', sans-serif;
 }
 
-/* Base styles */
 body {
-    font-family: 'Inter', sans-serif;
-    background-color: var(--primary-bg);
-    color: var(--text-color);
+    font-family: var(--font-inter);
+    background-color: var(--dark-gray);
+    color: var(--off-white);
     margin: 0;
     padding: 20px;
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-}
-
-.container {
-    display: flex;
     flex-direction: column;
-    gap: 20px;
-    max-width: 1200px;
-    width: 100%;
+    align-items: center;
+    min-height: 100vh;
+    overflow-y: auto;
+    scroll-behavior: smooth;
 }
 
 h1, h2 {
-    color: var(--accent-color);
-    text-align: center;
-}
-
-h1 {
-    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--off-white);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
     margin-bottom: 20px;
 }
 
-h2 {
-    font-size: 1.75rem;
-    margin-bottom: 15px;
-    border-bottom: 2px solid var(--accent-color);
-    padding-bottom: 10px;
+/* Specific fix for character sheet title to ensure high contrast */
+.character-sheet-card h2 {
+    color: var(--dark-gray);
 }
 
+.container {
+    width: 100%;
+    max-width: 1200px;
+}
+
+/* Responsive Layout */
 .main-content {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: 1fr;
     gap: 20px;
     margin-bottom: 20px;
 }
 
-/* Card styles */
-.encounter-tracker-card,
-.character-sheet-card,
-.dice-roller-card {
-    background-color: var(--card-bg);
-    border-radius: 12px;
-    padding: 25px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
+@media (min-width: 768px) {
+    .main-content {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* Card Styling */
+.encounter-tracker-card, .character-sheet-card, .dice-roller-card {
+    background-color: #fff;
+    border-radius: var(--border-radius);
+    padding: 20px;
+    box-shadow: var(--box-shadow);
+    border: 1px solid var(--light-gray);
+    transition: transform 0.2s ease-in-out;
+    color: var(--dark-gray); /* Important for contrast */
+}
+
+.encounter-tracker-card:hover, .character-sheet-card:hover, .dice-roller-card:hover {
+    transform: translateY(-2px);
 }
 
 .character-sheet-card {
-    display: none; /* Initially hidden, shown when a character is selected */
+    display: none;
+    flex-direction: column;
 }
 
-/* Input section */
+/* Inputs and Buttons */
 .input-section {
     display: flex;
     flex-wrap: wrap;
@@ -83,87 +93,55 @@ h2 {
 }
 
 .input-section input[type="text"],
-.input-section input[type="number"],
-.dice-input-section input[type="number"],
-.dice-input-section select,
-.modifier-input-group input[type="number"] {
-    flex: 1 1 100px;
-    padding: 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background-color: var(--input-bg);
-    color: var(--text-color);
-    font-size: 1rem;
-    outline: none;
-    transition: all 0.2s ease-in-out;
-}
-
-.input-section input:focus,
-.dice-input-section input:focus,
-.dice-input-section select:focus,
-.modifier-input-group input:focus {
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 2px rgba(99, 179, 237, 0.5);
-}
-
-.input-section button {
-    padding: 12px 20px;
-    border: none;
-    border-radius: 8px;
-    background-color: var(--accent-color);
-    color: var(--primary-bg);
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.2s ease-in-out;
-    flex: 1 1 50px;
-}
-
-.input-section button:hover {
-    background-color: #4299e1;
-}
-
-/* Turn controls */
-.turn-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.turn-round-info {
-    font-size: 1.1rem;
-    font-weight: 600;
+.input-section input[type="number"] {
     flex: 1;
-    display: flex;
-    gap: 20px;
+    padding: 10px;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-gray);
+    background-color: var(--off-white);
+    font-size: 1rem;
+    min-width: 120px;
+    color: var(--dark-gray); /* High contrast text */
 }
 
-.turn-buttons {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-}
-
-.turn-buttons button {
+button {
     padding: 10px 15px;
     border: none;
-    border-radius: 8px;
-    color: var(--text-color);
+    border-radius: var(--border-radius);
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    color: var(--off-white);
 }
 
-.sort-button { background-color: var(--button-bg); }
-.sort-button:hover { background-color: var(--button-hover-bg); }
-.turn-button { background-color: var(--accent-color); color: var(--primary-bg); }
-.turn-button:hover { background-color: #4299e1; }
-.reset-button { background-color: #e53e3e; }
-.reset-button:hover { background-color: #c53030; }
+button:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
 
-/* Sortable list */
+#addItemButton {
+    background-color: var(--primary-blue);
+}
+#addItemButton:hover {
+    background-color: var(--primary-blue-dark);
+}
+
+.sort-button, .turn-button {
+    background-color: var(--primary-purple);
+}
+.sort-button:hover, .turn-button:hover {
+    background-color: var(--primary-purple-dark);
+}
+
+.reset-button, .remove-button, .turn-button.reset-button {
+    background-color: var(--danger-red);
+}
+.reset-button:hover, .remove-button:hover {
+    background-color: var(--danger-red-dark);
+}
+
+/* List Styling */
 .sortable-list {
     list-style: none;
     padding: 0;
@@ -176,206 +154,262 @@ h2 {
 .sortable-list li {
     display: flex;
     align-items: center;
-    gap: 10px;
-    background-color: #2d3748;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+    background-color: var(--light-gray);
+    border: 1px solid var(--border-gray);
+    border-radius: var(--border-radius);
     padding: 10px;
-    transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
-    cursor: grab;
-}
-
-.sortable-list li.sortable-ghost {
-    background-color: var(--input-bg);
-    opacity: 0.5;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease-in-out;
 }
 
 .sortable-list li.highlighted {
-    border-color: var(--highlight-color);
-    box-shadow: 0 0 0 2px var(--highlight-color);
+    background-color: var(--primary-blue-dark);
+    border-color: var(--primary-blue);
+    color: var(--off-white);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.sortable-list li.highlighted .handle,
+.sortable-list li.highlighted .item-lock-button i,
+.sortable-list li.highlighted .list-item-hp,
+.sortable-list li.highlighted .status-icons i {
+    color: var(--off-white);
+}
+
+.sortable-ghost {
+    opacity: 0.5;
+    background-color: var(--light-gray);
+    border: 2px dashed var(--primary-blue);
 }
 
 .handle {
     cursor: grab;
-    color: var(--border-color);
-    margin-right: 5px;
+    margin-right: 10px;
+    color: var(--dark-gray);
 }
 
+/* Fix lock icon spacing */
 .item-lock-button {
-    background: none;
-    border: none;
-    color: var(--border-color);
-    cursor: pointer;
-    font-size: 1rem;
-    transition: color 0.2s;
-    padding: 0;
+    margin-right: 10px;
 }
-.item-lock-button:hover { color: var(--text-color); }
-.item-lock-button.locked { color: var(--highlight-color); }
+
 .item-text {
     flex-grow: 1;
     font-weight: 600;
 }
+
+.status-icons {
+    display: flex;
+    gap: 5px;
+    margin-left: 10px;
+}
+.status-icons i {
+    color: var(--danger-red);
+}
+.sortable-list li.highlighted .status-icons i {
+    color: var(--off-white);
+}
+
 .initiative-score {
-    font-weight: bold;
-    color: var(--accent-color);
+    font-weight: 700;
+    background-color: var(--dark-gray);
+    color: var(--off-white);
+    padding: 5px 10px;
+    border-radius: var(--border-radius);
+    margin-left: 10px;
     min-width: 30px;
     text-align: center;
 }
 .list-item-hp {
-    font-weight: bold;
+    margin-left: auto;
+    font-weight: 600;
+    color: var(--primary-blue-dark);
     min-width: 60px;
     text-align: right;
-    color: #e53e3e;
 }
 .remove-button {
-    background-color: transparent;
-    border: none;
-    color: #e53e3e;
-    cursor: pointer;
-    padding: 5px;
-    border-radius: 4px;
-    transition: background-color 0.2s;
-}
-.remove-button:hover {
-    background-color: rgba(229, 62, 62, 0.2);
+    background-color: var(--danger-red);
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    margin-left: 10px;
 }
 
-/* Character Sheet styles */
+/* Turn Controls */
+.turn-controls {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: var(--dark-gray);
+}
+.turn-round-info {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 700;
+    color: var(--off-white);
+}
+.turn-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Character Sheet */
 .sheet-group {
     display: flex;
-    flex-wrap: wrap;
     gap: 20px;
     margin-bottom: 20px;
 }
 .sheet-section {
-    flex: 1 1 150px;
+    flex: 1;
 }
 .sheet-label {
-    font-weight: 600;
-    margin-bottom: 10px;
+    font-weight: 700;
+    margin-bottom: 5px;
 }
-.sheet-label span,
-.sheet-label .editable-field {
-    font-weight: normal;
-    color: var(--highlight-color);
+.editable-field {
     display: inline-block;
-    min-width: 20px;
+    padding: 5px 10px;
+    border: 1px solid var(--border-gray);
+    border-radius: var(--border-radius);
+    background-color: var(--light-gray);
+    min-width: 30px;
+    text-align: center;
+    cursor: text;
 }
 .number-control-group {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     gap: 5px;
 }
 .number-btn {
-    background-color: var(--button-bg);
-    color: var(--text-color);
-    border: none;
-    border-radius: 4px;
-    width: 25px;
-    height: 25px;
-    cursor: pointer;
-    transition: background-color 0.2s;
+    background-color: var(--light-gray);
+    color: var(--dark-gray);
+    padding: 5px 10px;
+    font-size: 1rem;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
-.number-btn:hover { background-color: var(--button-hover-bg); }
+.number-btn:hover {
+    background-color: var(--border-gray);
+}
+.modifier-section, .status-section {
+    margin-bottom: 20px;
+}
+.modifiers-list, .status-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+label {
+    cursor: pointer;
+    color: var(--dark-gray);
+}
 
-/* Dice Roller styles */
+/* Dice Roller */
+.toggle-button {
+    /* Adjusting the toggle button to have high contrast text */
+    background-color: var(--dark-gray);
+    color: var(--off-white);
+    padding: 12px 20px;
+    font-size: 1.1rem;
+    border-radius: 50px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+    display: block;
+    margin: 20px auto;
+}
 .dice-roller-card {
-    max-width: 400px;
-    margin: 0 auto;
+    margin-top: 20px;
+}
+.dice-roller-card.hidden {
+    display: none;
 }
 .dice-input-section {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
-.dice-input-section .dice-x {
-    font-weight: bold;
-    font-size: 1.5rem;
-    color: var(--text-color);
+.dice-input-section input[type="number"], .dice-input-section select {
+    padding: 8px;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-gray);
+    font-size: 1rem;
+    background-color: var(--off-white);
+    color: var(--dark-gray);
 }
-#roll-dice-button {
-    padding: 12px 20px;
-    border: none;
-    border-radius: 8px;
-    background-color: var(--accent-color);
-    color: var(--primary-bg);
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.2s;
+.dice-x {
+    font-size: 1.2rem;
+    font-weight: 700;
 }
-#roll-dice-button:hover { background-color: #4299e1; }
 .dice-output {
-    background-color: var(--input-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+    background-color: var(--dark-gray);
+    color: var(--off-white);
     padding: 15px;
-    margin-bottom: 20px;
+    border-radius: var(--border-radius);
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    font-weight: 600;
 }
 .dice-output p {
-    margin: 5px 0;
+    margin: 0;
 }
 .dice-modifiers-section {
     display: flex;
     flex-direction: column;
     gap: 15px;
 }
-.modifier-input-group,
-.roll-type-group,
-.invert-d100-group {
+.modifier-input-group, .roll-type-group, .invert-d100-group {
     display: flex;
     align-items: center;
     gap: 10px;
 }
-.roll-type-group label,
-.invert-d100-group label {
-    font-weight: 600;
+.modifier-input-group input {
+    width: 60px;
+    text-align: center;
 }
 
-/* Custom Modal */
+/* Custom Modal Styling */
 .custom-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    display: none; /* Hidden by default */
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    display: none;
 }
-
 .custom-modal-content {
-    background-color: var(--card-bg);
+    background-color: #fff;
     padding: 30px;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 400px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
     text-align: center;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    width: 90%;
+    color: var(--dark-gray);
 }
-
-.custom-modal-content p {
-    margin: 0 0 20px 0;
-    font-size: 1.1rem;
+.modal-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
 }
-
 .modal-button {
     padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.2s;
+    font-size: 1rem;
+    font-weight: 600;
 }
-
 .modal-button-confirm {
-    background-color: var(--accent-color);
-    color: var(--primary-bg);
+    background-color: var(--primary-blue);
 }
-
-.modal-button-confirm:hover {
-    background-color: #4299e1;
+.modal-button-cancel {
+    background-color: var(--danger-red);
 }
