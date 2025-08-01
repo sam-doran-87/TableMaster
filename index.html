@@ -6,7 +6,8 @@
     <title>RPG Encounter List</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- Link to the custom style.css file -->
+
+    <!-- Linking to the external stylesheet -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -365,7 +366,7 @@
             sheetAc.textContent = ac;
             sheetSpeed.textContent = speed;
             sheetModifier.value = modifier;
-            characterSheet.style.display = 'block';
+            characterSheet.style.display = 'flex';
 
             statusCheckboxes.forEach(checkbox => {
                 const statusKey = checkbox.id.replace('status-', '');
@@ -412,9 +413,11 @@
             const listItem = document.createElement('li');
             
             // Safe way to add inner HTML for non-user content
+            const lockIconClass = isLocked ? 'fa-lock' : 'fa-lock-open';
+            const lockButtonClass = isLocked ? 'item-lock-button locked' : 'item-lock-button';
             listItem.innerHTML = `
                 <span class="handle"><i class="fa-solid fa-grip-lines"></i></span>
-                <button class="item-lock-button"><i class="fa-solid ${isLocked ? 'fa-lock' : 'fa-lock-open'}"></i></button>
+                <button class="${lockButtonClass}"><i class="fa-solid ${lockIconClass}"></i></button>
                 <span class="item-text"></span>
                 <span class="status-icons"></span>
                 <span class="initiative-score"></span>
@@ -595,15 +598,18 @@
         function handleLockButtonClick(listItem) {
             const isLocked = listItem.getAttribute('data-locked') === 'true';
             const lockIcon = listItem.querySelector('.item-lock-button i');
-
+            const lockButton = listItem.querySelector('.item-lock-button');
+            
             listItem.setAttribute('data-locked', !isLocked);
 
             if (isLocked) {
                 lockIcon.classList.remove('fa-lock');
                 lockIcon.classList.add('fa-lock-open');
+                lockButton.classList.remove('locked');
             } else {
                 lockIcon.classList.remove('fa-lock-open');
                 lockIcon.classList.add('fa-lock');
+                lockButton.classList.add('locked');
             }
             saveState();
         }
@@ -707,210 +713,165 @@
             if (listItems.length === 0) return;
             highlightedIndex--;
             if (highlightedIndex < 0) {
-                if (currentRound > 1) {
-                    highlightedIndex = listItems.length - 1;
-                    currentRound--;
-                } else {
-                    highlightedIndex = 0;
+                currentRound--;
+                if (currentRound < 1) {
+                    currentRound = 1;
+                    highlightedIndex = -1; // Reset turns completely
+                    updateHighlight(highlightedIndex);
+                    updateRoundCounter();
+                    return;
                 }
+                highlightedIndex = listItems.length - 1;
             }
             updateHighlight(highlightedIndex);
             updateRoundCounter();
         }
-        nextTurnButton.addEventListener('click', nextTurn);
-        prevTurnButton.addEventListener('click', prevTurn);
 
-        // --- Centralized Event Listener for List Item Clicks ---
-        sortableList.addEventListener('click', handleListItemClick);
-        sortableList.addEventListener('dblclick', function(event) {
-            const initiativeElement = event.target.closest('.initiative-score');
-            if (initiativeElement) {
-                startEditing(initiativeElement);
-            }
-        });
-
-        // --- Handle Editing Completion (on blur or Enter key) ---
-        document.addEventListener('blur', handleEditableBlur, true);
-        document.addEventListener('keypress', function (event) {
-            if (event.key === 'Enter' && event.target.getAttribute('contenteditable') === 'true') {
-                event.preventDefault();
-                event.target.blur();
-            }
-        });
-
-        // --- Event Listeners for Character Sheet Field Clicks to Start Editing ---
-        sheetCurrentHp.addEventListener('click', () => startEditing(sheetCurrentHp));
-        sheetMp.addEventListener('click', () => startEditing(sheetMp));
-        sheetAc.addEventListener('click', () => startEditing(sheetAc));
-        sheetSpeed.addEventListener('click', () => startEditing(sheetSpeed));
-
-        // --- Event Listeners for Number Button Clicks (+/-) ---
-        document.querySelectorAll('.number-control-group').forEach(group => {
-            group.addEventListener('click', handleNumberButtonClick);
-        });
-
-        // --- Event Listeners for Checkbox Changes ---
-        document.querySelectorAll('.status-checkbox, .modifier-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', function () {
-                const highlightedListItem = document.querySelector('.highlighted');
-                if (!highlightedListItem || highlightedListItem.getAttribute('data-locked') === 'true') {
-                    this.checked = !this.checked;
-                    return;
+        function resetTurns() {
+            showConfirmationModal("Are you sure you want to reset the turns and round counter?").then(result => {
+                if (result) {
+                    currentRound = 1;
+                    highlightedIndex = -1;
+                    updateHighlight(highlightedIndex);
+                    updateRoundCounter();
+                    saveState();
                 }
-                const statusString = highlightedListItem.getAttribute('data-status');
-                let statusObj;
-                try {
-                    statusObj = JSON.parse(statusString);
-                } catch (e) {
-                    console.error("Error parsing status JSON on checkbox change:", e);
-                    statusObj = {};
-                }
-                const statusKey = this.id.replace(/(status|modifier)-/, '');
-                statusObj[statusKey] = this.checked;
-                const newStatusJson = JSON.stringify(statusObj);
-                highlightedListItem.setAttribute('data-status', newStatusJson);
-                updateStatusIcons(highlightedListItem, statusObj);
-                saveState();
             });
-        });
+        }
 
-        // --- Function to Sort the List by Initiative Score ---
-        sortInitiativeButton.addEventListener('click', function () {
+        function sortInitiative() {
             const listItems = Array.from(sortableList.children);
-            const previouslySelectedName = document.querySelector('.highlighted .item-text')?.textContent;
-
-            listItems.sort((a, b) => {
-                const initiativeA = parseInt(a.getAttribute('data-initiative'), 10) || 0;
-                const initiativeB = parseInt(b.getAttribute('data-initiative'), 10) || 0;
-                return initiativeB - initiativeA;
+            const sortedItems = listItems.sort((a, b) => {
+                const initA = parseInt(a.getAttribute('data-initiative')) || 0;
+                const initB = parseInt(b.getAttribute('data-initiative')) || 0;
+                return initB - initA; // Sort in descending order
             });
 
-            listItems.forEach(item => {
-                sortableList.appendChild(item);
-            });
+            sortableList.innerHTML = '';
+            sortedItems.forEach(item => sortableList.appendChild(item));
+            highlightedIndex = -1;
+            updateHighlight(highlightedIndex);
             saveState();
-
-            if (previouslySelectedName) {
-                const newHighlightedItem = Array.from(sortableList.children).find(item =>
-                    item.querySelector('.item-text').textContent === previouslySelectedName
-                );
-                if (newHighlightedItem) {
-                    updateHighlight(Array.from(sortableList.children).indexOf(newHighlightedItem));
-                } else {
-                    updateHighlight(null);
-                }
-            } else {
-                updateHighlight(0);
-            }
-        });
-
-        // --- Reset Turns Functionality (now using the custom modal) ---
-        resetTurnButton.addEventListener('click', async function () {
-            const confirmed = await showConfirmationModal('Are you sure you want to reset the current turn and round?');
-            if (confirmed) {
-                currentRound = 1;
-                highlightedIndex = -1;
-                updateRoundCounter();
-                updateHighlight(null);
-                saveState(); // Save the reset state
-            }
-        });
-
-        // --- Clear All Functionality ---
-        clearAllButton.addEventListener('click', async function() {
-            const confirmed = await showConfirmationModal('Are you sure you want to clear all characters from the list? This cannot be undone.');
-            if (confirmed) {
+        }
+        
+        async function clearAllItems() {
+            const result = await showConfirmationModal("Are you sure you want to clear all characters from the list?");
+            if (result) {
                 sortableList.innerHTML = '';
                 currentRound = 1;
                 highlightedIndex = -1;
+                updateHighlight(highlightedIndex);
                 updateRoundCounter();
-                updateHighlight(null);
                 saveState();
             }
-        });
+        }
 
-        // --- Clear highlight and sheet when clicking outside the list/sheet/controls ---
-        document.addEventListener('click', function (event) {
-            const isClickInsideTrackerCard = event.target.closest('.encounter-tracker-card');
-            const isClickInsideSheet = event.target.closest('.character-sheet-card');
-            const isInteractiveElement = event.target.tagName === 'BUTTON' || event.target.tagName === 'INPUT' || event.target.closest('label');
+        // --- Dice Roller functions ---
+        function rollDice() {
+            const numDice = parseInt(numDiceInput.value) || 1;
+            const dieType = parseInt(dieTypeSelect.value) || 20;
+            const modifier = parseInt(rollModifierInput.value) || 0;
+            const rollType = document.querySelector('input[name="roll-type"]:checked').value;
+            const invertD100 = invertD100Checkbox.checked;
 
-            if (!isClickInsideTrackerCard && !isClickInsideSheet && !isInteractiveElement) {
-                updateHighlight(null);
+            let rolls = [];
+            for (let i = 0; i < numDice; i++) {
+                rolls.push(Math.floor(Math.random() * dieType) + 1);
             }
-        });
 
-        // --- Dice Roller Functionality, based on your CSS ---
+            let total = 0;
+            let displayRolls = '';
+
+            if (rollType === 'normal' || dieType !== 100) {
+                total = rolls.reduce((sum, roll) => sum + roll, 0);
+                displayRolls = rolls.join(', ');
+            } else { // Advantage / Disadvantage for d100
+                rolls = rolls.sort((a, b) => a - b);
+                if (rollType === 'advantage') {
+                    if (invertD100) {
+                        total = rolls[0];
+                    } else {
+                        total = rolls[rolls.length - 1];
+                    }
+                } else if (rollType === 'disadvantage') {
+                    if (invertD100) {
+                        total = rolls[rolls.length - 1];
+                    } else {
+                        total = rolls[0];
+                    }
+                }
+                displayRolls = rolls.join(', ');
+            }
+
+            total += modifier;
+
+            rollResults.textContent = `Rolls: ${displayRolls}`;
+            rollTotal.textContent = `Total: ${total}`;
+        }
+        
+        // --- Event listeners for Dice Roller ---
         toggleDiceRollerButton.addEventListener('click', () => {
             diceRollerCard.classList.toggle('hidden');
         });
+        
+        rollDiceButton.addEventListener('click', rollDice);
 
-        rollDiceButton.addEventListener('click', () => {
-            const numDice = parseInt(numDiceInput.value);
-            const dieType = parseInt(dieTypeSelect.value);
-            const modifier = parseInt(rollModifierInput.value);
-            const rollType = document.querySelector('input[name="roll-type"]:checked').value;
-            const isInverted = invertD100Checkbox.checked;
+        // --- Main Event Listener for delegation ---
+        document.addEventListener('click', function(event) {
+            const highlightedItem = document.querySelector('.highlighted');
 
-            if (isNaN(numDice) || isNaN(dieType) || numDice < 1) {
-                rollResults.textContent = "Please enter valid dice numbers.";
-                rollTotal.textContent = "Total: --";
-                return;
+            // Handle edit buttons on the character sheet
+            if (event.target.closest('.number-btn')) {
+                handleNumberButtonClick(event);
             }
 
-            let rolls = [];
-            let total = 0;
+            // Handle checkbox changes
+            if (event.target.closest('.status-checkbox') || event.target.closest('.modifier-checkbox')) {
+                const targetCheckbox = event.target;
+                const statusKey = targetCheckbox.id.replace('status-', '').replace('modifier-', '');
 
-            if (rollType === 'advantage') {
-                const roll1 = Math.floor(Math.random() * dieType) + 1;
-                const roll2 = Math.floor(Math.random() * dieType) + 1;
-                let finalRoll;
-                if (isInverted) {
-                    finalRoll = Math.min(roll1, roll2);
-                    rolls.push(`(Inverted Advantage: ${roll1}, ${roll2}) -> ${finalRoll}`);
+                if (highlightedItem && highlightedItem.getAttribute('data-locked') !== 'true') {
+                    const statusString = highlightedItem.getAttribute('data-status');
+                    let statusObj;
+                    try {
+                        statusObj = JSON.parse(statusString);
+                    } catch (e) {
+                        statusObj = {};
+                    }
+
+                    statusObj[statusKey] = targetCheckbox.checked;
+
+                    updateListItem(highlightedItem, 'status', JSON.stringify(statusObj));
+                    saveState();
                 } else {
-                    finalRoll = Math.max(roll1, roll2);
-                    rolls.push(`(Advantage: ${roll1}, ${roll2}) -> ${finalRoll}`);
-                }
-                total = finalRoll;
-            } else if (rollType === 'disadvantage') {
-                const roll1 = Math.floor(Math.random() * dieType) + 1;
-                const roll2 = Math.floor(Math.random() * dieType) + 1;
-                let finalRoll;
-                if (isInverted) {
-                    finalRoll = Math.max(roll1, roll2);
-                    rolls.push(`(Inverted Disadvantage: ${roll1}, ${roll2}) -> ${finalRoll}`);
-                } else {
-                    finalRoll = Math.min(roll1, roll2);
-                    rolls.push(`(Disadvantage: ${roll1}, ${roll2}) -> ${finalRoll}`);
-                }
-                total = finalRoll;
-            } else { // Normal or multiple dice
-                for (let i = 0; i < numDice; i++) {
-                    const roll = Math.floor(Math.random() * dieType) + 1;
-                    rolls.push(roll);
-                    total += roll;
+                    targetCheckbox.checked = !targetCheckbox.checked; // Revert the check if no item is highlighted or item is locked
                 }
             }
-
-            const finalTotal = total + modifier;
-            rollResults.textContent = `Rolls: ${rolls.join(', ')}`;
-
-            // Construct a more descriptive string for the total
-            let totalString = `Total: ${total}`;
-            if (modifier !== 0) {
-                const operator = modifier >= 0 ? '+' : '';
-                totalString += ` ${operator} ${modifier}`;
-            }
-            totalString += ` = ${finalTotal}`;
-            
-            rollTotal.textContent = totalString;
         });
 
-        // --- Load state and initialize sheet when the page finishes loading ---
-        window.addEventListener('load', () => {
-            loadState();
+        document.addEventListener('dblclick', function(event) {
+            const target = event.target;
+            if (target.classList.contains('item-text') || target.classList.contains('initiative-score') || target.classList.contains('editable-field')) {
+                startEditing(target);
+            }
         });
+
+        document.addEventListener('blur', function(event) {
+            if (event.target.classList.contains('editable-field') || event.target.classList.contains('item-text') || event.target.classList.contains('initiative-score')) {
+                handleEditableBlur(event);
+            }
+        }, true); // Use capture phase to ensure this runs before other blur events
+
+        // Initialize event listeners for turn controls and other buttons
+        sortableList.addEventListener('click', handleListItemClick);
+        sortInitiativeButton.addEventListener('click', sortInitiative);
+        nextTurnButton.addEventListener('click', nextTurn);
+        prevTurnButton.addEventListener('click', prevTurn);
+        resetTurnButton.addEventListener('click', resetTurns);
+        clearAllButton.addEventListener('click', clearAllItems);
+        
+        // Initial load
+        loadState();
     </script>
 </body>
 </html>
