@@ -3,138 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RPG Encounter List</title>
+    <title>TableMaster RPG Tracker</title>
+    <!-- Importing Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
-    <!-- Linking to the external stylesheet -->
+    <!-- Importing SortableJS for drag-and-drop functionality -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+    <!-- Linking the external CSS file -->
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* This is a simple fallback for the CSS file in case it is not loaded */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c;
+            color: #f7fafc;
+            margin: 0;
+            padding: 20px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>RPG Encounter List</h1>
-
+        <h1>TableMaster RPG Tracker</h1>
         <div class="main-content">
+            <!-- Encounter Tracker Card -->
             <div class="encounter-tracker-card">
+                <h2>Encounter Tracker</h2>
                 <div class="input-section">
-                    <input type="text" id="newItemText" placeholder="Character Name">
-                    <input type="number" id="newItemInitiative" placeholder="Initiative">
-                    <button id="addItemButton">Add Character</button>
-                    <button id="sortInitiativeButton" class="sort-button">Sort by Initiative</button>
-                    <button id="clearAllButton" class="reset-button">Clear All</button>
+                    <input type="text" id="itemName" placeholder="Name">
+                    <input type="number" id="itemInitiative" placeholder="Initiative" value="" onfocus="this.value=''">
+                    <input type="number" id="itemHP" placeholder="HP" value="" onfocus="this.value=''">
+                    <button id="addItemButton"><i class="fas fa-plus"></i> Add</button>
                 </div>
-
-                <ul id="sortable-list" class="sortable-list">
-                    <!-- List items will be dynamically added here -->
-                </ul>
-
                 <div class="turn-controls">
                     <div class="turn-round-info">
-                        <span id="roundCounter">Round: 1</span>
-                        <span id="turnCounter">Turn: --</span>
+                        <span id="turnInfo">Turn: 0</span>
+                        <span id="roundInfo">Round: 1</span>
                     </div>
                     <div class="turn-buttons">
-                        <button id="prevTurnButton" class="turn-button">Previous Turn</button>
-                        <button id="nextTurnButton" class="turn-button">Next Turn</button>
-                        <button id="resetTurnButton" class="reset-button">Reset Turns</button>
+                        <button id="sortButton" class="sort-button"><i class="fas fa-sort-numeric-down"></i> Sort</button>
+                        <button id="nextTurnButton" class="turn-button"><i class="fas fa-step-forward"></i> Next Turn</button>
+                        <button id="resetButton" class="reset-button"><i class="fas fa-undo"></i> Reset</button>
                     </div>
                 </div>
+                <ul id="sortableList" class="sortable-list">
+                    <!-- List items will be added here dynamically -->
+                </ul>
             </div>
-
-            <div id="character-sheet" class="character-sheet-card">
-                <h2 id="sheet-title">Selected Character</h2>
-
+            <!-- Character Sheet Card -->
+            <div class="character-sheet-card">
+                <h2>Character Sheet</h2>
                 <div class="sheet-group">
-                    <div class="sheet-section hp-section">
-                        <p class="sheet-label">HP</p>
-                        <div class="number-control-group">
-                            <button class="number-btn decrement" data-target="sheet-current-hp">-</button>
-                            <span id="sheet-current-hp" class="editable-field">--</span>
-                            <button class="number-btn increment" data-target="sheet-current-hp">+</button>
-                        </div>
+                    <div class="sheet-section">
+                        <div class="sheet-label">Name: <span id="sheetName"></span></div>
+                        <div class="sheet-label">Initiative: <span id="sheetInitiative"></span></div>
                     </div>
-
-                    <div class="sheet-section mp-section">
-                        <p class="sheet-label">MP</p>
-                        <div class="number-control-group">
-                            <button class="number-btn decrement" data-target="sheet-mp">-</button>
-                            <span id="sheet-mp" class="editable-field">--</span>
-                            <button class="number-btn increment" data-target="sheet-mp">+</button>
-                        </div>
+                    <div class="sheet-section">
+                        <div class="sheet-label">HP: <div class="number-control-group"><span id="sheetHP" class="editable-field" contenteditable="true"></span><button class="number-btn" onclick="updateHP(-1)">-</button><button class="number-btn" onclick="updateHP(1)">+</button></div></div>
                     </div>
                 </div>
-
-                <div class="sheet-group">
-                    <div class="sheet-section ac-section">
-                        <p class="sheet-label">Armor</p>
-                        <span id="sheet-ac" class="editable-field">--</span>
-                    </div>
-
-                    <div class="sheet-section speed-section">
-                        <p class="sheet-label">Speed</p>
-                        <span id="sheet-speed" class="editable-field">--</span>
-                    </div>
-                </div>
-
-                <div class="sheet-section modifier-section">
-                    <p class="sheet-label">Modifiers</p>
+                <div class="modifier-section">
+                    <div class="sheet-label">Modifiers:</div>
                     <div class="modifiers-list">
-                        <label>
-                            <input type="checkbox" class="modifier-checkbox" id="modifier-advantage">
-                            Advantage
-                        </label>
-                        <label>
-                            <input type="checkbox" class="modifier-checkbox" id="modifier-disadvantage">
-                            Disadvantage
-                        </label>
-                        <div class="number-control-group">
-                            <button class="number-btn decrement" data-target="sheet-modifier">-</button>
-                            <input type="number" class="modifier-input" id="sheet-modifier" placeholder="Mod">
-                            <button class="number-btn increment" data-target="sheet-modifier">+</button>
-                        </div>
+                        <!-- Modifiers will be added dynamically -->
                     </div>
                 </div>
-
-                <div class="sheet-section status-section">
-                    <p class="sheet-label">Status</p>
+                <div class="status-section">
+                    <div class="sheet-label">Status:</div>
                     <div class="status-list">
-                        <label>
-                            <input type="checkbox" class="status-checkbox" id="status-poisoned">
-                            Poisoned
-                        </label>
-                        <label>
-                            <input type="checkbox" class="status-checkbox" id="status-burning">
-                            Burning
-                        </label>
-                        <label>
-                            <input type="checkbox" class="status-checkbox" id="status-immobile">
-                            Immobile
-                        </label>
-                        <label>
-                            <input type="checkbox" class="status-checkbox" id="status-ko">
-                            K.O.
-                        </label>
-                        <label>
-                            <input type="checkbox" class="status-checkbox" id="status-dead">
-                            Dead
-                        </label>
+                        <!-- Statuses will be added dynamically -->
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Toggle button for the dice roller, added based on your CSS -->
-        <button id="toggleDiceRoller" class="toggle-button">
-            <i class="fas fa-dice"></i> Dice Roller
-        </button>
-
-        <!-- Dice Roller card, added based on your CSS -->
-        <div id="dice-roller-card" class="dice-roller-card hidden">
+        <!-- Dice Roller Card -->
+        <div class="dice-roller-card">
             <h2>Dice Roller</h2>
             <div class="dice-input-section">
-                <input type="number" id="num-dice-input" value="1" min="1">
+                <input type="number" id="dice-count" value="1" min="1" max="100">
                 <span class="dice-x">d</span>
-                <select id="die-type-select">
+                <select id="dice-type">
                     <option value="4">4</option>
                     <option value="6">6</option>
                     <option value="8">8</option>
@@ -145,733 +93,429 @@
                 </select>
                 <button id="roll-dice-button">Roll!</button>
             </div>
-            <div class="dice-output">
-                <p id="roll-results">Rolls: --</p>
-                <p id="roll-total">Total: --</p>
+            <div id="dice-output" class="dice-output">
+                <p>Rolls: --</p>
+                <p>Total: --</p>
             </div>
             <div class="dice-modifiers-section">
                 <div class="modifier-input-group">
-                    <label for="roll-modifier">Modifier:</label>
-                    <input type="number" id="roll-modifier" value="0">
+                    <label for="modifier">Modifier:</label>
+                    <input type="number" id="modifier" value="0">
                 </div>
                 <div class="roll-type-group">
-                    <label>
-                        <input type="radio" name="roll-type" value="normal" checked>
-                        Normal
-                    </label>
-                    <label>
-                        <input type="radio" name="roll-type" value="advantage">
-                        Advantage
-                    </label>
-                    <label>
-                        <input type="radio" name="roll-type" value="disadvantage">
-                        Disadvantage
-                    </label>
+                    <input type="radio" id="roll-normal" name="roll-type" value="normal" checked>
+                    <label for="roll-normal">Normal</label>
+                    <input type="radio" id="roll-advantage" name="roll-type" value="advantage">
+                    <label for="roll-advantage">Advantage</label>
+                    <input type="radio" id="roll-disadvantage" name="roll-type" value="disadvantage">
+                    <label for="roll-disadvantage">Disadvantage</label>
                 </div>
                 <div class="invert-d100-group">
-                    <label for="invert-d100-checkbox">
-                        <input type="checkbox" id="invert-d100-checkbox"> Invert for Roll Under
-                        <span class="help-icon" title="Inverts Advantage/Disadvantage for any roll. Advantage becomes picking the lower roll, Disadvantage becomes picking the higher roll. Useful for systems where you want to roll under a target number.">
-                            <i class="fas fa-question-circle"></i>
-                        </span>
-                    </label>
+                    <input type="checkbox" id="invert-d100">
+                    <label for="invert-d100">Invert for Roll Under</label>
                 </div>
             </div>
         </div>
 
     </div>
-    
-    <!-- Custom confirmation modal -->
-    <div id="confirmationModal" class="custom-modal-overlay">
+
+    <!-- Custom Modal for Alerts -->
+    <div id="custom-modal-overlay" class="custom-modal-overlay">
         <div class="custom-modal-content">
-            <h3 id="modalQuestion"></h3>
+            <p id="modal-message">This is a custom alert message.</p>
             <div class="modal-buttons">
-                <button id="modalConfirmButton" class="modal-button modal-button-confirm">Confirm</button>
-                <button id="modalCancelButton" class="modal-button modal-button-cancel">Cancel</button>
+                <button id="modal-ok" class="modal-button modal-button-confirm">OK</button>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script>
-        // --- Get references to all necessary HTML elements ---
-        const sortableList = document.getElementById('sortable-list');
-        const newItemText = document.getElementById('newItemText');
-        const newItemInitiative = document.getElementById('newItemInitiative');
-        const addItemButton = document.getElementById('addItemButton');
-        const sortInitiativeButton = document.getElementById('sortInitiativeButton');
-        const nextTurnButton = document.getElementById('nextTurnButton');
-        const prevTurnButton = document.getElementById('prevTurnButton');
-        const roundCounter = document.getElementById('roundCounter');
-        const turnCounter = document.getElementById('turnCounter');
-        const resetTurnButton = document.getElementById('resetTurnButton');
-        const clearAllButton = document.getElementById('clearAllButton');
+        // Data structure to hold our items and a unique ID counter
+        let items = [];
+        let itemIdCounter = 0;
+        let currentTurnIndex = 0;
+        let currentRound = 1;
 
-        const characterSheet = document.getElementById('character-sheet');
-        const sheetTitle = document.getElementById('sheet-title');
-        const sheetCurrentHp = document.getElementById('sheet-current-hp');
-        const sheetMp = document.getElementById('sheet-mp');
-        const sheetAc = document.getElementById('sheet-ac');
-        const sheetSpeed = document.getElementById('sheet-speed');
-        const sheetModifier = document.getElementById('sheet-modifier');
-        const statusCheckboxes = document.querySelectorAll('.status-checkbox');
-        const modifierCheckboxes = document.querySelectorAll('.modifier-checkbox');
-        
-        // Dice Roller elements, based on your CSS
-        const toggleDiceRollerButton = document.getElementById('toggleDiceRoller');
-        const diceRollerCard = document.getElementById('dice-roller-card');
-        const numDiceInput = document.getElementById('num-dice-input');
-        const dieTypeSelect = document.getElementById('die-type-select');
+        // Get DOM elements
+        const itemNameInput = document.getElementById('itemName');
+        const itemInitiativeInput = document.getElementById('itemInitiative');
+        const itemHPInput = document.getElementById('itemHP');
+        const addItemButton = document.getElementById('addItemButton');
+        const sortButton = document.getElementById('sortButton');
+        const nextTurnButton = document.getElementById('nextTurnButton');
+        const resetButton = document.getElementById('resetButton');
+        const sortableList = document.getElementById('sortableList');
+        const turnInfo = document.getElementById('turnInfo');
+        const roundInfo = document.getElementById('roundInfo');
+
+        // Dice Roller elements
+        const diceCountInput = document.getElementById('dice-count');
+        const diceTypeSelect = document.getElementById('dice-type');
         const rollDiceButton = document.getElementById('roll-dice-button');
-        const rollModifierInput = document.getElementById('roll-modifier');
-        const rollResults = document.getElementById('roll-results');
-        const rollTotal = document.getElementById('roll-total');
-        const invertD100Checkbox = document.getElementById('invert-d100-checkbox');
+        const diceOutput = document.getElementById('dice-output');
+        const modifierInput = document.getElementById('modifier');
+        const rollTypeNormal = document.getElementById('roll-normal');
+        const rollTypeAdvantage = document.getElementById('roll-advantage');
+        const rollTypeDisadvantage = document.getElementById('roll-disadvantage');
+        const invertD100Checkbox = document.getElementById('invert-d100');
+
+        // Character Sheet elements
+        const characterSheetCard = document.querySelector('.character-sheet-card');
+        const sheetName = document.getElementById('sheetName');
+        const sheetInitiative = document.getElementById('sheetInitiative');
+        const sheetHP = document.getElementById('sheetHP');
 
         // Custom Modal elements
-        const confirmationModal = document.getElementById('confirmationModal');
-        const modalQuestion = document.getElementById('modalQuestion');
-        const modalConfirmButton = document.getElementById('modalConfirmButton');
-        const modalCancelButton = document.getElementById('modalCancelButton');
+        const modalOverlay = document.getElementById('custom-modal-overlay');
+        const modalMessage = document.getElementById('modal-message');
+        const modalOkButton = document.getElementById('modal-ok');
 
-        let currentRound = 1;
-        let highlightedIndex = -1;
-        
-        const statusIcons = {
-            'poisoned': 'fa-solid fa-skull-crossbones',
-            'burning': 'fa-solid fa-fire',
-            'immobile': 'fa-solid fa-ban',
-            'ko': 'fa-solid fa-face-dizzy',
-            'dead': 'fa-solid fa-ghost'
-        };
-
-        // --- A simple function to safely sanitize HTML input to prevent XSS ---
-        // This creates a temporary div and sets the text, then retrieves the text back
-        // to ensure it's treated as plain text and not malicious HTML.
-        function sanitizeInput(input) {
-            const tempDiv = document.createElement('div');
-            tempDiv.textContent = input;
-            return tempDiv.innerHTML;
+        // Function to show a custom modal alert
+        function showModal(message) {
+            modalMessage.textContent = message;
+            modalOverlay.style.display = 'flex';
         }
 
-        // --- Custom confirmation modal to replace window.confirm() ---
-        function showConfirmationModal(message) {
-            return new Promise((resolve) => {
-                modalQuestion.textContent = message;
-                confirmationModal.style.display = 'flex';
-
-                const handleConfirm = () => {
-                    confirmationModal.style.display = 'none';
-                    modalConfirmButton.removeEventListener('click', handleConfirm);
-                    modalCancelButton.removeEventListener('click', handleCancel);
-                    resolve(true);
-                };
-
-                const handleCancel = () => {
-                    confirmationModal.style.display = 'none';
-                    modalConfirmButton.removeEventListener('click', handleConfirm);
-                    modalCancelButton.removeEventListener('click', handleCancel);
-                    resolve(false);
-                };
-
-                modalConfirmButton.addEventListener('click', handleConfirm);
-                modalCancelButton.addEventListener('click', handleCancel);
-            });
-        }
-
-
-        // --- Initialize SortableJS ---
-        const sortable = Sortable.create(sortableList, {
-            animation: 150,
-            ghostClass: 'sortable-ghost',
-            chosenClass: 'sortable-chosen',
-            dragClass: 'sortable-drag',
-            handle: '.handle',
-            onEnd: function (evt) {
-                saveState();
-            },
+        // Event listener for the modal OK button
+        modalOkButton.addEventListener('click', () => {
+            modalOverlay.style.display = 'none';
         });
 
-        // --- Helper function to update a list item's data and its visual representation ---
-        function updateListItem(listItem, key, value) {
-            listItem.setAttribute(`data-${key}`, value);
-            if (key === 'current-hp') {
-                const hpElement = listItem.querySelector('.list-item-hp');
-                if (hpElement) hpElement.textContent = `${value} HP`;
-            } else if (key === 'initiative') {
-                const initiativeElement = listItem.querySelector('.initiative-score');
-                if (initiativeElement) initiativeElement.textContent = value;
-            } else if (key === 'status') {
-                updateStatusIcons(listItem, JSON.parse(value));
-            }
-        }
+        // Function to create and render a list item
+        function renderItem(item) {
+            const li = document.createElement('li');
+            li.setAttribute('data-id', item.id);
 
-        // --- Function to update the visual status icons on a list item ---
-        function updateStatusIcons(listItem, statusObj) {
-            let statusContainer = listItem.querySelector('.status-icons');
-            if (!statusContainer) {
-                statusContainer = document.createElement('span');
-                statusContainer.classList.add('status-icons');
-                listItem.querySelector('.item-text').insertAdjacentElement('afterend', statusContainer);
-            }
-            statusContainer.innerHTML = '';
-            for (const status in statusObj) {
-                if (statusObj[status] && statusIcons[status]) {
-                    const icon = document.createElement('i');
-                    icon.classList.add(...statusIcons[status].split(' '));
-                    icon.setAttribute('title', status);
-                    statusContainer.appendChild(icon);
-                }
-            }
-        }
+            // Drag handle
+            const handle = document.createElement('i');
+            handle.className = 'fas fa-grip-lines handle';
 
-        // --- Function to clear the character sheet ---
-        function clearCharacterSheet() {
-            sheetTitle.textContent = 'Selected Character';
-            sheetCurrentHp.textContent = '--';
-            sheetMp.textContent = '--';
-            sheetAc.textContent = '--';
-            sheetSpeed.textContent = '--';
-            sheetModifier.value = '';
-            statusCheckboxes.forEach(checkbox => checkbox.checked = false);
-            modifierCheckboxes.forEach(checkbox => checkbox.checked = false);
-        }
+            // Lock button
+            const lockButton = document.createElement('button');
+            lockButton.className = `item-lock-button ${item.locked ? 'locked' : ''}`;
+            const lockIcon = document.createElement('i');
+            lockIcon.className = item.locked ? 'fas fa-lock' : 'fas fa-lock-open';
+            lockButton.appendChild(lockIcon);
 
-        // --- Function to populate the character sheet ---
-        function populateCharacterSheet(listItem) {
-            if (!listItem) {
-                clearCharacterSheet();
-                return;
+            // Name
+            const itemText = document.createElement('span');
+            itemText.className = 'item-text';
+            itemText.textContent = item.name;
+
+            // Status icons
+            const statusIcons = document.createElement('div');
+            statusIcons.className = 'status-icons';
+            if (item.status === 'down') {
+                const icon = document.createElement('i');
+                icon.className = 'fas fa-skull';
+                statusIcons.appendChild(icon);
             }
 
-            const name = listItem.querySelector('.item-text').textContent;
-            const currentHp = listItem.getAttribute('data-current-hp');
-            const mp = listItem.getAttribute('data-mp');
-            const ac = listItem.getAttribute('data-ac');
-            const speed = listItem.getAttribute('data-speed');
-            const modifier = listItem.getAttribute('data-modifier');
-            const statusString = listItem.getAttribute('data-status');
+            // Initiative score
+            const initiativeScore = document.createElement('span');
+            initiativeScore.className = 'initiative-score';
+            initiativeScore.textContent = item.initiative;
 
-            let statusObj;
-            try {
-                statusObj = JSON.parse(statusString);
-            } catch (e) {
-                console.error("Error parsing status JSON for", name, ":", e);
-                statusObj = {};
-            }
+            // HP
+            const itemHP = document.createElement('span');
+            itemHP.className = 'list-item-hp';
+            itemHP.textContent = `HP: ${item.hp}`;
 
-            sheetTitle.textContent = name;
-            sheetCurrentHp.textContent = currentHp;
-            sheetMp.textContent = mp;
-            sheetAc.textContent = ac;
-            sheetSpeed.textContent = speed;
-            sheetModifier.value = modifier;
-            characterSheet.style.display = 'flex';
+            // Remove button
+            const removeButton = document.createElement('button');
+            removeButton.className = 'remove-button';
+            removeButton.textContent = 'Remove';
 
-            statusCheckboxes.forEach(checkbox => {
-                const statusKey = checkbox.id.replace('status-', '');
-                checkbox.checked = statusObj[statusKey] || false;
-            });
+            // Append elements to list item
+            li.appendChild(handle);
+            li.appendChild(lockButton);
+            li.appendChild(itemText);
+            li.appendChild(statusIcons);
+            li.appendChild(itemHP);
+            li.appendChild(initiativeScore);
+            li.appendChild(removeButton);
 
-            modifierCheckboxes.forEach(checkbox => {
-                const modifierKey = checkbox.id.replace('modifier-', '');
-                checkbox.checked = statusObj[modifierKey] || false;
-            });
-        }
-
-        // --- Update the highlighted list item and character sheet ---
-        function updateHighlight(newIndex) {
-            const listItems = sortableList.querySelectorAll('li');
-            listItems.forEach((item, index) => {
-                if (index === newIndex) {
-                    item.classList.add('highlighted');
-                    populateCharacterSheet(item);
-                } else {
-                    item.classList.remove('highlighted');
-                }
-            });
-
-            highlightedIndex = newIndex;
-            if (highlightedIndex === null || highlightedIndex === -1) {
-                clearCharacterSheet();
-                turnCounter.textContent = 'Turn: --';
-            } else {
-                turnCounter.textContent = `Turn: ${highlightedIndex + 1}`;
-            }
-
-            saveState();
-        }
-
-        // --- Function to update the round counter display ---
-        function updateRoundCounter() {
-            roundCounter.textContent = `Round: ${currentRound}`;
-        }
-        
-        // --- Helper function to create a new list item HTML element (SAFE) ---
-        // This version uses textContent to prevent XSS attacks from user input.
-        function createListItemElement(nameText, initiativeValue, currentHp = 10, mp = 10, ac = 0, speed = 0, modifier = 0, statusObj = null, isLocked = false) {
-            const listItem = document.createElement('li');
-            
-            // Safe way to add inner HTML for non-user content
-            const lockIconClass = isLocked ? 'fa-lock' : 'fa-lock-open';
-            const lockButtonClass = isLocked ? 'item-lock-button locked' : 'item-lock-button';
-            listItem.innerHTML = `
-                <span class="handle"><i class="fa-solid fa-grip-lines"></i></span>
-                <button class="${lockButtonClass}"><i class="fa-solid ${lockIconClass}"></i></button>
-                <span class="item-text"></span>
-                <span class="status-icons"></span>
-                <span class="initiative-score"></span>
-                <span class="list-item-hp"></span>
-                <button class="remove-button">X</button>
-            `;
-            
-            // Set user-provided text content safely
-            listItem.querySelector('.item-text').textContent = nameText;
-            updateListItem(listItem, 'initiative', initiativeValue);
-            updateListItem(listItem, 'current-hp', currentHp);
-            listItem.setAttribute('data-mp', mp);
-            listItem.setAttribute('data-ac', ac);
-            listItem.setAttribute('data-speed', speed);
-            listItem.setAttribute('data-modifier', modifier);
-            listItem.setAttribute('data-locked', isLocked ? 'true' : 'false');
-            
-            if (statusObj === null) {
-                statusObj = {
-                    "poisoned": false, "burning": false, "immobile": false,
-                    "ko": false, "dead": false, "advantage": false,
-                    "disadvantage": false
-                };
-            }
-            const statusJson = JSON.stringify(statusObj);
-            listItem.setAttribute('data-status', statusJson);
-            updateStatusIcons(listItem, statusObj);
-            
-            return listItem;
-        }
-
-        // --- Function to Save the Current State to localStorage ---
-        function saveState() {
-            const items = [];
-            sortableList.querySelectorAll('li').forEach(listItem => {
-                const name = listItem.querySelector('.item-text').textContent;
-                const initiative = listItem.getAttribute('data-initiative');
-                const currentHp = listItem.getAttribute('data-current-hp');
-                const mp = listItem.getAttribute('data-mp');
-                const ac = listItem.getAttribute('data-ac');
-                const speed = listItem.getAttribute('data-speed');
-                const modifier = listItem.getAttribute('data-modifier');
-                const status = listItem.getAttribute('data-status');
-                const isLocked = listItem.getAttribute('data-locked');
-                // Sanitize the name before saving
-                items.push({ name: sanitizeInput(name), initiative, currentHp, mp, ac, speed, modifier, status, isLocked });
-            });
-            localStorage.setItem('rpgEncounterList', JSON.stringify(items));
-            localStorage.setItem('rpgEncounterRound', currentRound);
-            localStorage.setItem('rpgEncounterTurn', highlightedIndex);
-        }
-
-        // --- Function to Load the State from localStorage ---
-        function loadState() {
-            const savedList = localStorage.getItem('rpgEncounterList');
-            const savedRound = localStorage.getItem('rpgEncounterRound');
-            const savedTurn = localStorage.getItem('rpgEncounterTurn');
-
-            if (savedList) {
-                try {
-                    const items = JSON.parse(savedList);
-                    sortableList.innerHTML = '';
-                    items.forEach(item => {
-                        let statusObj = {};
-                        try {
-                            statusObj = item.status ? JSON.parse(item.status) : {};
-                        } catch (e) {
-                            console.error("Error parsing status JSON for item during load:", item.name, e);
-                        }
-                        const listItem = createListItemElement(item.name, item.initiative, item.currentHp, item.mp, item.ac, item.speed, item.modifier, statusObj, item.isLocked === 'true');
-                        sortableList.appendChild(listItem);
-                    });
-                } catch (e) {
-                    console.error("Error loading or parsing entire list from localStorage:", e);
-                    localStorage.removeItem('rpgEncounterList');
-                    sortableList.innerHTML = '';
-                }
-            } else {
-                sortableList.innerHTML = '';
-            }
-
-            if (savedRound) {
-                currentRound = parseInt(savedRound, 10);
-            } else {
-                currentRound = 1;
-            }
-
-            if (savedTurn && savedTurn !== '-1') {
-                highlightedIndex = parseInt(savedTurn, 10);
-                if (highlightedIndex >= sortableList.children.length) {
-                    highlightedIndex = -1;
-                }
-            } else {
-                highlightedIndex = -1;
-            }
-
-            updateRoundCounter();
-            updateHighlight(highlightedIndex);
-        }
-
-        // --- Function to Start Editing a Span (using modern selection API) ---
-        function startEditing(element) {
-            const listItem = document.querySelector('.highlighted');
-            if (!listItem || listItem.getAttribute('data-locked') === 'true') {
-                return;
-            }
-            element.setAttribute('contenteditable', 'true');
-            element.focus();
-
-            // Modern way to select all content
-            const range = document.createRange();
-            range.selectNodeContents(element);
-            const selection = window.getSelection();
-            selection.removeAllRanges();
-            selection.addRange(range);
-        }
-
-        // --- Function to Add a New List Item ---
-        function addListItem() {
-            const nameText = newItemText.value.trim();
-            const initiativeValue = newItemInitiative.value.trim();
-
-            if (nameText.length > 0 && initiativeValue.length > 0) {
-                const sanitizedName = sanitizeInput(nameText);
-                const listItem = createListItemElement(sanitizedName, initiativeValue);
-                sortableList.appendChild(listItem);
-                newItemText.value = '';
-                newItemInitiative.value = '';
-                newItemText.focus();
-                saveState();
-            } else {
-                console.error("Failed to add character: Name or Initiative is missing.");
-            }
-        }
-
-        // --- Event listeners for adding items ---
-        addItemButton.addEventListener('click', addListItem);
-        newItemText.addEventListener('keypress', function (event) {
-            if (event.key === 'Enter') addListItem();
-        });
-        newItemInitiative.addEventListener('keypress', function (event) {
-            if (event.key === 'Enter') addListItem();
-        });
-
-        // --- Event handler for list item clicks ---
-        function handleListItemClick(event) {
-            const clickedListItem = event.target.closest('li');
-            if (!clickedListItem) return;
-
-            if (event.target.closest('.remove-button')) {
-                handleRemoveButtonClick(clickedListItem);
-            } else if (event.target.closest('.item-lock-button')) {
-                handleLockButtonClick(clickedListItem);
-            } else {
-                const newIndex = Array.from(sortableList.children).indexOf(clickedListItem);
-                updateHighlight(newIndex);
-            }
-        }
-
-        // --- Event handler for remove button clicks ---
-        function handleRemoveButtonClick(listItem) {
-            const wasHighlighted = listItem.classList.contains('highlighted');
-            const indexToRemove = Array.from(sortableList.children).indexOf(listItem);
-            sortableList.removeChild(listItem);
-
-            if (wasHighlighted) {
-                if (indexToRemove < highlightedIndex) {
-                    highlightedIndex--;
-                } else if (indexToRemove === highlightedIndex) {
-                    highlightedIndex = -1;
-                }
-            }
-            saveState();
-            updateHighlight(highlightedIndex);
-        }
-
-        // --- Event handler for lock button clicks ---
-        function handleLockButtonClick(listItem) {
-            const isLocked = listItem.getAttribute('data-locked') === 'true';
-            const lockIcon = listItem.querySelector('.item-lock-button i');
-            const lockButton = listItem.querySelector('.item-lock-button');
-            
-            listItem.setAttribute('data-locked', !isLocked);
-
-            if (isLocked) {
-                lockIcon.classList.remove('fa-lock');
-                lockIcon.classList.add('fa-lock-open');
-                lockButton.classList.remove('locked');
-            } else {
-                lockIcon.classList.remove('fa-lock-open');
-                lockIcon.classList.add('fa-lock');
-                lockButton.classList.add('locked');
-            }
-            saveState();
-        }
-
-        // --- Event handler for blur on editable fields ---
-        function handleEditableBlur(event) {
-            const targetElement = event.target;
-            const listItem = document.querySelector('.highlighted');
-
-            if (event.target.closest('li')) { // Handling inline edits
-                const initiativeElement = event.target.closest('.initiative-score');
-                if (initiativeElement) {
-                    const newInitiative = parseInt(initiativeElement.textContent) || 0;
-                    event.target.closest('li').setAttribute('data-initiative', newInitiative);
-                    initiativeElement.removeAttribute('contenteditable');
-                    saveState();
+            // Event listeners for the item
+            li.addEventListener('click', (e) => {
+                if (e.target.closest('.remove-button') || e.target.closest('.item-lock-button')) {
+                    // Clicks on remove or lock button are handled separately
                     return;
                 }
+                selectItem(item.id);
+            });
+
+            lockButton.addEventListener('click', () => toggleLock(item.id));
+            removeButton.addEventListener('click', () => removeItem(item.id));
+
+            return li;
+        }
+
+        // Function to add a new item to the list
+        function addItem() {
+            const name = itemNameInput.value.trim();
+            const initiative = parseInt(itemInitiativeInput.value, 10);
+            const hp = parseInt(itemHPInput.value, 10);
+
+            if (!name) {
+                showModal('Name is required.');
+                return;
             }
-
-
-            if (!listItem || listItem.getAttribute('data-locked') === 'true') {
-                populateCharacterSheet(listItem);
-                targetElement.removeAttribute('contenteditable');
+            if (isNaN(initiative)) {
+                showModal('Initiative must be a number.');
+                return;
+            }
+            if (isNaN(hp)) {
+                showModal('HP must be a number.');
                 return;
             }
 
-            let newValue = targetElement.textContent.trim();
-            let sanitizedValue = sanitizeInput(newValue);
+            const newItem = {
+                id: itemIdCounter++,
+                name,
+                initiative,
+                hp,
+                maxHp: hp,
+                status: 'normal',
+                locked: false
+            };
 
-            if (targetElement.id === 'sheet-current-hp') {
-                updateListItem(listItem, 'current-hp', parseInt(sanitizedValue) || 0);
-            } else if (targetElement.id === 'sheet-mp') {
-                updateListItem(listItem, 'mp', parseInt(sanitizedValue) || 0);
-            } else if (targetElement.id === 'sheet-ac') {
-                updateListItem(listItem, 'ac', parseInt(sanitizedValue) || 0);
-            } else if (targetElement.id === 'sheet-speed') {
-                updateListItem(listItem, 'speed', parseInt(sanitizedValue) || 0);
-            }
+            items.push(newItem);
+            renderList();
 
-            targetElement.removeAttribute('contenteditable');
-            saveState();
+            // Clear inputs
+            itemNameInput.value = '';
+            itemInitiativeInput.value = '';
+            itemHPInput.value = '';
+            itemNameInput.focus();
         }
 
-        // --- Event handler for number control buttons (+/-) ---
-        function handleNumberButtonClick(event) {
-            const button = event.target.closest('.number-btn');
-            if (!button) return;
-
-            const highlightedItem = document.querySelector('.highlighted');
-            if (!highlightedItem || highlightedItem.getAttribute('data-locked') === 'true') {
-                return;
+        // Function to remove an item from the list
+        function removeItem(id) {
+            const itemIndex = items.findIndex(item => item.id === id);
+            if (itemIndex > -1) {
+                items.splice(itemIndex, 1);
+                // Adjust turn index if the removed item was before the current turn
+                if (itemIndex < currentTurnIndex) {
+                    currentTurnIndex--;
+                }
+                renderList();
             }
-
-            const targetId = button.getAttribute('data-target');
-            const targetElement = document.getElementById(targetId);
-
-            let currentValue;
-            if (targetElement.tagName === 'SPAN') {
-                currentValue = parseInt(targetElement.textContent);
-            } else if (targetElement.tagName === 'INPUT') {
-                currentValue = parseInt(targetElement.value);
-            }
-
-            if (isNaN(currentValue)) currentValue = 0;
-            if (button.classList.contains('increment')) currentValue++;
-            else if (button.classList.contains('decrement')) currentValue--;
-
-            if (targetElement.tagName === 'SPAN') {
-                targetElement.textContent = currentValue;
-            } else if (targetElement.tagName === 'INPUT') {
-                targetElement.value = currentValue;
-            }
-
-            if (targetId === 'sheet-current-hp') {
-                updateListItem(highlightedItem, 'current-hp', currentValue);
-            } else if (targetId === 'sheet-mp') {
-                updateListItem(highlightedItem, 'mp', currentValue);
-            } else if (targetId === 'sheet-modifier') {
-                updateListItem(highlightedItem, 'modifier', currentValue);
-            }
-
-            saveState();
         }
 
-        // --- Event Listeners for Turn Controls ---
+        // Function to toggle the lock state of an item
+        function toggleLock(id) {
+            const item = items.find(i => i.id === id);
+            if (item) {
+                item.locked = !item.locked;
+                renderList();
+            }
+        }
+
+        // Function to select an item and display its details in the character sheet
+        function selectItem(id) {
+            const selectedItem = items.find(item => item.id === id);
+            if (selectedItem) {
+                characterSheetCard.style.display = 'flex';
+                sheetName.textContent = selectedItem.name;
+                sheetInitiative.textContent = selectedItem.initiative;
+                sheetHP.textContent = selectedItem.hp;
+                sheetHP.dataset.itemId = selectedItem.id;
+
+                // Highlight the selected item in the list
+                document.querySelectorAll('.sortable-list li').forEach(li => {
+                    li.classList.remove('highlighted');
+                    if (parseInt(li.dataset.id) === id) {
+                        li.classList.add('highlighted');
+                    }
+                });
+            }
+        }
+
+        // Function to update the HP of a selected character
+        function updateHP(value) {
+            const itemId = sheetHP.dataset.itemId;
+            if (itemId) {
+                const item = items.find(i => i.id === parseInt(itemId));
+                if (item) {
+                    item.hp += value;
+                    if (item.hp <= 0) {
+                        item.status = 'down';
+                    } else {
+                        item.status = 'normal';
+                    }
+                    sheetHP.textContent = item.hp;
+                    renderList();
+                }
+            }
+        }
+
+        // Function to update HP directly from contenteditable span
+        sheetHP.addEventListener('input', () => {
+            const itemId = sheetHP.dataset.itemId;
+            if (itemId) {
+                const item = items.find(i => i.id === parseInt(itemId));
+                if (item) {
+                    const newHP = parseInt(sheetHP.textContent, 10);
+                    if (!isNaN(newHP)) {
+                        item.hp = newHP;
+                        if (item.hp <= 0) {
+                            item.status = 'down';
+                        } else {
+                            item.status = 'normal';
+                        }
+                        renderList();
+                    }
+                }
+            }
+        });
+
+        // Function to render the entire list
+        function renderList() {
+            sortableList.innerHTML = '';
+            items.forEach((item, index) => {
+                const li = renderItem(item);
+                if (index === currentTurnIndex) {
+                    li.classList.add('highlighted');
+                }
+                sortableList.appendChild(li);
+            });
+            updateTurnInfo();
+        }
+
+        // Function to sort the list by initiative
+        function sortList() {
+            items.sort((a, b) => b.initiative - a.initiative);
+            currentTurnIndex = 0;
+            currentRound = 1;
+            renderList();
+        }
+
+        // Function to advance the turn
         function nextTurn() {
-            const listItems = sortableList.querySelectorAll('li');
-            if (listItems.length === 0) return;
-            highlightedIndex++;
-            if (highlightedIndex >= listItems.length) {
-                highlightedIndex = 0;
+            if (items.length === 0) {
+                return;
+            }
+            // Move the current highlighted class
+            const currentItem = document.querySelector('.sortable-list li.highlighted');
+            if (currentItem) {
+                currentItem.classList.remove('highlighted');
+            }
+
+            currentTurnIndex = (currentTurnIndex + 1) % items.length;
+
+            if (currentTurnIndex === 0) {
                 currentRound++;
             }
-            updateHighlight(highlightedIndex);
-            updateRoundCounter();
-        }
 
-        function prevTurn() {
-            const listItems = sortableList.querySelectorAll('li');
-            if (listItems.length === 0) return;
-            highlightedIndex--;
-            if (highlightedIndex < 0) {
-                currentRound--;
-                if (currentRound < 1) {
-                    currentRound = 1;
-                    highlightedIndex = -1; // Reset turns completely
-                    updateHighlight(highlightedIndex);
-                    updateRoundCounter();
-                    return;
-                }
-                highlightedIndex = listItems.length - 1;
+            // Highlight the new current item
+            const nextItem = document.querySelector(`.sortable-list li[data-id="${items[currentTurnIndex].id}"]`);
+            if (nextItem) {
+                nextItem.classList.add('highlighted');
             }
-            updateHighlight(highlightedIndex);
-            updateRoundCounter();
+
+            updateTurnInfo();
         }
 
-        function resetTurns() {
-            showConfirmationModal("Are you sure you want to reset the turns and round counter?").then(result => {
-                if (result) {
-                    currentRound = 1;
-                    highlightedIndex = -1;
-                    updateHighlight(highlightedIndex);
-                    updateRoundCounter();
-                    saveState();
+        // Function to reset the tracker
+        function resetTracker() {
+            items = [];
+            currentTurnIndex = 0;
+            currentRound = 1;
+            renderList();
+        }
+
+        // Function to update turn and round information display
+        function updateTurnInfo() {
+            turnInfo.textContent = `Turn: ${currentTurnIndex + 1}`;
+            roundInfo.textContent = `Round: ${currentRound}`;
+        }
+
+        // Event listeners for the main buttons
+        addItemButton.addEventListener('click', addItem);
+        sortButton.addEventListener('click', sortList);
+        nextTurnButton.addEventListener('click', nextTurn);
+        resetButton.addEventListener('click', resetTracker);
+
+        // Add item on Enter key press
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                if (document.activeElement === itemNameInput || document.activeElement === itemInitiativeInput || document.activeElement === itemHPInput) {
+                    addItem();
                 }
-            });
-        }
-
-        function sortInitiative() {
-            const listItems = Array.from(sortableList.children);
-            const sortedItems = listItems.sort((a, b) => {
-                const initA = parseInt(a.getAttribute('data-initiative')) || 0;
-                const initB = parseInt(b.getAttribute('data-initiative')) || 0;
-                return initB - initA; // Sort in descending order
-            });
-
-            sortableList.innerHTML = '';
-            sortedItems.forEach(item => sortableList.appendChild(item));
-            highlightedIndex = -1;
-            updateHighlight(highlightedIndex);
-            saveState();
-        }
-        
-        async function clearAllItems() {
-            const result = await showConfirmationModal("Are you sure you want to clear all characters from the list?");
-            if (result) {
-                sortableList.innerHTML = '';
-                currentRound = 1;
-                highlightedIndex = -1;
-                updateHighlight(highlightedIndex);
-                updateRoundCounter();
-                saveState();
             }
-        }
+        });
 
-        // --- Dice Roller functions ---
-        function rollDice() {
-            const numDice = parseInt(numDiceInput.value) || 1;
-            const dieType = parseInt(dieTypeSelect.value) || 20;
-            const modifier = parseInt(rollModifierInput.value) || 0;
-            const rollType = document.querySelector('input[name="roll-type"]:checked').value;
+        // Initialize SortableJS
+        new Sortable(sortableList, {
+            handle: '.handle',
+            animation: 150,
+            onUpdate: function (evt) {
+                // Reorder the items array to match the new DOM order
+                const newOrder = Array.from(evt.from.children).map(li => parseInt(li.dataset.id));
+                const reorderedItems = newOrder.map(id => items.find(item => item.id === id));
+                items = reorderedItems;
+                // Find the new index of the current turn item
+                const currentItemId = items[currentTurnIndex].id;
+                currentTurnIndex = items.findIndex(item => item.id === currentItemId);
+                renderList();
+            }
+        });
+
+        // DICE ROLLER LOGIC
+        rollDiceButton.addEventListener('click', () => {
+            const diceCount = parseInt(diceCountInput.value, 10);
+            const diceType = parseInt(diceTypeSelect.value, 10);
+            const modifier = parseInt(modifierInput.value, 10);
+            const isAdvantage = rollTypeAdvantage.checked;
+            const isDisadvantage = rollTypeDisadvantage.checked;
             const invertD100 = invertD100Checkbox.checked;
 
+            if (isNaN(diceCount) || diceCount < 1) {
+                showModal("Please enter a valid number of dice.");
+                return;
+            }
+
             let rolls = [];
-            for (let i = 0; i < numDice; i++) {
-                rolls.push(Math.floor(Math.random() * dieType) + 1);
-            }
-
             let total = 0;
-            let displayRolls = '';
 
-            if (rollType === 'normal' || dieType !== 100) {
-                total = rolls.reduce((sum, roll) => sum + roll, 0);
-                displayRolls = rolls.join(', ');
-            } else { // Advantage / Disadvantage for d100
-                rolls = rolls.sort((a, b) => a - b);
-                if (rollType === 'advantage') {
-                    if (invertD100) {
-                        total = rolls[0];
-                    } else {
-                        total = rolls[rolls.length - 1];
-                    }
-                } else if (rollType === 'disadvantage') {
-                    if (invertD100) {
-                        total = rolls[rolls.length - 1];
-                    } else {
-                        total = rolls[0];
-                    }
+            if (isAdvantage || isDisadvantage) {
+                // For Advantage/Disadvantage, always roll two dice
+                let roll1 = Math.floor(Math.random() * diceType) + 1;
+                let roll2 = Math.floor(Math.random() * diceType) + 1;
+                rolls.push(roll1, roll2);
+
+                if (isAdvantage) {
+                    total = Math.max(roll1, roll2);
+                } else { // Disadvantage
+                    total = Math.min(roll1, roll2);
                 }
-                displayRolls = rolls.join(', ');
-            }
-
-            total += modifier;
-
-            rollResults.textContent = `Rolls: ${displayRolls}`;
-            rollTotal.textContent = `Total: ${total}`;
-        }
-        
-        // --- Event listeners for Dice Roller ---
-        toggleDiceRollerButton.addEventListener('click', () => {
-            diceRollerCard.classList.toggle('hidden');
-        });
-        
-        rollDiceButton.addEventListener('click', rollDice);
-
-        // --- Main Event Listener for delegation ---
-        document.addEventListener('click', function(event) {
-            const highlightedItem = document.querySelector('.highlighted');
-
-            // Handle edit buttons on the character sheet
-            if (event.target.closest('.number-btn')) {
-                handleNumberButtonClick(event);
-            }
-
-            // Handle checkbox changes
-            if (event.target.closest('.status-checkbox') || event.target.closest('.modifier-checkbox')) {
-                const targetCheckbox = event.target;
-                const statusKey = targetCheckbox.id.replace('status-', '').replace('modifier-', '');
-
-                if (highlightedItem && highlightedItem.getAttribute('data-locked') !== 'true') {
-                    const statusString = highlightedItem.getAttribute('data-status');
-                    let statusObj;
-                    try {
-                        statusObj = JSON.parse(statusString);
-                    } catch (e) {
-                        statusObj = {};
-                    }
-
-                    statusObj[statusKey] = targetCheckbox.checked;
-
-                    updateListItem(highlightedItem, 'status', JSON.stringify(statusObj));
-                    saveState();
-                } else {
-                    targetCheckbox.checked = !targetCheckbox.checked; // Revert the check if no item is highlighted or item is locked
+                
+                // Add modifier
+                total += modifier;
+            } else { // Normal roll or multiple dice
+                for (let i = 0; i < diceCount; i++) {
+                    const roll = Math.floor(Math.random() * diceType) + 1;
+                    rolls.push(roll);
+                    total += roll;
                 }
+                
+                // Add modifier
+                total += modifier;
             }
+
+            // Invert logic for d100
+            if (invertD100 && diceType === 100) {
+                // Roll a d100 normally
+                const d100Roll = Math.floor(Math.random() * 100) + 1;
+                rolls = [d100Roll];
+                total = d100Roll + modifier;
+            }
+
+            diceOutput.innerHTML = `
+                <p>Rolls: ${rolls.join(', ')}</p>
+                <p>Total: ${total}</p>
+            `;
         });
-
-        document.addEventListener('dblclick', function(event) {
-            const target = event.target;
-            if (target.classList.contains('item-text') || target.classList.contains('initiative-score') || target.classList.contains('editable-field')) {
-                startEditing(target);
-            }
-        });
-
-        document.addEventListener('blur', function(event) {
-            if (event.target.classList.contains('editable-field') || event.target.classList.contains('item-text') || event.target.classList.contains('initiative-score')) {
-                handleEditableBlur(event);
-            }
-        }, true); // Use capture phase to ensure this runs before other blur events
-
-        // Initialize event listeners for turn controls and other buttons
-        sortableList.addEventListener('click', handleListItemClick);
-        sortInitiativeButton.addEventListener('click', sortInitiative);
-        nextTurnButton.addEventListener('click', nextTurn);
-        prevTurnButton.addEventListener('click', prevTurn);
-        resetTurnButton.addEventListener('click', resetTurns);
-        clearAllButton.addEventListener('click', clearAllItems);
-        
-        // Initial load
-        loadState();
     </script>
 </body>
 </html>
