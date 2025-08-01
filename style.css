@@ -413,7 +413,7 @@ label {
 }
 /* Ensure labels within the dice roller are a high-contrast color */
 .dice-roller-card label {
-    color: var(--off-white);
+    color: var(--dark-gray); /* Corrected from --off-white to a darker color for contrast on the card's background */
 }
 
 /* Custom Modal Styling */
