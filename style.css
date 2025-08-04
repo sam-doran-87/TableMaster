@@ -1,37 +1,39 @@
 /* Color Palette Variables (Refined for better appeal) */
 :root {
-    --primary-bg: #f8f9fa; /* Light background for cards/sections */
-    --secondary-bg: #e9ecef; /* Slightly darker background for accents/controls */
-    --border-color: #dee2e6; /* Soft border color */
-    --text-dark: #343a40; /* Dark text for main content */
-    --text-medium: #6c757d; /* Medium gray for labels/subtle text */
-    --text-light: #adb5bd; /* Light gray for handles/less prominent text */
+    /* Sophisticated Palette */
+    --dark-gray: #1a202c;
+    --off-white: #f7fafc;
+    --light-gray: #e2e8f0;
+    --border-gray: #cbd5e0;
+    
+    /* Accent Colors for Buttons */
+    --primary-blue: #4299e1;
+    --primary-blue-dark: #3182ce;
+    --primary-purple: #9f7aea;
+    --primary-purple-dark: #805ad5;
+    --danger-red: #e53e3e;
+    --danger-red-dark: #c53030;
 
-    --button-primary: #007bff; /* Blue for main actions */
-    --button-primary-hover: #0056b3;
-    --button-success: #28a745; /* Green for Add Character */
-    --button-success-hover: #218838;
-    --button-danger: #dc3545; /* Red for Remove */
-    --button-danger-hover: #c82333;
-    --button-accent: #6f42c1; /* Purple for Turn controls */
-    --button-accent-hover: #5a2e9e;
-    --button-reset: #6c757d; /* Gray for Reset buttons */
-    --button-reset-hover: #5a6268;
+    /* Common Styling */
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+    --border-radius: 8px;
+    --font-inter: 'Inter', sans-serif;
 
-    --highlight-color: #ffc107; /* Bright yellow for highlights */
-    --highlight-bg: #fffbe6;
-    --highlight-border: #ffcc00;
-
-    --card-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    /* New variables for consistent card/background colors */
+    --card-bg: var(--off-white);
+    --body-bg: var(--light-gray); /* Lighter gray background for the body */
+    --input-bg: var(--off-white);
+    --button-text-light: var(--off-white); /* For buttons with dark backgrounds */
+    --button-text-dark: var(--dark-gray); /* For buttons with light backgrounds */
 }
 
 /* Base and Layout Styles */
 body {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-inter);
     margin: 0;
     padding: 20px;
-    background-color: #f0f2f5;
-    color: var(--text-dark);
+    background-color: var(--body-bg); /* Using new variable */
+    color: var(--dark-gray); /* Default text color */
     line-height: 1.6;
     display: flex;
     justify-content: center;
@@ -41,7 +43,7 @@ body {
 
 h1 {
     text-align: center;
-    color: var(--text-dark);
+    color: var(--dark-gray);
     margin-bottom: 25px;
     font-weight: 700;
     font-size: 2.5rem;
@@ -55,7 +57,7 @@ h1 {
     gap: 30px;
 }
 
-/* Fix for the main content layout */
+/* Main content layout */
 .main-content {
     display: flex;
     flex-direction: column; /* Default to column on smaller screens */
@@ -65,10 +67,10 @@ h1 {
 /* Card Styling */
 .encounter-tracker-card,
 .character-sheet-card,
-.dice-roller-card { /* Added dice-roller-card */
-    background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: var(--card-shadow);
+.dice-roller-card {
+    background-color: var(--card-bg); /* Using new variable */
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
     padding: 25px;
 }
 
@@ -83,10 +85,12 @@ h1 {
 #newItemText,
 #newItemInitiative {
     padding: 12px 15px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border: 1px solid var(--border-gray);
+    border-radius: var(--border-radius);
     font-size: 1rem;
     flex-grow: 1;
+    background-color: var(--input-bg); /* Using new variable */
+    color: var(--dark-gray);
 }
 #newItemInitiative {
     max-width: 120px;
@@ -96,25 +100,24 @@ h1 {
 button {
     padding: 12px 20px;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--border-radius);
     cursor: pointer;
     font-size: 1rem;
     font-weight: 600;
     transition: background-color 0.2s ease, transform 0.1s ease;
     flex-shrink: 0;
+    color: var(--button-text-light); /* Default button text color */
 }
 
 #addItemButton {
-    background-color: var(--button-success);
-    color: white;
+    background-color: var(--primary-blue); /* Changed to primary blue */
 }
-#addItemButton:hover { background-color: var(--button-success-hover); }
+#addItemButton:hover { background-color: var(--primary-blue-dark); }
 
 .sort-button {
-    background-color: var(--button-primary);
-    color: white;
+    background-color: var(--primary-purple); /* Changed to primary purple */
 }
-.sort-button:hover { background-color: var(--button-primary-hover); }
+.sort-button:hover { background-color: var(--primary-purple-dark); }
 
 /* Initiative List Styles */
 .sortable-list {
@@ -123,30 +126,30 @@ button {
     margin: 20px 0 0 0;
 }
 
-/* Fix for the list item layout */
 .sortable-list li {
-    background-color: var(--secondary-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+    background-color: var(--input-bg); /* Changed to input background */
+    border: 1px solid var(--border-gray);
+    border-radius: var(--border-radius);
     padding: 15px;
     margin-bottom: 10px;
-    display: flex; /* Corrected: use flexbox for horizontal layout */
+    display: flex;
     align-items: center;
     gap: 15px;
     cursor: pointer;
     transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+    color: var(--dark-gray); /* Ensure text is dark */
 }
 
 .sortable-list li:hover:not(.highlighted) {
-    background-color: var(--border-color);
+    background-color: var(--light-gray); /* Lighter hover */
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--box-shadow);
 }
 
 .sortable-list li.highlighted {
-    background-color: var(--highlight-bg);
-    border-color: var(--highlight-border);
-    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+    background-color: var(--light-gray); /* Highlighted background */
+    border-color: var(--primary-blue); /* Highlighted border */
+    box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3); /* Blue shadow */
     transform: scale(1.01);
     z-index: 1;
 }
@@ -165,8 +168,8 @@ button {
 }
 .initiative-score {
     font-weight: 700;
-    color: var(--button-primary);
-    background-color: var(--secondary-bg);
+    color: var(--primary-blue);
+    background-color: var(--light-gray); /* Consistent light background */
     padding: 5px 10px;
     border-radius: 5px;
     flex-shrink: 0;
@@ -180,12 +183,12 @@ button {
 /* Delete Button */
 .remove-button {
     background-color: transparent;
-    color: var(--button-danger);
+    color: var(--danger-red);
     font-weight: 700;
     font-size: 1rem;
     padding: 5px 10px;
 }
-.remove-button:hover { background-color: var(--border-color); }
+.remove-button:hover { background-color: var(--light-gray); }
 
 /* Lock Button */
 .item-lock-button {
@@ -198,15 +201,15 @@ button {
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 5px; /* Added for background color */
+    border-radius: 5px;
     transition: background-color 0.2s ease;
 }
 /* 1. Lock icon contrast fix */
 .sortable-list li[data-locked="true"] .item-lock-button {
-    background-color: var(--text-dark); /* Dark background for locked state */
-    color: white; /* Ensure icon is white */
+    background-color: var(--dark-gray); /* Dark background for locked state */
+    color: var(--off-white); /* Ensure icon is light */
 }
-.item-lock-button:hover { color: var(--text-dark); }
+.item-lock-button:hover { color: var(--dark-gray); }
 
 
 /* Turn Controls */
@@ -231,27 +234,27 @@ button {
     justify-content: center;
 }
 .turn-button {
-    background-color: var(--button-accent);
-    color: white;
+    background-color: var(--primary-purple); /* Consistent purple accent */
+    color: var(--button-text-light);
     width: auto;
     flex-grow: 1;
 }
-.turn-button:hover { background-color: var(--button-accent-hover); }
+.turn-button:hover { background-color: var(--primary-purple-dark); }
 
 #roundCounter, #turnCounter {
     font-weight: 600;
     font-size: 1.2rem;
-    color: var(--text-dark);
+    color: var(--dark-gray);
 }
 
 /* Reset Button (Consistent Sizing) */
 .reset-button {
-    background-color: var(--button-reset);
-    color: white;
+    background-color: var(--border-gray); /* Using border-gray for reset */
+    color: var(--dark-gray); /* Dark text for contrast */
     flex-grow: 1;
     width: auto;
 }
-.reset-button:hover { background-color: var(--button-reset-hover); }
+.reset-button:hover { background-color: var(--text-medium); } /* Darker gray on hover */
 
 /* Character Sheet Styles */
 .character-sheet-card {
@@ -263,13 +266,14 @@ button {
     text-align: center;
     margin-top: 0;
     margin-bottom: 20px;
+    color: var(--dark-gray);
 }
 
 .sheet-group {
     display: flex;
     gap: 20px;
     margin-bottom: 20px;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-gray);
     padding-bottom: 15px;
 }
 .sheet-group > .sheet-section {
@@ -279,7 +283,7 @@ button {
 }
 .sheet-section {
     margin-bottom: 20px;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-gray);
     padding-bottom: 15px;
 }
 .sheet-section:last-of-type {
@@ -297,19 +301,19 @@ button {
 .editable-field {
     font-weight: 700;
     font-size: 1.25rem;
-    color: var(--text-dark);
+    color: var(--dark-gray);
     padding: 5px 8px;
     border-radius: 4px;
     min-width: 40px;
     text-align: center;
-    background-color: var(--secondary-bg);
+    background-color: var(--light-gray); /* Consistent light background */
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
 .editable-field[contenteditable="true"] {
-    background-color: #fffacd;
-    outline: 2px dashed var(--button-primary);
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    background-color: var(--off-white); /* Lighter edit background */
+    outline: 2px dashed var(--primary-blue);
+    box-shadow: 0 0 5px rgba(66, 153, 225, 0.5);
 }
 
 /* Styles for the new number control buttons */
@@ -328,9 +332,9 @@ button {
     line-height: 1;
     flex-shrink: 0;
     padding: 0;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border-gray);
 }
-.number-control-group .number-btn:hover { background-color: var(--secondary-bg); }
+.number-control-group .number-btn:hover { background-color: var(--light-gray); }
 
 /* Modifier & Status Sections */
 .modifiers-list,
@@ -344,7 +348,7 @@ button {
 .modifiers-list label,
 .status-list label {
     font-weight: 400;
-    color: var(--text-dark);
+    color: var(--dark-gray);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -355,16 +359,18 @@ button {
 .status-checkbox {
     transform: scale(1.2);
     cursor: pointer;
-    accent-color: var(--button-success);
+    accent-color: var(--primary-blue); /* Accent color for checkboxes */
 }
 
 .modifier-input {
     padding: 8px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
+    border: 1px solid var(--border-gray);
+    border-radius: var(--border-radius);
     font-size: 0.9rem;
     width: 80px;
     text-align: center;
+    background-color: var(--input-bg);
+    color: var(--dark-gray);
 }
 
 /* 2. Status Icons in Initiative Tracker */
@@ -379,13 +385,13 @@ button {
     color: var(--text-medium); /* Default icon color */
 }
 /* Specific colors for status icons (optional, but good for clarity) */
-.status-icon-poisoned { color: #28a745; } /* Green */
-.status-icon-burning { color: #dc3545; } /* Red */
-.status-icon-immobile { color: #ffc107; } /* Yellow/Orange */
-.status-icon-ko { color: #6c757d; } /* Gray */
-.status-icon-dead { color: #343a40; } /* Darker Gray/Black */
-.status-icon-advantage { color: var(--button-primary); } /* Blue */
-.status-icon-disadvantage { color: var(--button-danger); } /* Red */
+.status-icon-poisoned { color: var(--primary-blue); } /* Blue */
+.status-icon-burning { color: var(--danger-red); } /* Red */
+.status-icon-immobile { color: var(--primary-purple); } /* Purple */
+.status-icon-ko { color: var(--text-medium); } /* Gray */
+.status-icon-dead { color: var(--dark-gray); } /* Darker Gray/Black */
+.status-icon-advantage { color: var(--primary-blue); } /* Blue */
+.status-icon-disadvantage { color: var(--danger-red); } /* Red */
 
 
 /* Responsive Design */
@@ -403,30 +409,30 @@ button {
 
 /* --- Dice Roller Specific Styles --- */
 .toggle-button {
-    background-color: var(--button-primary);
-    color: white;
+    background-color: var(--primary-blue); /* Consistent primary blue */
+    color: var(--button-text-light);
     margin-top: 20px;
-    width: fit-content; /* Adjust width to content */
-    align-self: center; /* Center the button if container is flex column */
-    display: flex; /* Allow icon and text to align */
+    width: fit-content;
+    align-self: center;
+    display: flex;
     align-items: center;
     gap: 8px;
     padding: 12px 25px;
 }
 .toggle-button:hover {
-    background-color: var(--button-primary-hover);
+    background-color: var(--primary-blue-dark);
 }
 
 .dice-roller-card {
-    margin-top: 20px; /* Space from the toggle button */
+    margin-top: 20px;
     display: flex;
     flex-direction: column;
-    align-items: center; /* Center content horizontally */
+    align-items: center;
     gap: 20px;
 }
 
 .dice-roller-card.hidden {
-    display: none; /* Hide the roller by default */
+    display: none;
 }
 
 /* 3. Dice Roller Headline Text Color Fix */
@@ -434,24 +440,26 @@ button {
     font-size: 1.8rem;
     margin-top: 0;
     margin-bottom: 0;
-    color: var(--text-dark); /* Changed to dark text for contrast */
+    color: var(--dark-gray); /* Changed to dark text for contrast */
 }
 
 .dice-input-section {
     display: flex;
     align-items: center;
     gap: 10px;
-    flex-wrap: wrap; /* Allow wrapping on small screens */
-    justify-content: center; /* Center items when wrapped */
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 #num-dice-input {
     width: 60px;
     padding: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border: 1px solid var(--border-gray);
+    border-radius: var(--border-radius);
     font-size: 1rem;
     text-align: center;
+    background-color: var(--input-bg);
+    color: var(--dark-gray);
 }
 
 .dice-x {
@@ -462,17 +470,18 @@ button {
 
 #die-type-select {
     padding: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border: 1px solid var(--border-gray);
+    border-radius: var(--border-radius);
     font-size: 1rem;
-    background-color: white;
+    background-color: var(--input-bg);
+    color: var(--dark-gray);
     cursor: pointer;
 }
 
 /* 3A. Roll Button Contrast Fix */
 #roll-dice-button {
-    background-color: var(--text-dark); /* Dark background for contrast */
-    color: white; /* Ensure text is white */
+    background-color: var(--dark-gray); /* Dark background for contrast */
+    color: var(--off-white); /* Ensure text is light */
     padding: 10px 20px;
 }
 #roll-dice-button:hover {
@@ -480,16 +489,16 @@ button {
 }
 
 .dice-output {
-    background-color: var(--secondary-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+    background-color: var(--light-gray); /* Consistent light background */
+    border: 1px solid var(--border-gray);
+    border-radius: var(--border-radius);
     padding: 15px;
-    min-height: 60px; /* Ensure space for output */
+    min-height: 60px;
     width: 90%;
     max-width: 300px;
     text-align: center;
     font-size: 1.1rem;
-    color: var(--text-dark);
+    color: var(--dark-gray);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -499,7 +508,7 @@ button {
     margin: 5px 0;
 }
 .dice-output strong {
-    color: var(--button-accent);
+    color: var(--primary-purple); /* Consistent accent color */
 }
 
 /* New Dice Modifier Section Styles */
@@ -509,7 +518,7 @@ button {
     gap: 15px;
     margin-top: 15px;
     padding-top: 15px;
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid var(--border-gray);
     width: 100%;
     align-items: center;
 }
@@ -526,10 +535,12 @@ button {
 #roll-modifier {
     width: 70px;
     padding: 8px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
+    border: 1px solid var(--border-gray);
+    border-radius: var(--border-radius);
     font-size: 1rem;
     text-align: center;
+    background-color: var(--input-bg);
+    color: var(--dark-gray);
 }
 
 .roll-type-group {
@@ -544,15 +555,15 @@ button {
     gap: 5px;
     cursor: pointer;
     font-weight: 400;
-    color: var(--text-dark);
+    color: var(--dark-gray);
 }
 .roll-type-group input[type="radio"] {
     transform: scale(1.1);
     cursor: pointer;
-    accent-color: var(--button-primary);
+    accent-color: var(--primary-blue); /* Accent color for radio buttons */
 }
 
-/* Responsive adjustments for dice roller */
+/* Responsive adjustments */
 @media (max-width: 500px) {
     .dice-input-section,
     .dice-modifiers-section,
