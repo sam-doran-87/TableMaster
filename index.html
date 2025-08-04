@@ -6,7 +6,6 @@
     <title>RPG Encounter List</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- Link to the custom style.css file -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -121,32 +120,27 @@
             </div>
         </div>
 
-        <!-- Toggle button for the dice roller, added based on your CSS -->
-        <button id="toggleDiceRoller" class="toggle-button">
-            <i class="fas fa-dice"></i> Dice Roller
-        </button>
+        <!-- Dice Roller Toggle Button -->
+        <button id="toggle-dice-roller-button" class="toggle-button">Dice Roller <i class="fa-solid fa-dice"></i></button>
 
-        <!-- Dice Roller card, added based on your CSS -->
-        <div id="dice-roller-card" class="dice-roller-card hidden">
+        <!-- Dice Roller Container -->
+        <div id="dice-roller-container" class="dice-roller-card hidden">
             <h2>Dice Roller</h2>
             <div class="dice-input-section">
                 <input type="number" id="num-dice-input" value="1" min="1">
                 <span class="dice-x">d</span>
                 <select id="die-type-select">
-                    <option value="4">4</option>
-                    <option value="6">6</option>
-                    <option value="8">8</option>
-                    <option value="10">10</option>
-                    <option value="12">12</option>
-                    <option value="20" selected>20</option>
-                    <option value="100">100</option>
+                    <option value="4">d4</option>
+                    <option value="6">d6</option>
+                    <option value="8">d8</option>
+                    <option value="10">d10</option>
+                    <option value="12">d12</option>
+                    <option value="20">d20</option>
+                    <option value="100">d100</option>
                 </select>
-                <button id="roll-dice-button">Roll!</button>
+                <button id="roll-dice-button">Roll</button>
             </div>
-            <div class="dice-output">
-                <p id="roll-results">Rolls: --</p>
-                <p id="roll-total">Total: --</p>
-            </div>
+
             <div class="dice-modifiers-section">
                 <div class="modifier-input-group">
                     <label for="roll-modifier">Modifier:</label>
@@ -154,42 +148,22 @@
                 </div>
                 <div class="roll-type-group">
                     <label>
-                        <input type="radio" name="roll-type" value="normal" checked>
-                        Normal
+                        <input type="radio" name="roll-type" value="normal" checked> Normal
                     </label>
                     <label>
-                        <input type="radio" name="roll-type" value="advantage">
-                        Advantage
+                        <input type="radio" name="roll-type" value="advantage"> Advantage
                     </label>
                     <label>
-                        <input type="radio" name="roll-type" value="disadvantage">
-                        Disadvantage
+                        <input type="radio" name="roll-type" value="disadvantage"> Disadvantage
                     </label>
                 </div>
-                <!-- START OF NEW CODE -->
-                <div class="invert-d100-group">
-                    <label for="invert-d100-checkbox">
-                        <input type="checkbox" id="invert-d100-checkbox"> Invert for Roll Under
-                        <span class="help-icon" title="Inverts Advantage/Disadvantage for any roll. Advantage becomes picking the lower roll, Disadvantage becomes picking the higher roll. Useful for systems where you want to roll under a target number.">
-                            <i class="fas fa-question-circle"></i>
-                        </span>
-                    </label>
-                </div>
-                <!-- END OF NEW CODE -->
+            </div>
+
+            <div id="dice-roll-output" class="dice-output">
+                <!-- Roll results will be displayed here -->
             </div>
         </div>
 
-    </div>
-    
-    <!-- Custom confirmation modal -->
-    <div id="confirmationModal" class="custom-modal-overlay">
-        <div class="custom-modal-content">
-            <h3 id="modalQuestion"></h3>
-            <div class="modal-buttons">
-                <button id="modalConfirmButton" class="modal-button modal-button-confirm">Confirm</button>
-                <button id="modalCancelButton" class="modal-button modal-button-cancel">Cancel</button>
-            </div>
-        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
@@ -215,61 +189,20 @@
         const sheetModifier = document.getElementById('sheet-modifier');
         const statusCheckboxes = document.querySelectorAll('.status-checkbox');
         const modifierCheckboxes = document.querySelectorAll('.modifier-checkbox');
-        
-        // Dice Roller elements, based on your CSS
-        const toggleDiceRollerButton = document.getElementById('toggleDiceRoller');
-        const diceRollerCard = document.getElementById('dice-roller-card');
+
+        // Dice Roller elements
+        const toggleDiceRollerButton = document.getElementById('toggle-dice-roller-button');
+        const diceRollerContainer = document.getElementById('dice-roller-container');
         const numDiceInput = document.getElementById('num-dice-input');
         const dieTypeSelect = document.getElementById('die-type-select');
         const rollDiceButton = document.getElementById('roll-dice-button');
-        const rollModifierInput = document.getElementById('roll-modifier');
-        const rollResults = document.getElementById('roll-results');
-        const rollTotal = document.getElementById('roll-total');
-        const invertD100Checkbox = document.getElementById('invert-d100-checkbox');
+        const diceRollOutput = document.getElementById('dice-roll-output');
+        const rollModifierInput = document.getElementById('roll-modifier'); // New modifier input
+        const rollTypeRadios = document.querySelectorAll('input[name="roll-type"]'); // New radio buttons
 
-        // Custom Modal elements
-        const confirmationModal = document.getElementById('confirmationModal');
-        const modalQuestion = document.getElementById('modalQuestion');
-        const modalConfirmButton = document.getElementById('modalConfirmButton');
-        const modalCancelButton = document.getElementById('modalCancelButton');
 
         let currentRound = 1;
         let highlightedIndex = -1;
-
-        // --- A simple function to safely sanitize HTML input to prevent XSS ---
-        // This creates a temporary div and sets the text, then retrieves the text back
-        // to ensure it's treated as plain text and not malicious HTML.
-        function sanitizeInput(input) {
-            const tempDiv = document.createElement('div');
-            tempDiv.textContent = input;
-            return tempDiv.innerHTML;
-        }
-
-        // --- Custom confirmation modal to replace window.confirm() ---
-        function showConfirmationModal(message) {
-            return new Promise((resolve) => {
-                modalQuestion.textContent = message;
-                confirmationModal.style.display = 'flex';
-
-                const handleConfirm = () => {
-                    confirmationModal.style.display = 'none';
-                    modalConfirmButton.removeEventListener('click', handleConfirm);
-                    modalCancelButton.removeEventListener('click', handleCancel);
-                    resolve(true);
-                };
-
-                const handleCancel = () => {
-                    confirmationModal.style.display = 'none';
-                    modalConfirmButton.removeEventListener('click', handleConfirm);
-                    modalCancelButton.removeEventListener('click', handleCancel);
-                    resolve(false);
-                };
-
-                modalConfirmButton.addEventListener('click', handleConfirm);
-                modalCancelButton.addEventListener('click', handleCancel);
-            });
-        }
-
 
         // --- Initialize SortableJS ---
         const sortable = Sortable.create(sortableList, {
@@ -286,6 +219,7 @@
         // --- Helper function to update a list item's data and its visual representation ---
         function updateListItem(listItem, key, value) {
             listItem.setAttribute(`data-${key}`, value);
+            // Ensure the inner HTML elements exist before trying to update their textContent
             if (key === 'current-hp') {
                 const hpElement = listItem.querySelector('.list-item-hp');
                 if (hpElement) hpElement.textContent = `${value} HP`;
@@ -347,6 +281,8 @@
                 const modifierKey = checkbox.id.replace('modifier-', '');
                 checkbox.checked = statusObj[modifierKey] || false;
             });
+            // Update status icons on the list item when sheet is populated
+            updateStatusIcons(listItem, statusObj);
         }
 
         // --- Update the highlighted list item and character sheet ---
@@ -375,24 +311,24 @@
         function updateRoundCounter() {
             roundCounter.textContent = `Round: ${currentRound}`;
         }
-        
-        // --- Helper function to create a new list item HTML element (SAFE) ---
-        // This version uses textContent to prevent XSS attacks from user input.
+
+        // --- Helper function to create a new list item HTML element ---
         function createListItemElement(nameText, initiativeValue, currentHp = 10, mp = 10, ac = 0, speed = 0, modifier = 0, statusObj = null, isLocked = false) {
             const listItem = document.createElement('li');
-            
-            // Safe way to add inner HTML for non-user content
+
+            // Set innerHTML first so querySelectors can find elements
+            const lockIcon = isLocked ? 'fa-lock' : 'fa-lock-open';
             listItem.innerHTML = `
                 <span class="handle"><i class="fa-solid fa-grip-lines"></i></span>
-                <button class="item-lock-button"><i class="fa-solid ${isLocked ? 'fa-lock' : 'fa-lock-open'}"></i></button>
-                <span class="item-text"></span>
+                <button class="item-lock-button"><i class="fa-solid ${lockIcon}"></i></button>
+                <span class="item-text">${nameText}</span>
                 <span class="initiative-score"></span>
                 <span class="list-item-hp"></span>
+                <div class="status-icons"></div> <!-- Container for status icons -->
                 <button class="remove-button">X</button>
             `;
-            
-            // Set user-provided text content safely
-            listItem.querySelector('.item-text').textContent = nameText;
+
+            // Now update attributes and text content using the helper
             updateListItem(listItem, 'initiative', initiativeValue);
             updateListItem(listItem, 'current-hp', currentHp);
             listItem.setAttribute('data-mp', mp);
@@ -400,16 +336,21 @@
             listItem.setAttribute('data-speed', speed);
             listItem.setAttribute('data-modifier', modifier);
             listItem.setAttribute('data-locked', isLocked ? 'true' : 'false');
-            
+
             if (statusObj === null) {
                 statusObj = {
-                    "poisoned": false, "burning": false, "immobile": false,
-                    "ko": false, "dead": false, "advantage": false,
+                    "poisoned": false,
+                    "burning": false,
+                    "immobile": false,
+                    "ko": false,
+                    "dead": false,
+                    "advantage": false,
                     "disadvantage": false
                 };
             }
             listItem.setAttribute('data-status', JSON.stringify(statusObj));
-            
+            updateStatusIcons(listItem, statusObj); // Initial update of icons
+
             return listItem;
         }
 
@@ -426,10 +367,10 @@
                 const modifier = listItem.getAttribute('data-modifier');
                 const status = listItem.getAttribute('data-status');
                 const isLocked = listItem.getAttribute('data-locked');
-                // Sanitize the name before saving
-                items.push({ name: sanitizeInput(name), initiative, currentHp, mp, ac, speed, modifier, status, isLocked });
+                items.push({ name, initiative, currentHp, mp, ac, speed, modifier, status, isLocked });
             });
             localStorage.setItem('rpgEncounterList', JSON.stringify(items));
+            console.log('List state saved.');
         }
 
         // --- Function to Load the State from localStorage ---
@@ -445,23 +386,27 @@
                             statusObj = item.status ? JSON.parse(item.status) : {};
                         } catch (e) {
                             console.error("Error parsing status JSON for item during load:", item.name, e);
+                            // If status is corrupted, default to empty object
                         }
                         const listItem = createListItemElement(item.name, item.initiative, item.currentHp, item.mp, item.ac, item.speed, item.modifier, statusObj, item.isLocked === 'true');
                         sortableList.appendChild(listItem);
                     });
+                    console.log('List state loaded from localStorage.');
                 } catch (e) {
                     console.error("Error loading or parsing entire list from localStorage:", e);
-                    localStorage.removeItem('rpgEncounterList');
-                    sortableList.innerHTML = '';
+                    localStorage.removeItem('rpgEncounterList'); // Clear corrupted data
+                    sortableList.innerHTML = ''; // Ensure list is empty
+                    console.log('Corrupted localStorage data cleared. List remains empty.');
                 }
             } else {
                 sortableList.innerHTML = '';
+                console.log('No saved list found. List remains empty.');
             }
             updateHighlight(null);
             updateRoundCounter();
         }
 
-        // --- Function to Start Editing a Span (using modern selection API) ---
+        // --- Function to Start Editing a Span ---
         function startEditing(element) {
             const listItem = document.querySelector('.highlighted');
             if (!listItem || listItem.getAttribute('data-locked') === 'true') {
@@ -469,13 +414,7 @@
             }
             element.setAttribute('contenteditable', 'true');
             element.focus();
-
-            // Modern way to select all content
-            const range = document.createRange();
-            range.selectNodeContents(element);
-            const selection = window.getSelection();
-            selection.removeAllRanges();
-            selection.addRange(range);
+            document.execCommand('selectAll', false, null);
         }
 
         // --- Function to Add a New List Item ---
@@ -484,8 +423,7 @@
             const initiativeValue = newItemInitiative.value.trim();
 
             if (nameText.length > 0 && initiativeValue.length > 0) {
-                const sanitizedName = sanitizeInput(nameText);
-                const listItem = createListItemElement(sanitizedName, initiativeValue);
+                const listItem = createListItemElement(nameText, initiativeValue);
                 sortableList.appendChild(listItem);
                 newItemText.value = '';
                 newItemInitiative.value = '';
@@ -560,22 +498,22 @@
             const listItem = document.querySelector('.highlighted');
 
             if (!listItem || listItem.getAttribute('data-locked') === 'true') {
+                 // Reset content if locked
                 populateCharacterSheet(listItem);
                 targetElement.removeAttribute('contenteditable');
                 return;
             }
 
             let newValue = targetElement.textContent.trim();
-            let sanitizedValue = sanitizeInput(newValue);
 
             if (targetElement.id === 'sheet-current-hp') {
-                updateListItem(listItem, 'current-hp', parseInt(sanitizedValue) || 0);
+                updateListItem(listItem, 'current-hp', parseInt(newValue) || 0);
             } else if (targetElement.id === 'sheet-mp') {
-                updateListItem(listItem, 'mp', parseInt(sanitizedValue) || 0);
+                updateListItem(listItem, 'mp', parseInt(newValue) || 0);
             } else if (targetElement.id === 'sheet-ac') {
-                updateListItem(listItem, 'ac', parseInt(sanitizedValue) || 0);
+                updateListItem(listItem, 'ac', parseInt(newValue) || 0);
             } else if (targetElement.id === 'sheet-speed') {
-                updateListItem(listItem, 'speed', parseInt(sanitizedValue) || 0);
+                updateListItem(listItem, 'speed', parseInt(newValue) || 0);
             }
 
             targetElement.removeAttribute('contenteditable');
@@ -677,6 +615,33 @@
             group.addEventListener('click', handleNumberButtonClick);
         });
 
+        // --- Status Icon Mapping ---
+        const statusIconMap = {
+            "poisoned": "fa-skull-crossbones",
+            "burning": "fa-fire",
+            "immobile": "fa-hand-paper", // or fa-shoe-prints-slash
+            "ko": "fa-dizzy",
+            "dead": "fa-cross", // or fa-skull
+            "advantage": "fa-plus-circle", // or fa-check-circle
+            "disadvantage": "fa-minus-circle" // or fa-times-circle
+        };
+
+        // Function to update status icons on a list item
+        function updateStatusIcons(listItem, statusObj) {
+            const statusIconsContainer = listItem.querySelector('.status-icons');
+            if (!statusIconsContainer) return;
+
+            statusIconsContainer.innerHTML = ''; // Clear existing icons
+
+            for (const statusKey in statusObj) {
+                if (statusObj[statusKey] && statusIconMap[statusKey]) {
+                    const iconElement = document.createElement('i');
+                    iconElement.classList.add('fas', statusIconMap[statusKey], 'status-icon', `status-icon-${statusKey}`);
+                    statusIconsContainer.appendChild(iconElement);
+                }
+            }
+        }
+
         // --- Event Listeners for Checkbox Changes ---
         document.querySelectorAll('.status-checkbox, .modifier-checkbox').forEach(checkbox => {
             checkbox.addEventListener('change', function () {
@@ -696,6 +661,7 @@
                 const statusKey = this.id.replace(/(status|modifier)-/, '');
                 statusObj[statusKey] = this.checked;
                 highlightedListItem.setAttribute('data-status', JSON.stringify(statusObj));
+                updateStatusIcons(highlightedListItem, statusObj); // Update icons immediately
                 saveState();
             });
         });
@@ -730,15 +696,13 @@
             }
         });
 
-        // --- Reset Turns Functionality (now using the custom modal) ---
-        resetTurnButton.addEventListener('click', async function () {
-            const confirmed = await showConfirmationModal('Are you sure you want to reset the current turn and round?');
-            if (confirmed) {
+        // --- Reset Turns Functionality ---
+        resetTurnButton.addEventListener('click', function () {
+            if (confirm('Are you sure you want to reset the current turn and round?')) {
                 currentRound = 1;
                 highlightedIndex = -1;
                 updateRoundCounter();
                 updateHighlight(null);
-                saveState(); // Save the reset state
             }
         });
 
@@ -753,68 +717,98 @@
             }
         });
 
-        // --- Dice Roller Functionality, based on your CSS ---
-        toggleDiceRollerButton.addEventListener('click', () => {
-            diceRollerCard.classList.toggle('hidden');
-        });
-
-        rollDiceButton.addEventListener('click', () => {
-            const numDice = parseInt(numDiceInput.value);
-            const dieType = parseInt(dieTypeSelect.value);
-            const modifier = parseInt(rollModifierInput.value);
-            const rollType = document.querySelector('input[name="roll-type"]:checked').value;
-            const isInverted = invertD100Checkbox.checked;
-
-            if (isNaN(numDice) || isNaN(dieType) || numDice < 1) {
-                rollResults.textContent = "Please enter valid dice numbers.";
-                rollTotal.textContent = "Total: --";
-                return;
-            }
-
-            let rolls = [];
-            let total = 0;
-
-            if (rollType === 'advantage') {
-                const roll1 = Math.floor(Math.random() * dieType) + 1;
-                const roll2 = Math.floor(Math.random() * dieType) + 1;
-                let finalRoll;
-                if (isInverted) {
-                    finalRoll = Math.min(roll1, roll2);
-                    rolls.push(`(Inverted Advantage: ${roll1}, ${roll2}) -> ${finalRoll}`);
-                } else {
-                    finalRoll = Math.max(roll1, roll2);
-                    rolls.push(`(Advantage: ${roll1}, ${roll2}) -> ${finalRoll}`);
-                }
-                total = finalRoll;
-            } else if (rollType === 'disadvantage') {
-                const roll1 = Math.floor(Math.random() * dieType) + 1;
-                const roll2 = Math.floor(Math.random() * dieType) + 1;
-                let finalRoll;
-                if (isInverted) {
-                    finalRoll = Math.max(roll1, roll2);
-                    rolls.push(`(Inverted Disadvantage: ${roll1}, ${roll2}) -> ${finalRoll}`);
-                } else {
-                    finalRoll = Math.min(roll1, roll2);
-                    rolls.push(`(Disadvantage: ${roll1}, ${roll2}) -> ${finalRoll}`);
-                }
-                total = finalRoll;
-            } else { // Normal or multiple dice
-                for (let i = 0; i < numDice; i++) {
-                    const roll = Math.floor(Math.random() * dieType) + 1;
-                    rolls.push(roll);
-                    total += roll;
-                }
-            }
-
-            const modifierText = modifier !== 0 ? ` + ${modifier}` : '';
-            rollResults.textContent = `Rolls: ${rolls.join(', ')}`;
-            rollTotal.textContent = `Total: ${total + modifier}`;
-        });
-
         // --- Load state and initialize sheet when the page finishes loading ---
         window.addEventListener('load', () => {
             loadState();
         });
+
+        // --- Dice Roller Functions ---
+
+        // Toggles the visibility of the dice roller container
+        function toggleDiceRoller() {
+            diceRollerContainer.classList.toggle('hidden');
+            if (diceRollerContainer.classList.contains('hidden')) {
+                toggleDiceRollerButton.innerHTML = 'Dice Roller <i class="fa-solid fa-dice"></i>';
+            } else {
+                toggleDiceRollerButton.innerHTML = 'Hide Roller <i class="fa-solid fa-chevron-up"></i>';
+            }
+        }
+
+        // Helper function to perform a single set of dice rolls
+        function _singleRollSet(numDice, dieType) {
+            let rolls = [];
+            let total = 0;
+            for (let i = 0; i < numDice; i++) {
+                const roll = Math.floor(Math.random() * dieType) + 1;
+                rolls.push(roll);
+                total += roll;
+            }
+            return { rolls, total };
+        }
+
+        // Main function to roll dice based on user input and modifiers
+        function rollDice() {
+            const numDice = parseInt(numDiceInput.value);
+            const dieType = parseInt(dieTypeSelect.value);
+            const modifier = parseInt(rollModifierInput.value) || 0; // Get modifier, default to 0
+            let rollType = 'normal';
+            for (const radio of rollTypeRadios) {
+                if (radio.checked) {
+                    rollType = radio.value;
+                    break;
+                }
+            }
+
+            if (isNaN(numDice) || numDice < 1 || isNaN(dieType)) {
+                diceRollOutput.textContent = "Please enter valid numbers for dice and type.";
+                return { rolls: [], total: 0, finalTotal: 0, modifierUsed: modifier, rollTypeUsed: rollType };
+            }
+
+            let result1 = _singleRollSet(numDice, dieType);
+            let result2 = null;
+            let chosenResult = result1;
+            let rollDescription = `${numDice}d${dieType}`;
+
+            if (rollType === 'advantage') {
+                result2 = _singleRollSet(numDice, dieType);
+                chosenResult = (result1.total >= result2.total) ? result1 : result2;
+                rollDescription += " (Advantage)";
+            } else if (rollType === 'disadvantage') {
+                result2 = _singleRollSet(numDice, dieType);
+                chosenResult = (result1.total <= result2.total) ? result1 : result2;
+                rollDescription += " (Disadvantage)";
+            }
+
+            const finalTotal = chosenResult.total + modifier;
+
+            let outputHTML = `<p>${rollDescription}</p>`;
+            outputHTML += `<p>Rolls: ${chosenResult.rolls.join(', ')}</p>`;
+            if (rollType !== 'normal') {
+                outputHTML += `<p>Other Roll: ${rollType === 'advantage' ? result2.rolls.join(', ') : result1.rolls.join(', ')}</p>`;
+            }
+            if (modifier !== 0) {
+                outputHTML += `<p>Modifier: ${modifier > 0 ? '+' : ''}${modifier}</p>`;
+            }
+            outputHTML += `<p>Total: <strong>${finalTotal}</strong></p>`;
+
+            diceRollOutput.innerHTML = outputHTML;
+
+            // Return structured result for future interaction
+            return {
+                rolls: chosenResult.rolls,
+                total: chosenResult.total, // raw total before modifier
+                finalTotal: finalTotal, // total after modifier
+                modifierUsed: modifier,
+                rollTypeUsed: rollType
+            };
+        }
+
+        // --- Dice Roller Event Listeners ---
+        toggleDiceRollerButton.addEventListener('click', toggleDiceRoller);
+        rollDiceButton.addEventListener('click', rollDice);
+
+        // Set default die type
+        dieTypeSelect.value = "4"; // Default to d4
     </script>
 </body>
 </html>
