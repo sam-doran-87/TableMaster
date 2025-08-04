@@ -317,17 +317,43 @@
         function createListItemElement(nameText, initiativeValue, currentHp = 10, mp = 10, ac = 0, speed = 0, modifier = 0, statusObj = null, isLocked = false) {
             const listItem = document.createElement('li');
 
-            // Set innerHTML first so querySelectors can find elements
+            // Create individual elements to safely set textContent where user input is involved
+            const handleSpan = document.createElement('span');
+            handleSpan.classList.add('handle');
+            handleSpan.innerHTML = '<i class="fa-solid fa-grip-lines"></i>'; // Static icon, safe
+
+            const lockButton = document.createElement('button');
+            lockButton.classList.add('item-lock-button');
             const lockIcon = isLocked ? 'fa-lock' : 'fa-lock-open';
-            listItem.innerHTML = `
-                <span class="handle"><i class="fa-solid fa-grip-lines"></i></span>
-                <button class="item-lock-button"><i class="fa-solid ${lockIcon}"></i></button>
-                <span class="item-text">${nameText}</span>
-                <span class="initiative-score"></span>
-                <span class="list-item-hp"></span>
-                <div class="status-icons"></div> <!-- Container for status icons -->
-                <button class="remove-button">X</button>
-            `;
+            lockButton.innerHTML = `<i class="fa-solid ${lockIcon}"></i>`; // Static icon, safe
+
+            const itemTextSpan = document.createElement('span');
+            itemTextSpan.classList.add('item-text');
+            itemTextSpan.textContent = nameText; // SECURITY FIX: Use textContent to prevent XSS
+
+            const initiativeScoreSpan = document.createElement('span');
+            initiativeScoreSpan.classList.add('initiative-score');
+            // Text content will be updated by updateListItem later
+
+            const hpSpan = document.createElement('span');
+            hpSpan.classList.add('list-item-hp');
+            // Text content will be updated by updateListItem later
+
+            const statusIconsDiv = document.createElement('div');
+            statusIconsDiv.classList.add('status-icons');
+
+            const removeButton = document.createElement('button');
+            removeButton.classList.add('remove-button');
+            removeButton.textContent = 'X'; // Static text, safe
+
+            // Append elements to the listItem
+            listItem.appendChild(handleSpan);
+            listItem.appendChild(lockButton);
+            listItem.appendChild(itemTextSpan);
+            listItem.appendChild(initiativeScoreSpan);
+            listItem.appendChild(hpSpan);
+            listItem.appendChild(statusIconsDiv);
+            listItem.appendChild(removeButton);
 
             // Now update attributes and text content using the helper
             updateListItem(listItem, 'initiative', initiativeValue);
@@ -505,7 +531,7 @@
                 return;
             }
 
-            let newValue = targetElement.textContent.trim();
+            let newValue = targetElement.textContent.trim(); // Reading textContent is safe
 
             if (targetElement.id === 'sheet-current-hp') {
                 updateListItem(listItem, 'current-hp', parseInt(newValue) || 0);
@@ -622,7 +648,7 @@
             "burning": "fa-fire",
             "immobile": "fa-hand-paper", // or fa-shoe-prints-slash
             "ko": "fa-dizzy",
-            "dead": "fa-skull", // Changed from fa-tombstone to fa-skull for free FA compatibility
+            "dead": "fa-skull",
             "advantage": "fa-plus-circle", // or fa-check-circle
             "disadvantage": "fa-minus-circle" // or fa-times-circle
         };
