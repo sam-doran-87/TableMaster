@@ -6,77 +6,29 @@
     <title>RPG Encounter List</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- Link to the custom style.css file -->
     <link rel="stylesheet" href="style.css">
-    <!-- Import Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import {
-            getAuth,
-            signInWithEmailAndPassword,
-            createUserWithEmailAndPassword,
-            signOut,
-            onAuthStateChanged,
-            signInWithCustomToken,
-            signInAnonymously
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import {
-            getFirestore,
-            doc,
-            getDoc,
-            setDoc,
-            collection,
-            getDocs,
-            deleteDoc
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Global variables for Firebase access
-        window.app = null;
-        window.db = null;
-        window.auth = null;
-        window.userId = null;
-        window.isAuthReady = false;
-
-        // Use the global variables provided by the Canvas environment
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        // Initialize Firebase
-        try {
-            if (Object.keys(firebaseConfig).length > 0) {
-                window.app = initializeApp(firebaseConfig);
-                window.auth = getAuth(window.app);
-                window.db = getFirestore(window.app);
-            } else {
-                console.error("Firebase config is missing. The app will not function correctly.");
-            }
-        } catch (e) {
-            console.error("Firebase initialization failed:", e);
-        }
-    </script>
 </head>
 <body>
     <div class="container">
         <h1>RPG Encounter List</h1>
 
         <!-- Authentication Section -->
-        <div id="auth-section" class="auth-section">
+        <div class="auth-section">
             <div id="user-info" style="display: none;">
                 <p>Logged in as: <span id="user-email-display"></span></p>
-                <button id="logout-button" class="auth-button">Sign Out</button>
+                <p>User ID: <span id="user-id-display"></span></p>
+                <button id="logout-button" class="auth-button">Log Out</button>
             </div>
-            <div id="login-form">
+            <form id="login-form">
+                <p id="auth-status-message" class="error-message" style="display: none;"></p>
                 <input type="email" id="email-input" placeholder="Email" required>
                 <input type="password" id="password-input" placeholder="Password" required>
-                <button id="signin-button" class="auth-button">Sign In</button>
-                <button id="signup-button" class="auth-button">Sign Up</button>
-                <p id="auth-error-message" class="error-message" style="display: none;"></p>
-            </div>
+                <button id="signin-button" type="submit" class="auth-button">Sign In</button>
+                <button id="signup-button" type="button" class="auth-button">Sign Up</button>
+            </form>
         </div>
-        
+
         <div class="main-content">
-            <!-- Encounter Tracker Card -->
             <div class="encounter-tracker-card">
                 <div class="input-section">
                     <input type="text" id="newItemText" placeholder="Character Name">
@@ -91,553 +43,585 @@
 
                 <div class="turn-controls">
                     <div class="turn-round-info">
-                        <p>Round: <span id="roundCounter">0</span></p>
-                        <p>Turn: <span id="turnCounter">0</span></p>
+                        <span id="roundCounter">Round: 1</span>
+                        <span id="turnCounter">Turn: --</span>
                     </div>
                     <div class="turn-buttons">
+                        <button id="prevTurnButton" class="turn-button">Previous Turn</button>
                         <button id="nextTurnButton" class="turn-button">Next Turn</button>
-                        <button id="resetButton" class="reset-button">Reset</button>
+                        <button id="resetTurnButton" class="reset-button">Reset Turns</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Character Sheet Card -->
-            <div id="character-sheet" class="character-sheet-card" style="display: none;">
-                <h2 id="sheet-title"></h2>
-                
+            <div id="character-sheet" class="character-sheet-card">
+                <h2 id="sheet-title">Selected Character</h2>
                 <div class="sheet-group">
-                    <div class="sheet-section">
-                        <p class="sheet-label">Health</p>
+                    <div class="sheet-section hp-section">
+                        <p class="sheet-label">HP</p>
                         <div class="number-control-group">
-                            <button id="hp-minus-btn" class="number-btn">-</button>
-                            <span id="sheet-hp" class="editable-field" contenteditable="true">0</span>
-                            <button id="hp-plus-btn" class="number-btn">+</button>
+                            <button class="number-btn decrement" data-target="sheet-current-hp">-</button>
+                            <span id="sheet-current-hp" class="editable-field" contenteditable="true">--</span>
+                            <button class="number-btn increment" data-target="sheet-current-hp">+</button>
                         </div>
                     </div>
-                    <div class="sheet-section">
-                        <p class="sheet-label">Initiative</p>
+                    <div class="sheet-section mp-section">
+                        <p class="sheet-label">MP</p>
                         <div class="number-control-group">
-                            <button id="init-minus-btn" class="number-btn">-</button>
-                            <span id="sheet-initiative" class="editable-field" contenteditable="true">0</span>
-                            <button id="init-plus-btn" class="number-btn">+</button>
+                            <button class="number-btn decrement" data-target="sheet-mp">-</button>
+                            <span id="sheet-mp" class="editable-field" contenteditable="true">--</span>
+                            <button class="number-btn increment" data-target="sheet-mp">+</button>
                         </div>
                     </div>
                 </div>
 
                 <div class="sheet-group">
-                    <div class="sheet-section">
-                        <p class="sheet-label">Modifiers</p>
-                        <div class="modifiers-list">
-                            <label><input type="checkbox" class="modifier-checkbox" id="modifier-advantage">Advantage</label>
-                            <label><input type="checkbox" class="modifier-checkbox" id="modifier-disadvantage">Disadvantage</label>
+                    <div class="sheet-section ac-section">
+                        <p class="sheet-label">Armor</p>
+                        <span id="sheet-ac" class="editable-field" contenteditable="true">--</span>
+                    </div>
+                    <div class="sheet-section speed-section">
+                        <p class="sheet-label">Speed</p>
+                        <span id="sheet-speed" class="editable-field" contenteditable="true">--</span>
+                    </div>
+                </div>
+
+                <div class="sheet-section modifier-section">
+                    <p class="sheet-label">Modifiers</p>
+                    <div class="modifiers-list">
+                        <label>
+                            <input type="checkbox" class="modifier-checkbox" id="modifier-advantage">
+                            Advantage
+                        </label>
+                        <label>
+                            <input type="checkbox" class="modifier-checkbox" id="modifier-disadvantage">
+                            Disadvantage
+                        </label>
+                        <div class="number-control-group">
+                            <button class="number-btn decrement" data-target="sheet-modifier">-</button>
+                            <input type="number" class="modifier-input" id="sheet-modifier" placeholder="Mod">
+                            <button class="number-btn increment" data-target="sheet-modifier">+</button>
                         </div>
                     </div>
-                    <div class="sheet-section">
-                        <p class="sheet-label">Status</p>
-                        <div class="status-list">
-                            <label><input type="checkbox" class="status-checkbox" id="status-unconscious">Unconscious</label>
-                            <label><input type="checkbox" class="status-checkbox" id="status-poisoned">Poisoned</label>
-                        </div>
-                    </div>
                 </div>
 
-                <div class="sheet-section">
-                    <p class="sheet-label">Notes</p>
-                    <div id="sheet-notes" class="notes-field" contenteditable="true" placeholder="Add notes here..."></div>
-                </div>
-
-                <button id="delete-sheet-button" class="reset-button">Delete Character</button>
-            </div>
-            
-            <!-- Dice Roller Card -->
-            <div id="dice-roller" class="dice-roller-card">
-                <h2>Dice Roller</h2>
-                <div class="dice-input-section">
-                    <input type="number" id="num-dice-input" value="1" min="1" max="10">
-                    <p class="dice-x">x</p>
-                    <select id="die-type-select">
-                        <option value="4">d4</option>
-                        <option value="6">d6</option>
-                        <option value="8">d8</option>
-                        <option value="10">d10</option>
-                        <option value="12">d12</option>
-                        <option value="20">d20</option>
-                        <option value="100">d100</option>
-                    </select>
-                    <button id="roll-dice-button" class="roll-button">Roll</button>
-                </div>
-                
-                <div class="dice-output">
-                    <p id="rollResults">Rolls: 0</p>
-                    <p id="rollTotal">Total: 0</p>
-                </div>
-
-                <div class="dice-modifiers-section">
-                    <div class="modifier-input-group">
-                        <label for="roll-modifier">Modifier:</label>
-                        <input type="number" id="roll-modifier" value="0">
-                    </div>
-                    <div class="roll-type-group">
-                        <label><input type="radio" name="rollType" value="normal" checked>Normal</label>
-                        <label><input type="radio" name="rollType" value="advantage">Advantage</label>
-                        <label><input type="radio" name="rollType" value="disadvantage">Disadvantage</label>
+                <div class="sheet-section status-section">
+                    <p class="sheet-label">Status</p>
+                    <div class="status-list">
+                        <label><input type="checkbox" class="status-checkbox" id="status-poisoned">Poisoned</label>
+                        <label><input type="checkbox" class="status-checkbox" id="status-burning">Burning</label>
+                        <label><input type="checkbox" class="status-checkbox" id="status-immobile">Immobile</label>
+                        <label><input type="checkbox" class="status-checkbox" id="status-ko">K.O.</label>
+                        <label><input type="checkbox" class="status-checkbox" id="status-dead">Dead</label>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Dice Roller Toggle Button -->
+        <button id="toggle-dice-roller-button" class="toggle-button">Dice Roller <i class="fa-solid fa-dice"></i></button>
+
+        <!-- Dice Roller Container -->
+        <div id="dice-roller-container" class="dice-roller-card hidden">
+            <h2>Dice Roller</h2>
+            <div class="dice-input-section">
+                <input type="number" id="num-dice-input" value="1" min="1">
+                <span class="dice-x">d</span>
+                <select id="die-type-select">
+                    <option value="3">d3</option>
+                    <option value="4">d4</option>
+                    <option value="6">d6</option>
+                    <option value="8">d8</option>
+                    <option value="10">d10</option>
+                    <option value="12">d12</option>
+                    <option value="20">d20</option>
+                    <option value="100">d100</option>
+                </select>
+                <button id="roll-dice-button">Roll</button>
+            </div>
+
+            <div class="dice-modifiers-section">
+                <div class="modifier-input-group">
+                    <label for="roll-modifier">Modifier:</label>
+                    <input type="number" id="roll-modifier" value="0">
+                </div>
+                <div class="roll-type-group">
+                    <label>
+                        <input type="radio" name="roll-type" value="normal" checked> Normal
+                    </label>
+                    <label>
+                        <input type="radio" name="roll-type" value="advantage"> Advantage
+                    </label>
+                    <label>
+                        <input type="radio" name="roll-type" value="disadvantage"> Disadvantage
+                    </label>
+                </div>
+            </div>
+
+            <div id="dice-roll-output" class="dice-output">
+                <!-- Roll results will be displayed here -->
+            </div>
+        </div>
+
     </div>
+
+    <!-- Firebase SDK Scripts -->
     <script type="module">
-        import {
-            getAuth,
-            signInWithEmailAndPassword,
-            createUserWithEmailAndPassword,
-            signOut,
-            onAuthStateChanged
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import {
-            getFirestore,
-            doc,
-            getDoc,
-            setDoc,
-            collection,
-            getDocs,
-            deleteDoc
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, query, orderBy, getDocs, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import Sortable from "https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js";
 
-        // Wait for Firebase to be initialized before getting instances
-        let auth, db, userId;
+        // Firebase Setup
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        // Get DOM elements
+        let db;
+        let auth;
+        let userId;
+        let unsubscribeFromSnapshot;
+
+        async function initializeFirebase() {
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                // Set up auth state change listener
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        document.getElementById('user-info').style.display = 'flex';
+                        document.getElementById('login-form').style.display = 'none';
+                        document.getElementById('user-email-display').textContent = user.email || 'Anonymous User';
+                        document.getElementById('user-id-display').textContent = user.uid;
+                        console.log("Authenticated with user ID:", userId);
+
+                        // Unsubscribe from previous snapshot listener if it exists
+                        if (unsubscribeFromSnapshot) {
+                            unsubscribeFromSnapshot();
+                        }
+
+                        // Set up new snapshot listener for the current user's data
+                        unsubscribeFromSnapshot = onSnapshot(doc(db, "artifacts", appId, "users", userId, "data", "encounter_list"), (docSnapshot) => {
+                            if (docSnapshot.exists()) {
+                                const data = docSnapshot.data();
+                                console.log("Current data from Firestore:", data);
+                                if (data && data.characters) {
+                                    loadState(data.characters);
+                                }
+                            } else {
+                                console.log("No data found for this user. Starting with empty list.");
+                                loadState([]);
+                            }
+                        }, (error) => {
+                            console.error("Error listening to Firestore document:", error);
+                        });
+                    } else {
+                        // User is signed out or not authenticated
+                        userId = null;
+                        document.getElementById('user-info').style.display = 'none';
+                        document.getElementById('login-form').style.display = 'flex';
+                        console.log("User is logged out.");
+                        
+                        if (unsubscribeFromSnapshot) {
+                            unsubscribeFromSnapshot();
+                        }
+
+                        // Load empty list or handle a logged-out state
+                        loadState([]);
+                    }
+                });
+
+            } catch (e) {
+                console.error("Firebase initialization failed:", e);
+                // Fallback to anonymous sign-in if custom token fails
+                try {
+                    auth = getAuth();
+                    await signInAnonymously(auth);
+                } catch (e2) {
+                    console.error("Anonymous sign-in failed:", e2);
+                }
+            }
+        }
+
+        initializeFirebase();
+
+        // --- AUTHENTICATION FUNCTIONS ---
+        async function signIn(email, password) {
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                console.log("Sign-in successful!");
+            } catch (error) {
+                console.error("Sign-in failed:", error.message);
+                showAuthStatus(error.message);
+            }
+        }
+
+        async function signUp(email, password) {
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                console.log("Sign-up successful!");
+            } catch (error) {
+                console.error("Sign-up failed:", error.message);
+                showAuthStatus(error.message);
+            }
+        }
+
+        async function handleLogout() {
+            try {
+                await signOut(auth);
+                console.log("Logged out successfully.");
+            } catch (error) {
+                console.error("Logout failed:", error.message);
+                showAuthStatus(error.message);
+            }
+        }
+
+        function showAuthStatus(message) {
+            const statusMessage = document.getElementById('auth-status-message');
+            statusMessage.textContent = message;
+            statusMessage.style.display = 'block';
+        }
+
+        // --- Get references to all necessary HTML elements ---
         const sortableList = document.getElementById('sortable-list');
         const newItemText = document.getElementById('newItemText');
         const newItemInitiative = document.getElementById('newItemInitiative');
         const addItemButton = document.getElementById('addItemButton');
         const sortInitiativeButton = document.getElementById('sortInitiativeButton');
-        const characterSheet = document.getElementById('character-sheet');
-        const sheetTitle = document.getElementById('sheet-title');
-        const sheetHP = document.getElementById('sheet-hp');
-        const hpMinusBtn = document.getElementById('hp-minus-btn');
-        const hpPlusBtn = document.getElementById('hp-plus-btn');
-        const sheetInitiative = document.getElementById('sheet-initiative');
-        const initMinusBtn = document.getElementById('init-minus-btn');
-        const initPlusBtn = document.getElementById('init-plus-btn');
-        const sheetNotes = document.getElementById('sheet-notes');
-        const deleteSheetButton = document.getElementById('delete-sheet-button');
+        const nextTurnButton = document.getElementById('nextTurnButton');
+        const prevTurnButton = document.getElementById('prevTurnButton');
         const roundCounter = document.getElementById('roundCounter');
         const turnCounter = document.getElementById('turnCounter');
-        const nextTurnButton = document.getElementById('nextTurnButton');
-        const resetButton = document.getElementById('resetButton');
-        const modifierCheckboxes = document.querySelectorAll('.modifier-checkbox');
+        const resetTurnButton = document.getElementById('resetTurnButton');
+        const characterSheet = document.getElementById('character-sheet');
+        const sheetTitle = document.getElementById('sheet-title');
+        const sheetCurrentHp = document.getElementById('sheet-current-hp');
+        const sheetMp = document.getElementById('sheet-mp');
+        const sheetAc = document.getElementById('sheet-ac');
+        const sheetSpeed = document.getElementById('sheet-speed');
+        const sheetModifier = document.getElementById('sheet-modifier');
         const statusCheckboxes = document.querySelectorAll('.status-checkbox');
-        
-        // Dice Roller Elements
+        const modifierCheckboxes = document.querySelectorAll('.modifier-checkbox');
+        const toggleDiceRollerButton = document.getElementById('toggle-dice-roller-button');
+        const diceRollerContainer = document.getElementById('dice-roller-container');
         const numDiceInput = document.getElementById('num-dice-input');
         const dieTypeSelect = document.getElementById('die-type-select');
         const rollDiceButton = document.getElementById('roll-dice-button');
-        const rollResults = document.getElementById('rollResults');
-        const rollTotal = document.getElementById('rollTotal');
+        const diceRollOutput = document.getElementById('dice-roll-output');
         const rollModifierInput = document.getElementById('roll-modifier');
-        const rollTypeRadios = document.querySelectorAll('input[name="rollType"]');
-
-        // Authentication Elements
+        const rollTypeRadios = document.querySelectorAll('input[name="roll-type"]');
+        const loginForm = document.getElementById('login-form');
         const emailInput = document.getElementById('email-input');
         const passwordInput = document.getElementById('password-input');
-        const signinButton = document.getElementById('signin-button');
         const signupButton = document.getElementById('signup-button');
         const logoutButton = document.getElementById('logout-button');
-        const userInfoDiv = document.getElementById('user-info');
-        const userEmailDisplay = document.getElementById('user-email-display');
-        const authErrorMessage = document.getElementById('auth-error-message');
-        const loginFormDiv = document.getElementById('login-form');
 
-        let selectedCharacter = null;
-        let characters = [];
-        let currentTurnIndex = 0;
-        let currentRound = 0;
+        let currentRound = 1;
+        let highlightedIndex = -1;
+        let turnOrder = [];
 
-        // Utility function to get the correct document path for a user's character
-        const getCharacterDocRef = (charId) => {
-            if (!userId) {
-                console.error("User ID is not set. Cannot get document reference.");
-                return null;
+        // --- Initialize SortableJS ---
+        const sortable = new Sortable(sortableList, {
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
+            dragClass: 'sortable-drag',
+            handle: '.handle',
+            onEnd: function (evt) {
+                // Ensure the data model is updated after a drag-and-drop
+                turnOrder = Array.from(sortableList.children).map(li => JSON.parse(li.getAttribute('data-character')));
+                saveState();
+                updateTurnCounter();
+            },
+        });
+
+        // --- Helper function to update a list item's data and its visual representation ---
+        function updateListItem(listItem, key, value) {
+            // Get the current character data, update it, and re-serialize
+            const charData = JSON.parse(listItem.getAttribute('data-character'));
+            charData[key] = value;
+            listItem.setAttribute('data-character', JSON.stringify(charData));
+
+            // Now, update the visible elements
+            if (key === 'currentHp') {
+                const hpElement = listItem.querySelector('.list-item-hp');
+                if (hpElement) hpElement.textContent = `${value} HP`;
+            } else if (key === 'initiative') {
+                const initiativeElement = listItem.querySelector('.initiative-score');
+                if (initiativeElement) initiativeElement.textContent = value;
+            } else if (key === 'status') {
+                updateStatusIcons(listItem, value);
             }
-            return doc(db, `/artifacts/${appId}/users/${userId}/characters`, charId);
-        };
-
-        // Custom Modal Functions
-        const showModal = (message, onConfirm, onCancel) => {
-            let modal = document.querySelector('.custom-modal-overlay');
-            if (modal) modal.remove();
-
+        }
+        
+        // --- Custom modal for confirmation
+        function showCustomModal(message, callback) {
             const modalHtml = `
-                <div class="custom-modal-overlay">
+                <div id="customModalOverlay" class="custom-modal-overlay">
                     <div class="custom-modal">
-                        <h3>${message}</h3>
+                        <h3>Confirmation</h3>
+                        <p>${message}</p>
                         <div class="custom-modal-buttons">
-                            <button class="confirm-btn">Confirm</button>
-                            <button class="cancel-btn">Cancel</button>
+                            <button id="modalConfirmBtn" class="confirm-btn">Confirm</button>
+                            <button id="modalCancelBtn" class="cancel-btn">Cancel</button>
                         </div>
                     </div>
                 </div>
             `;
             document.body.insertAdjacentHTML('beforeend', modalHtml);
 
-            modal = document.querySelector('.custom-modal-overlay');
-            modal.querySelector('.confirm-btn').addEventListener('click', () => {
-                onConfirm();
-                modal.remove();
+            const modalOverlay = document.getElementById('customModalOverlay');
+            const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+            const modalCancelBtn = document.getElementById('modalCancelBtn');
+
+            modalConfirmBtn.addEventListener('click', () => {
+                modalOverlay.remove();
+                callback(true);
             });
-            modal.querySelector('.cancel-btn').addEventListener('click', () => {
-                if (onCancel) onCancel();
-                modal.remove();
+            modalCancelBtn.addEventListener('click', () => {
+                modalOverlay.remove();
+                callback(false);
             });
-        };
+        }
 
-        // Firebase Auth State Listener
-        onAuthStateChanged(window.auth, async (user) => {
-            window.isAuthReady = true;
-            if (user) {
-                userId = user.uid;
-                userEmailDisplay.textContent = user.email || 'Anonymous User';
-                userInfoDiv.style.display = 'block';
-                loginFormDiv.style.display = 'none';
-                await loadCharacterSheets();
-            } else {
-                // If there's no logged-in user, sign in anonymously as a fallback
-                if (window.auth && !window.auth.currentUser) {
-                    try {
-                        if (window.initialAuthToken) {
-                            await signInWithCustomToken(window.auth, window.initialAuthToken);
-                        } else {
-                            await signInAnonymously(window.auth);
-                        }
-                    } catch (e) {
-                        console.error("Anonymous login failed:", e);
-                    }
-                }
-                userId = null;
-                userInfoDiv.style.display = 'none';
-                loginFormDiv.style.display = 'block';
-                characters = [];
-                renderList();
+        // --- Function to clear the character sheet ---
+        function clearCharacterSheet() {
+            sheetTitle.textContent = 'Selected Character';
+            sheetCurrentHp.textContent = '--';
+            sheetMp.textContent = '--';
+            sheetAc.textContent = '--';
+            sheetSpeed.textContent = '--';
+            sheetModifier.value = '';
+            statusCheckboxes.forEach(checkbox => checkbox.checked = false);
+            modifierCheckboxes.forEach(checkbox => checkbox.checked = false);
+            characterSheet.style.display = 'none';
+        }
+
+        // --- Function to populate the character sheet ---
+        function populateCharacterSheet(listItem) {
+            if (!listItem) {
+                clearCharacterSheet();
+                return;
             }
-        });
+        
+            const charData = JSON.parse(listItem.getAttribute('data-character'));
+        
+            sheetTitle.textContent = charData.name;
+            sheetCurrentHp.textContent = charData.currentHp;
+            sheetMp.textContent = charData.mp;
+            sheetAc.textContent = charData.ac;
+            sheetSpeed.textContent = charData.speed;
+            sheetModifier.value = charData.modifier;
+            characterSheet.style.display = 'block';
+        
+            // Update status checkboxes
+            statusCheckboxes.forEach(checkbox => {
+                const statusKey = checkbox.id.replace('status-', '');
+                checkbox.checked = charData.status[statusKey] || false;
+            });
+        
+            // Update modifier checkboxes
+            modifierCheckboxes.forEach(checkbox => {
+                const modifierKey = checkbox.id.replace('modifier-', '');
+                checkbox.checked = charData.status[modifierKey] || false;
+            });
+        }
 
-        // Auth Event Listeners
-        signinButton.addEventListener('click', async (e) => {
-            e.preventDefault();
-            authErrorMessage.style.display = 'none';
-            try {
-                await signInWithEmailAndPassword(window.auth, emailInput.value, passwordInput.value);
-            } catch (error) {
-                authErrorMessage.textContent = error.message;
-                authErrorMessage.style.display = 'block';
-            }
-        });
-
-        signupButton.addEventListener('click', async (e) => {
-            e.preventDefault();
-            authErrorMessage.style.display = 'none';
-            try {
-                await createUserWithEmailAndPassword(window.auth, emailInput.value, passwordInput.value);
-            } catch (error) {
-                authErrorMessage.textContent = error.message;
-                authErrorMessage.style.display = 'block';
-            }
-        });
-
-        logoutButton.addEventListener('click', async (e) => {
-            e.preventDefault();
-            showModal('Are you sure you want to sign out? Your current session will be cleared.', async () => {
-                try {
-                    await signOut(window.auth);
-                    characters = []; // Clear list on sign out
-                    selectedCharacter = null;
-                    characterSheet.style.display = 'none';
-                    renderList();
-                    // Reload or redirect to a clean state if needed
-                } catch (error) {
-                    console.error("Logout failed:", error);
+        // --- Update the highlighted list item and character sheet ---
+        function updateHighlight(newIndex) {
+            const listItems = sortableList.querySelectorAll('li');
+            listItems.forEach((item, index) => {
+                if (index === newIndex) {
+                    item.classList.add('highlighted');
+                    populateCharacterSheet(item);
+                } else {
+                    item.classList.remove('highlighted');
                 }
             });
-        });
+        
+            highlightedIndex = newIndex;
+            updateTurnCounter();
+        
+            if (newIndex === null || newIndex === -1) {
+                clearCharacterSheet();
+            }
+        
+            saveState();
+        }
 
-        // Function to save a character to Firestore
-        const saveCharacterSheet = async (character) => {
+        // --- Function to update the round and turn counters ---
+        function updateRoundCounter() {
+            roundCounter.textContent = `Round: ${currentRound}`;
+        }
+        function updateTurnCounter() {
+            const listItems = sortableList.querySelectorAll('li');
+            const turnText = (highlightedIndex !== null && highlightedIndex !== -1 && listItems.length > 0) ? `${highlightedIndex + 1}` : '--';
+            turnCounter.textContent = `Turn: ${turnText}`;
+        }
+
+        // --- Function to create and add a new list item to the DOM ---
+        function createListItemElement(characterData) {
+            const listItem = document.createElement('li');
+            listItem.setAttribute('data-character', JSON.stringify(characterData));
+        
+            const handleSpan = document.createElement('span');
+            handleSpan.classList.add('handle');
+            handleSpan.innerHTML = '<i class="fa-solid fa-grip-lines"></i>';
+        
+            const lockButton = document.createElement('button');
+            lockButton.classList.add('item-lock-button');
+            lockButton.innerHTML = `<i class="fa-solid ${characterData.isLocked ? 'fa-lock' : 'fa-lock-open'}"></i>`;
+        
+            const itemTextSpan = document.createElement('span');
+            itemTextSpan.classList.add('item-text');
+            itemTextSpan.textContent = characterData.name;
+        
+            const initiativeScoreSpan = document.createElement('span');
+            initiativeScoreSpan.classList.add('initiative-score');
+            initiativeScoreSpan.textContent = characterData.initiative;
+        
+            const hpSpan = document.createElement('span');
+            hpSpan.classList.add('list-item-hp');
+            hpSpan.textContent = `${characterData.currentHp} HP`;
+        
+            const statusIconsDiv = document.createElement('div');
+            statusIconsDiv.classList.add('status-icons');
+            updateStatusIcons(statusIconsDiv, characterData.status);
+        
+            const removeButton = document.createElement('button');
+            removeButton.classList.add('remove-button');
+            removeButton.innerHTML = '<i class="fa-solid fa-trash"></i>';
+        
+            listItem.appendChild(handleSpan);
+            listItem.appendChild(lockButton);
+            listItem.appendChild(itemTextSpan);
+            listItem.appendChild(initiativeScoreSpan);
+            listItem.appendChild(hpSpan);
+            listItem.appendChild(statusIconsDiv);
+            listItem.appendChild(removeButton);
+        
+            return listItem;
+        }
+
+        // --- Function to Save the Current State to Firestore ---
+        async function saveState() {
             if (!userId) {
-                console.error("Cannot save. User is not authenticated.");
+                console.log("Not authenticated, skipping save to Firestore.");
                 return;
             }
             try {
-                const docRef = getCharacterDocRef(character.id);
-                await setDoc(docRef, character);
+                const characters = Array.from(sortableList.children).map(li => JSON.parse(li.getAttribute('data-character')));
+                const docRef = doc(db, "artifacts", appId, "users", userId, "data", "encounter_list");
+                await setDoc(docRef, { characters, currentRound, highlightedIndex });
+                console.log("State saved to Firestore.");
             } catch (e) {
-                console.error("Error saving document: ", e);
+                console.error("Error saving state to Firestore:", e);
             }
-        };
+        }
 
-        // Function to load all characters from Firestore for the current user
-        const loadCharacterSheets = async () => {
-            if (!userId) {
-                console.error("Cannot load. User is not authenticated.");
-                return;
-            }
-            try {
-                const charactersCol = collection(db, `/artifacts/${appId}/users/${userId}/characters`);
-                const querySnapshot = await getDocs(charactersCol);
-                characters = [];
-                querySnapshot.forEach((doc) => {
-                    characters.push(doc.data());
-                });
-                renderList();
-            } catch (e) {
-                console.error("Error loading characters: ", e);
-            }
-        };
-
-        // --- Core Application Logic (mostly unchanged, but now uses the authenticated userId) ---
-
-        const getCharacterIndexById = (id) => characters.findIndex(c => c.id === id);
-
-        const updateSheetDisplay = (character) => {
-            if (character) {
-                sheetTitle.textContent = character.name;
-                sheetHP.textContent = character.hp;
-                sheetInitiative.textContent = character.initiative;
-                sheetNotes.textContent = character.notes;
-                
-                // Update checkboxes
-                modifierCheckboxes.forEach(checkbox => {
-                    checkbox.checked = character.modifiers[checkbox.id.replace('modifier-', '')] || false;
-                });
-                statusCheckboxes.forEach(checkbox => {
-                    checkbox.checked = character.status[checkbox.id.replace('status-', '')] || false;
-                });
-
-                characterSheet.style.display = 'flex';
-                selectedCharacter = character;
-            } else {
-                characterSheet.style.display = 'none';
-                selectedCharacter = null;
-            }
-        };
-
-        const renderList = () => {
+        // --- Function to Load the State from a data object ---
+        function loadState(characters) {
             sortableList.innerHTML = '';
-            characters.forEach((char, index) => {
-                const li = document.createElement('li');
-                li.id = char.id;
-                li.innerHTML = `
-                    <span class="handle"><i class="fas fa-grip-lines"></i></span>
-                    <span class="item-text">${char.name}</span>
-                    <span class="initiative-score">${char.initiative}</span>
-                    <span class="list-item-hp">HP: ${char.hp}</span>
-                    <button class="item-lock-button">
-                        <i class="fas fa-lock${char.locked ? '' : '-open'}"></i>
-                    </button>
-                    <button class="remove-button">
-                        <i class="fas fa-times-circle"></i>
-                    </button>
-                `;
-                li.addEventListener('click', (e) => {
-                    if (e.target.closest('.remove-button') || e.target.closest('.item-lock-button')) {
-                        return;
-                    }
-                    updateSheetDisplay(char);
-                });
-                sortableList.appendChild(li);
+            characters.forEach(charData => {
+                const listItem = createListItemElement(charData);
+                sortableList.appendChild(listItem);
             });
-
-            // Update highlighted character
-            document.querySelectorAll('#sortable-list li').forEach(li => li.classList.remove('highlighted'));
-            if (currentTurnIndex >= 0 && currentTurnIndex < characters.length) {
-                const currentCharacterElement = document.getElementById(characters[currentTurnIndex].id);
-                if (currentCharacterElement) {
-                    currentCharacterElement.classList.add('highlighted');
-                }
+            turnOrder = characters; // Update the in-memory array
+            
+            // Re-apply highlight if needed
+            if (highlightedIndex !== null && highlightedIndex !== -1 && turnOrder.length > 0) {
+                const newIndex = Math.min(highlightedIndex, turnOrder.length - 1);
+                updateHighlight(newIndex);
+            } else {
+                updateHighlight(null);
             }
-        };
+            updateRoundCounter();
+            updateTurnCounter();
+        }
 
-        addItemButton.addEventListener('click', () => {
-            const name = newItemText.value.trim();
-            const initiative = parseInt(newItemInitiative.value, 10);
-            if (name && !isNaN(initiative)) {
+        // --- Function to Update Status Icons on a List Item ---
+        function updateStatusIcons(element, statusObj) {
+            let iconsHtml = '';
+            if (statusObj.poisoned) iconsHtml += '<i class="fa-solid fa-skull-crossbones status-icon poisoned" title="Poisoned"></i>';
+            if (statusObj.burning) iconsHtml += '<i class="fa-solid fa-fire status-icon burning" title="Burning"></i>';
+            if (statusObj.immobile) iconsHtml += '<i class="fa-solid fa-shoe-prints status-icon immobile" title="Immobile"></i>';
+            if (statusObj.ko) iconsHtml += '<i class="fa-solid fa-face-dizzy status-icon ko" title="Knocked Out"></i>';
+            if (statusObj.dead) iconsHtml += '<i class="fa-solid fa-cross status-icon dead" title="Dead"></i>';
+            if (statusObj.advantage) iconsHtml += '<i class="fa-solid fa-circle-plus status-icon advantage" title="Advantage"></i>';
+            if (statusObj.disadvantage) iconsHtml += '<i class="fa-solid fa-circle-minus status-icon disadvantage" title="Disadvantage"></i>';
+        
+            // Find the status-icons container, whether it's the list item's or the sheet's
+            const statusIconsContainer = element.classList.contains('status-icons') ? element : element.querySelector('.status-icons');
+            if (statusIconsContainer) {
+                statusIconsContainer.innerHTML = iconsHtml;
+            }
+        }
+        
+        // --- Event listeners for adding items ---
+        function addListItem() {
+            const nameText = newItemText.value.trim();
+            const initiativeValue = newItemInitiative.value.trim();
+            if (nameText.length > 0 && initiativeValue.length > 0) {
                 const newCharacter = {
-                    id: crypto.randomUUID(),
-                    name,
-                    initiative,
-                    hp: 10, // Default HP
-                    locked: false,
-                    notes: '',
-                    modifiers: {},
-                    status: {}
+                    name: nameText,
+                    initiative: initiativeValue,
+                    currentHp: 10,
+                    mp: 10,
+                    ac: 0,
+                    speed: 0,
+                    modifier: 0,
+                    status: {
+                        poisoned: false, burning: false, immobile: false, ko: false, dead: false,
+                        advantage: false, disadvantage: false
+                    },
+                    isLocked: false
                 };
-                characters.push(newCharacter);
-                saveCharacterSheet(newCharacter); // Save the new character
+                
+                const listItem = createListItemElement(newCharacter);
+                sortableList.appendChild(listItem);
+                turnOrder.push(newCharacter);
+                
                 newItemText.value = '';
                 newItemInitiative.value = '';
-                renderList();
+                newItemText.focus();
+                
+                saveState();
             }
-        });
+        }
 
-        sortInitiativeButton.addEventListener('click', () => {
-            characters.sort((a, b) => b.initiative - a.initiative);
-            renderList();
-        });
+        // --- Dice Roller functions ---
+        function toggleDiceRoller() {
+            diceRollerContainer.classList.toggle('hidden');
+        }
 
-        sortableList.addEventListener('click', async (e) => {
-            const listItem = e.target.closest('li');
-            if (!listItem) return;
-            const charId = listItem.id;
-
-            if (e.target.closest('.remove-button')) {
-                showModal('Are you sure you want to delete this character?', async () => {
-                    try {
-                        const docRef = getCharacterDocRef(charId);
-                        await deleteDoc(docRef);
-                        characters = characters.filter(char => char.id !== charId);
-                        renderList();
-                        if (selectedCharacter && selectedCharacter.id === charId) {
-                            updateSheetDisplay(null);
-                        }
-                    } catch (error) {
-                        console.error("Error deleting document: ", error);
-                    }
-                });
-            } else if (e.target.closest('.item-lock-button')) {
-                const charIndex = getCharacterIndexById(charId);
-                if (charIndex !== -1) {
-                    characters[charIndex].locked = !characters[charIndex].locked;
-                    saveCharacterSheet(characters[charIndex]); // Save the lock status change
-                    renderList();
+        function rollDice() {
+            const numDice = parseInt(numDiceInput.value);
+            const dieType = parseInt(dieTypeSelect.value);
+            const modifier = parseInt(rollModifierInput.value) || 0;
+            let rollType = 'normal';
+            rollTypeRadios.forEach(radio => {
+                if (radio.checked) {
+                    rollType = radio.value;
                 }
-            }
-        });
-
-        // Turn Controls
-        nextTurnButton.addEventListener('click', () => {
-            if (characters.length === 0) return;
-            currentTurnIndex++;
-            if (currentTurnIndex >= characters.length) {
-                currentTurnIndex = 0;
-                currentRound++;
-            }
-            turnCounter.textContent = currentTurnIndex + 1;
-            roundCounter.textContent = currentRound;
-            renderList();
-        });
-
-        resetButton.addEventListener('click', () => {
-            showModal('Are you sure you want to reset the encounter?', () => {
-                currentTurnIndex = 0;
-                currentRound = 0;
-                turnCounter.textContent = '0';
-                roundCounter.textContent = '0';
-                renderList();
             });
-        });
 
-        // Sheet Logic
-        const handleStatChange = (event, statName) => {
-            if (selectedCharacter) {
-                const newValue = event.target.textContent;
-                selectedCharacter[statName] = parseInt(newValue, 10) || 0;
-                renderList();
-                saveCharacterSheet(selectedCharacter);
+            if (isNaN(numDice) || isNaN(dieType) || numDice <= 0) {
+                diceRollOutput.textContent = "Please enter a valid number of dice and select a die type.";
+                return;
             }
-        };
 
-        const handleCheckboxChange = (event, type) => {
-            if (selectedCharacter) {
-                const key = event.target.id.replace(`${type}-`, '');
-                selectedCharacter[type][key] = event.target.checked;
-                saveCharacterSheet(selectedCharacter);
-            }
-        };
-
-        const handleNotesChange = () => {
-            if (selectedCharacter) {
-                selectedCharacter.notes = sheetNotes.textContent;
-                saveCharacterSheet(selectedCharacter);
-            }
-        };
-
-        sheetHP.addEventListener('input', (e) => handleStatChange(e, 'hp'));
-        sheetInitiative.addEventListener('input', (e) => handleStatChange(e, 'initiative'));
-        sheetNotes.addEventListener('input', handleNotesChange);
-
-        hpMinusBtn.addEventListener('click', () => {
-            if (selectedCharacter) {
-                selectedCharacter.hp = Math.max(0, (selectedCharacter.hp || 0) - 1);
-                sheetHP.textContent = selectedCharacter.hp;
-                renderList();
-                saveCharacterSheet(selectedCharacter);
-            }
-        });
-
-        hpPlusBtn.addEventListener('click', () => {
-            if (selectedCharacter) {
-                selectedCharacter.hp = (selectedCharacter.hp || 0) + 1;
-                sheetHP.textContent = selectedCharacter.hp;
-                renderList();
-                saveCharacterSheet(selectedCharacter);
-            }
-        });
-        
-        initMinusBtn.addEventListener('click', () => {
-            if (selectedCharacter) {
-                selectedCharacter.initiative = Math.max(0, (selectedCharacter.initiative || 0) - 1);
-                sheetInitiative.textContent = selectedCharacter.initiative;
-                renderList();
-                saveCharacterSheet(selectedCharacter);
-            }
-        });
-
-        initPlusBtn.addEventListener('click', () => {
-            if (selectedCharacter) {
-                selectedCharacter.initiative = (selectedCharacter.initiative || 0) + 1;
-                sheetInitiative.textContent = selectedCharacter.initiative;
-                renderList();
-                saveCharacterSheet(selectedCharacter);
-            }
-            
-        });
-
-        deleteSheetButton.addEventListener('click', () => {
-            if (selectedCharacter) {
-                showModal('Are you sure you want to delete this character?', async () => {
-                    const charId = selectedCharacter.id;
-                    try {
-                        const docRef = getCharacterDocRef(charId);
-                        await deleteDoc(docRef);
-                        characters = characters.filter(char => char.id !== charId);
-                        updateSheetDisplay(null);
-                        renderList();
-                    } catch (error) {
-                        console.error("Error deleting document: ", error);
-                    }
-                });
-            }
-        });
-
-        modifierCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', (e) => handleCheckboxChange(e, 'modifiers'));
-        });
-
-        statusCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', (e) => handleCheckboxChange(e, 'status'));
-        });
-
-        // Dice Roller Logic
-        rollDiceButton.addEventListener('click', () => {
-            const numDice = parseInt(numDiceInput.value, 10);
-            const dieType = parseInt(dieTypeSelect.value, 10);
-            const modifier = parseInt(rollModifierInput.value, 10) || 0;
-            const rollType = document.querySelector('input[name="rollType"]:checked').value;
             let total = 0;
             const rolls = [];
-            
+
             if (rollType === 'advantage') {
                 const roll1 = Math.floor(Math.random() * dieType) + 1;
                 const roll2 = Math.floor(Math.random() * dieType) + 1;
@@ -659,9 +643,115 @@
             }
 
             const modifierText = modifier !== 0 ? ` + ${modifier}` : '';
-            rollResults.textContent = `Rolls: ${rolls.join(', ')}`;
-            rollTotal.textContent = `Total: ${total + modifier}`;
+            diceRollOutput.innerHTML = `<p>Rolls: ${rolls.join(', ')}</p><p>Total: <strong>${total + modifier}</strong></p>`;
+        }
+        
+        // --- Event listeners ---
+        addItemButton.addEventListener('click', addListItem);
+        sortInitiativeButton.addEventListener('click', () => {
+            const listItems = Array.from(sortableList.children);
+            listItems.sort((a, b) => {
+                const aInitiative = parseInt(JSON.parse(a.getAttribute('data-character')).initiative) || 0;
+                const bInitiative = parseInt(JSON.parse(b.getAttribute('data-character')).initiative) || 0;
+                return bInitiative - aInitiative;
+            });
+            listItems.forEach(item => sortableList.appendChild(item));
+            updateHighlight(null);
+            turnOrder = Array.from(sortableList.children).map(li => JSON.parse(li.getAttribute('data-character')));
+            saveState();
         });
+
+        sortableList.addEventListener('click', (event) => {
+            const listItem = event.target.closest('li');
+            if (listItem) {
+                const isRemoveButton = event.target.closest('.remove-button');
+                const isLockButton = event.target.closest('.item-lock-button');
+                const index = Array.from(sortableList.children).indexOf(listItem);
+                
+                if (isRemoveButton) {
+                    showCustomModal('Are you sure you want to remove this character?', (confirmed) => {
+                        if (confirmed) {
+                            listItem.remove();
+                            turnOrder.splice(index, 1);
+                            
+                            // Adjust highlighted index if needed
+                            if (highlightedIndex === index) {
+                                highlightedIndex = -1;
+                            } else if (highlightedIndex > index) {
+                                highlightedIndex--;
+                            }
+                            
+                            updateHighlight(highlightedIndex);
+                            saveState();
+                        }
+                    });
+                } else if (isLockButton) {
+                    const charData = JSON.parse(listItem.getAttribute('data-character'));
+                    charData.isLocked = !charData.isLocked;
+                    listItem.setAttribute('data-character', JSON.stringify(charData));
+                    const lockIcon = listItem.querySelector('.item-lock-button i');
+                    lockIcon.classList.toggle('fa-lock');
+                    lockIcon.classList.toggle('fa-lock-open');
+                    saveState();
+                } else {
+                    updateHighlight(index);
+                }
+            }
+        });
+
+        nextTurnButton.addEventListener('click', () => {
+            const listItems = sortableList.querySelectorAll('li');
+            if (listItems.length === 0) return;
+            highlightedIndex = (highlightedIndex + 1) % listItems.length;
+            if (highlightedIndex === 0) {
+                currentRound++;
+            }
+            updateHighlight(highlightedIndex);
+            updateRoundCounter();
+        });
+
+        prevTurnButton.addEventListener('click', () => {
+            const listItems = sortableList.querySelectorAll('li');
+            if (listItems.length === 0) return;
+            highlightedIndex--;
+            if (highlightedIndex < 0) {
+                highlightedIndex = listItems.length - 1;
+                if (currentRound > 1) {
+                    currentRound--;
+                }
+            }
+            updateHighlight(highlightedIndex);
+            updateRoundCounter();
+        });
+
+        resetTurnButton.addEventListener('click', () => {
+            showCustomModal('Are you sure you want to reset all turns?', (confirmed) => {
+                if (confirmed) {
+                    currentRound = 1;
+                    highlightedIndex = -1;
+                    updateHighlight(highlightedIndex);
+                    updateRoundCounter();
+                }
+            });
+        });
+
+        toggleDiceRollerButton.addEventListener('click', toggleDiceRoller);
+        rollDiceButton.addEventListener('click', rollDice);
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            signIn(email, password);
+        });
+
+        signupButton.addEventListener('click', () => {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            signUp(email, password);
+        });
+
+        logoutButton.addEventListener('click', handleLogout);
 
     </script>
 </body>
