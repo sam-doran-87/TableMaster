@@ -195,33 +195,62 @@
             saveState();
         };
 
-        // --- MODAL FIX ---
-        // This promise-based approach is a clean way to handle confirmation dialogs.
-        // It provides a single point of entry and exit, making the logic much clearer.
-        let modalResolve;
-        const showModal = (message) => {
-            return new Promise((resolve) => {
-                modalMessage.textContent = message;
-                customModal.classList.add('is-visible');
-                modalResolve = resolve;
-            });
+        // --- NEW MODAL LOGIC ---
+        // A simple variable to store the index of the item to be deleted
+        let itemToDeleteIndex = -1;
+
+        // Function to show the modal and set the item index
+        const showDeleteModal = (index) => {
+            itemToDeleteIndex = index;
+            customModal.classList.add('is-visible');
         };
 
-        // Attach a single listener for the confirm button
+        // Event listener for the confirm button
         modalConfirmButton.addEventListener('click', () => {
-            if (modalResolve) {
-                modalResolve(true);
-                customModal.classList.remove('is-visible');
-                modalResolve = null;
+            if (itemToDeleteIndex !== -1) {
+                encounterItems.splice(itemToDeleteIndex, 1);
+                if (currentTurnIndex >= itemToDeleteIndex) {
+                    currentTurnIndex--;
+                }
+                if (currentTurnIndex < 0 && encounterItems.length > 0) {
+                    currentTurnIndex = 0;
+                }
+                if (encounterItems.length === 0) {
+                    currentTurnIndex = -1;
+                    round = 1;
+                }
+                updateTurnDisplay();
+                itemToDeleteIndex = -1; // Reset the index
             }
+            customModal.classList.remove('is-visible');
         });
 
-        // Attach a single listener for the cancel button
+        // Event listener for the cancel button
         modalCancelButton.addEventListener('click', () => {
-            if (modalResolve) {
-                modalResolve(false);
-                customModal.classList.remove('is-visible');
-                modalResolve = null;
+            customModal.classList.remove('is-visible');
+            itemToDeleteIndex = -1; // Reset the index
+        });
+        
+        // Event delegation for delete and edit buttons
+        sortableList.addEventListener('click', (e) => {
+            if (e.target.closest('.delete-button')) {
+                const index = parseInt(e.target.closest('.delete-button').dataset.index, 10);
+                showDeleteModal(index);
+            } else if (e.target.closest('.edit-button')) {
+                const index = parseInt(e.target.closest('.edit-button').dataset.index, 10);
+                const item = encounterItems[index];
+                const newName = prompt("Edit character name:", item.name);
+                const newInitiative = prompt("Edit initiative:", item.initiative);
+
+                if (newName !== null && newInitiative !== null) {
+                    const parsedInitiative = parseInt(newInitiative, 10);
+                    if (!isNaN(parsedInitiative)) {
+                        encounterItems[index] = { name: newName.trim(), initiative: parsedInitiative };
+                        renderList();
+                    } else {
+                        console.error("Invalid initiative entered.");
+                    }
+                }
             }
         });
 
@@ -261,44 +290,6 @@
             currentTurnIndex = -1; // Reset turn after sorting
             round = 1;
             updateTurnDisplay();
-        });
-
-        // Event delegation for delete and edit buttons
-        sortableList.addEventListener('click', async (e) => {
-            if (e.target.closest('.delete-button')) {
-                const index = parseInt(e.target.closest('.delete-button').dataset.index, 10);
-                const isConfirmed = await showModal('Are you sure you want to delete this character?');
-
-                if (isConfirmed) {
-                    encounterItems.splice(index, 1);
-                    if (currentTurnIndex >= index) {
-                        currentTurnIndex--;
-                    }
-                    if (currentTurnIndex < 0 && encounterItems.length > 0) {
-                        currentTurnIndex = 0; // Move to the new first item if applicable
-                    }
-                    if (encounterItems.length === 0) {
-                        currentTurnIndex = -1;
-                        round = 1;
-                    }
-                    updateTurnDisplay();
-                }
-            } else if (e.target.closest('.edit-button')) {
-                const index = parseInt(e.target.closest('.edit-button').dataset.index, 10);
-                const item = encounterItems[index];
-                const newName = prompt("Edit character name:", item.name);
-                const newInitiative = prompt("Edit initiative:", item.initiative);
-
-                if (newName !== null && newInitiative !== null) {
-                    const parsedInitiative = parseInt(newInitiative, 10);
-                    if (!isNaN(parsedInitiative)) {
-                        encounterItems[index] = { name: newName.trim(), initiative: parsedInitiative };
-                        renderList();
-                    } else {
-                        console.error("Invalid initiative entered.");
-                    }
-                }
-            }
         });
 
         // Next Turn logic
