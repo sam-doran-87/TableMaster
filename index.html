@@ -195,7 +195,7 @@
             saveState();
         };
 
-        // --- NEW MODAL LOGIC ---
+        // --- NEW MODAL LOGIC FIX ---
         // A simple variable to store the index of the item to be deleted
         let itemToDeleteIndex = -1;
 
@@ -209,20 +209,19 @@
         modalConfirmButton.addEventListener('click', () => {
             if (itemToDeleteIndex !== -1) {
                 encounterItems.splice(itemToDeleteIndex, 1);
+                // Adjust the currentTurnIndex if the deleted item was before it
                 if (currentTurnIndex >= itemToDeleteIndex) {
                     currentTurnIndex--;
                 }
-                if (currentTurnIndex < 0 && encounterItems.length > 0) {
-                    currentTurnIndex = 0;
-                }
+                // Handle edge case of deleting the last item
                 if (encounterItems.length === 0) {
                     currentTurnIndex = -1;
                     round = 1;
                 }
                 updateTurnDisplay();
-                itemToDeleteIndex = -1; // Reset the index
             }
             customModal.classList.remove('is-visible');
+            itemToDeleteIndex = -1; // Reset the index
         });
 
         // Event listener for the cancel button
@@ -232,6 +231,7 @@
         });
         
         // Event delegation for delete and edit buttons
+        // FIX: The logic has been moved here to ensure it's only called on a click.
         sortableList.addEventListener('click', (e) => {
             if (e.target.closest('.delete-button')) {
                 const index = parseInt(e.target.closest('.delete-button').dataset.index, 10);
