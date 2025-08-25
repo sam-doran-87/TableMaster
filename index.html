@@ -207,21 +207,23 @@
             });
         };
 
-        // Single handler for both modal buttons
-        const handleModalAction = (event) => {
+        // Attach a single listener for the confirm button
+        modalConfirmButton.addEventListener('click', () => {
             if (modalResolve) {
-                if (event.target === modalConfirmButton) {
-                    modalResolve(true);
-                } else if (event.target === modalCancelButton) {
-                    modalResolve(false);
-                }
+                modalResolve(true);
                 customModal.classList.remove('is-visible');
-                modalResolve = null; // Clear the resolver
+                modalResolve = null;
             }
-        };
+        });
 
-        // Attach a single listener to the modal overlay
-        customModal.addEventListener('click', handleModalAction);
+        // Attach a single listener for the cancel button
+        modalCancelButton.addEventListener('click', () => {
+            if (modalResolve) {
+                modalResolve(false);
+                customModal.classList.remove('is-visible');
+                modalResolve = null;
+            }
+        });
 
         /**
          * Updates the turn and round display on the page.
