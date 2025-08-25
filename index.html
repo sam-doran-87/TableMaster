@@ -195,34 +195,33 @@
             saveState();
         };
 
-        /**
-         * Shows the custom confirmation modal.
-         * @param {string} message The message to display in the modal.
-         * @returns {Promise<boolean>} A promise that resolves to true if confirmed, false if canceled.
-         */
+        // --- MODAL FIX ---
+        // This promise-based approach is a clean way to handle confirmation dialogs.
+        // It provides a single point of entry and exit, making the logic much clearer.
+        let modalResolve;
         const showModal = (message) => {
             return new Promise((resolve) => {
                 modalMessage.textContent = message;
                 customModal.classList.add('is-visible');
-
-                const handleConfirm = () => {
-                    customModal.classList.remove('is-visible');
-                    modalConfirmButton.removeEventListener('click', handleConfirm);
-                    modalCancelButton.removeEventListener('click', handleCancel);
-                    resolve(true);
-                };
-
-                const handleCancel = () => {
-                    customModal.classList.remove('is-visible');
-                    modalConfirmButton.removeEventListener('click', handleConfirm);
-                    modalCancelButton.removeEventListener('click', handleCancel);
-                    resolve(false);
-                };
-
-                modalConfirmButton.addEventListener('click', handleConfirm);
-                modalCancelButton.addEventListener('click', handleCancel);
+                modalResolve = resolve;
             });
         };
+
+        // Single handler for both modal buttons
+        const handleModalAction = (event) => {
+            if (modalResolve) {
+                if (event.target === modalConfirmButton) {
+                    modalResolve(true);
+                } else if (event.target === modalCancelButton) {
+                    modalResolve(false);
+                }
+                customModal.classList.remove('is-visible');
+                modalResolve = null; // Clear the resolver
+            }
+        };
+
+        // Attach a single listener to the modal overlay
+        customModal.addEventListener('click', handleModalAction);
 
         /**
          * Updates the turn and round display on the page.
@@ -349,16 +348,14 @@
             const rollType = document.querySelector('input[name="rollType"]:checked').value;
             const isInverted = invertD100Checkbox.checked;
 
-            let rollResult;
-            if (rollType === 'advantage') {
-                rollResult = rollWithAdvantageOrDisadvantage(numDice, dieType, 'advantage', isInverted);
-            } else if (rollType === 'disadvantage') {
-                rollResult = rollWithAdvantageOrDisadvantage(numDice, dieType, 'disadvantage', isInverted);
+            let result;
+            if (rollType === 'normal') {
+                result = rollNormal(numDice, dieType);
             } else {
-                rollResult = rollNormal(numDice, dieType);
+                result = rollWithAdvantageOrDisadvantage(dieType, rollType, isInverted);
             }
 
-            displayDiceRollResult(rollResult, modifier, rollType);
+            displayDiceRollResult(result, modifier);
         };
 
         /**
@@ -380,48 +377,39 @@
 
         /**
          * Rolls with advantage or disadvantage.
-         * @param {number} numDice The number of dice to roll (should be 1 for this function).
          * @param {number} dieType The type of die (e.g., 20 for d20).
          * @param {string} type 'advantage' or 'disadvantage'.
          * @param {boolean} isInverted True if d100 inverted logic is applied.
-         * @returns {{rolls: number[], total: number}} The selected roll results and total.
+         * @returns {{rolls: number[], total: number, otherRolls: number[]}} The selected roll results and total.
          */
-        const rollWithAdvantageOrDisadvantage = (numDice, dieType, type, isInverted) => {
-            const roll1 = rollNormal(numDice, dieType);
-            const roll2 = rollNormal(numDice, dieType);
+        const rollWithAdvantageOrDisadvantage = (dieType, type, isInverted) => {
+            const roll1 = Math.floor(Math.random() * dieType) + 1;
+            const roll2 = Math.floor(Math.random() * dieType) + 1;
 
             let chosenRoll, otherRoll;
             if (type === 'advantage') {
-                chosenRoll = (isInverted) ? (roll1.total <= roll2.total ? roll1 : roll2) : (roll1.total >= roll2.total ? roll1 : roll2);
+                chosenRoll = (isInverted) ? Math.min(roll1, roll2) : Math.max(roll1, roll2);
                 otherRoll = (chosenRoll === roll1) ? roll2 : roll1;
             } else { // disadvantage
-                chosenRoll = (isInverted) ? (roll1.total >= roll2.total ? roll1 : roll2) : (roll1.total <= roll2.total ? roll1 : roll2);
+                chosenRoll = (isInverted) ? Math.max(roll1, roll2) : Math.min(roll1, roll2);
                 otherRoll = (chosenRoll === roll1) ? roll2 : roll1;
             }
 
-            return { chosen: chosenRoll, other: otherRoll };
+            return { rolls: [chosenRoll], total: chosenRoll, otherRolls: [otherRoll] };
         };
 
         /**
          * Displays the result of a dice roll.
-         * @param {{chosen: {rolls: number[], total: number}, other: {rolls: number[], total: number}}} result The roll results.
+         * @param {{rolls: number[], total: number, otherRolls?: number[]}} result The roll results.
          * @param {number} modifier The modifier value.
-         * @param {string} rollType The type of roll ('normal', 'advantage', 'disadvantage').
          */
-        const displayDiceRollResult = (result, modifier, rollType) => {
+        const displayDiceRollResult = (result, modifier) => {
             let outputHTML = '';
-            let finalTotal;
-            let displayRolls = result.rolls;
+            const finalTotal = result.total + modifier;
 
-            if (rollType === 'normal') {
-                finalTotal = result.total + modifier;
-                outputHTML = `<p>Rolls: ${result.rolls.join(', ')}</p>`;
-            } else {
-                finalTotal = result.chosen.total + modifier;
-                outputHTML = `
-                    <p>Rolls (${rollType}): ${result.chosen.rolls.join(', ')}</p>
-                    <p>Other Roll: ${result.other.rolls.join(', ')}</p>
-                `;
+            outputHTML += `<p>Rolls: ${result.rolls.join(', ')}</p>`;
+            if (result.otherRolls) {
+                outputHTML += `<p>Other Roll: ${result.otherRolls.join(', ')}</p>`;
             }
 
             if (modifier !== 0) {
