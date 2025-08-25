@@ -456,6 +456,8 @@
 
         // Load state and initialize sheet when the page finishes loading
         window.addEventListener('load', () => {
+            // THIS LINE WILL FORCE A CLEAN RESET.
+            localStorage.clear();
             loadState();
         });
     </script>
