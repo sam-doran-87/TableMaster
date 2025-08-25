@@ -21,6 +21,8 @@
                     <input type="number" id="newItemInitiative" placeholder="Initiative">
                     <button id="addItemButton">Add Character</button>
                     <button id="sortInitiativeButton" class="sort-button">Sort by Initiative</button>
+                    <!-- New button to reset local storage -->
+                    <button id="resetStateButton" class="danger-button">Reset App</button>
                 </div>
 
                 <ul id="sortable-list" class="sortable-list">
@@ -126,6 +128,7 @@
         const rollTypeAdvantage = document.getElementById('advantage');
         const rollTypeDisadvantage = document.getElementById('disadvantage');
         const invertD100Checkbox = document.getElementById('invertD100Checkbox');
+        const resetStateButton = document.getElementById('resetStateButton'); // New button
 
         // Modal elements
         const customModal = document.getElementById('customModal');
@@ -145,24 +148,37 @@
         };
 
         /**
-         * Loads the state from local storage.
+         * Loads the state from local storage. This is the key change.
          */
         const loadState = () => {
+            console.log("Attempting to load state from localStorage...");
             const savedItems = localStorage.getItem('encounterItems');
             const savedTurnIndex = localStorage.getItem('currentTurnIndex');
             const savedRound = localStorage.getItem('round');
 
-            if (savedItems) {
-                encounterItems = JSON.parse(savedItems);
-                renderList();
-            }
-
-            if (savedTurnIndex !== null) {
-                currentTurnIndex = parseInt(savedTurnIndex, 10);
-            }
-
-            if (savedRound !== null) {
-                round = parseInt(savedRound, 10);
+            if (savedItems && savedItems !== '[]') {
+                try {
+                    encounterItems = JSON.parse(savedItems);
+                    console.log("State loaded successfully:", encounterItems);
+                    if (savedTurnIndex !== null) {
+                        currentTurnIndex = parseInt(savedTurnIndex, 10);
+                    }
+                    if (savedRound !== null) {
+                        round = parseInt(savedRound, 10);
+                    }
+                } catch (e) {
+                    console.error("Failed to parse saved state from localStorage:", e);
+                    // On error, reset to default state
+                    encounterItems = [];
+                    currentTurnIndex = -1;
+                    round = 1;
+                }
+            } else {
+                // If savedItems is null or empty, ensure the state is clean
+                console.log("No valid state found in localStorage. Starting fresh.");
+                encounterItems = [];
+                currentTurnIndex = -1;
+                round = 1;
             }
             updateTurnDisplay();
         };
@@ -195,7 +211,7 @@
             saveState();
         };
 
-        // --- NEW MODAL LOGIC FIX ---
+        // --- MODAL LOGIC ---
         // A simple variable to store the index of the item to be deleted
         let itemToDeleteIndex = -1;
 
@@ -231,7 +247,6 @@
         });
         
         // Event delegation for delete and edit buttons
-        // FIX: The logic has been moved here to ensure it's only called on a click.
         sortableList.addEventListener('click', (e) => {
             if (e.target.closest('.delete-button')) {
                 const index = parseInt(e.target.closest('.delete-button').dataset.index, 10);
@@ -417,6 +432,19 @@
         
         toggleDiceRollerButton.addEventListener('click', toggleDiceRoller);
         rollDiceButton.addEventListener('click', rollDice);
+
+        // New event listener for the reset button
+        resetStateButton.addEventListener('click', () => {
+            const confirmReset = confirm("Are you sure you want to reset the app? This will delete all saved characters.");
+            if (confirmReset) {
+                localStorage.clear();
+                encounterItems = [];
+                currentTurnIndex = -1;
+                round = 1;
+                updateTurnDisplay();
+                alert("App has been reset!");
+            }
+        });
 
         // Set default die type
         dieTypeSelect.value = "20";
