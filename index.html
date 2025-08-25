@@ -128,13 +128,16 @@
         const rollTypeAdvantage = document.getElementById('advantage');
         const rollTypeDisadvantage = document.getElementById('disadvantage');
         const invertD100Checkbox = document.getElementById('invertD100Checkbox');
-        const resetStateButton = document.getElementById('resetStateButton'); // New button
+        const resetStateButton = document.getElementById('resetStateButton');
 
         // Modal elements
         const customModal = document.getElementById('customModal');
         const modalMessage = document.getElementById('modalMessage');
         const modalConfirmButton = document.getElementById('modalConfirmButton');
         const modalCancelButton = document.getElementById('modalCancelButton');
+        
+        // A simple variable to store the context of the modal (delete or reset)
+        let modalActionContext = { type: 'none', index: -1 };
 
         // --- Utility Functions ---
 
@@ -148,10 +151,9 @@
         };
 
         /**
-         * Loads the state from local storage. This is the key change.
+         * Loads the state from local storage.
          */
         const loadState = () => {
-            console.log("Attempting to load state from localStorage...");
             const savedItems = localStorage.getItem('encounterItems');
             const savedTurnIndex = localStorage.getItem('currentTurnIndex');
             const savedRound = localStorage.getItem('round');
@@ -159,7 +161,6 @@
             if (savedItems && savedItems !== '[]') {
                 try {
                     encounterItems = JSON.parse(savedItems);
-                    console.log("State loaded successfully:", encounterItems);
                     if (savedTurnIndex !== null) {
                         currentTurnIndex = parseInt(savedTurnIndex, 10);
                     }
@@ -175,7 +176,6 @@
                 }
             } else {
                 // If savedItems is null or empty, ensure the state is clean
-                console.log("No valid state found in localStorage. Starting fresh.");
                 encounterItems = [];
                 currentTurnIndex = -1;
                 round = 1;
@@ -212,45 +212,58 @@
         };
 
         // --- MODAL LOGIC ---
-        // A simple variable to store the index of the item to be deleted
-        let itemToDeleteIndex = -1;
-
-        // Function to show the modal and set the item index
-        const showDeleteModal = (index) => {
-            itemToDeleteIndex = index;
+        
+        /**
+         * Shows the custom modal with a specific message and action.
+         * @param {string} message The message to display.
+         * @param {string} type The action type ('delete' or 'reset').
+         * @param {number} [index=-1] The index of the item to act on, if applicable.
+         */
+        const showModal = (message, type, index = -1) => {
+            modalMessage.textContent = message;
+            modalActionContext = { type, index };
             customModal.classList.add('is-visible');
         };
 
         // Event listener for the confirm button
         modalConfirmButton.addEventListener('click', () => {
-            if (itemToDeleteIndex !== -1) {
-                encounterItems.splice(itemToDeleteIndex, 1);
-                // Adjust the currentTurnIndex if the deleted item was before it
-                if (currentTurnIndex >= itemToDeleteIndex) {
-                    currentTurnIndex--;
+            if (modalActionContext.type === 'delete') {
+                const index = modalActionContext.index;
+                if (index !== -1) {
+                    encounterItems.splice(index, 1);
+                    // Adjust the currentTurnIndex if the deleted item was before it
+                    if (currentTurnIndex >= index) {
+                        currentTurnIndex--;
+                    }
+                    // Handle edge case of deleting the last item
+                    if (encounterItems.length === 0) {
+                        currentTurnIndex = -1;
+                        round = 1;
+                    }
+                    updateTurnDisplay();
                 }
-                // Handle edge case of deleting the last item
-                if (encounterItems.length === 0) {
-                    currentTurnIndex = -1;
-                    round = 1;
-                }
+            } else if (modalActionContext.type === 'reset') {
+                localStorage.clear();
+                encounterItems = [];
+                currentTurnIndex = -1;
+                round = 1;
                 updateTurnDisplay();
             }
             customModal.classList.remove('is-visible');
-            itemToDeleteIndex = -1; // Reset the index
+            modalActionContext = { type: 'none', index: -1 }; // Reset context
         });
 
         // Event listener for the cancel button
         modalCancelButton.addEventListener('click', () => {
             customModal.classList.remove('is-visible');
-            itemToDeleteIndex = -1; // Reset the index
+            modalActionContext = { type: 'none', index: -1 }; // Reset context
         });
         
         // Event delegation for delete and edit buttons
         sortableList.addEventListener('click', (e) => {
             if (e.target.closest('.delete-button')) {
                 const index = parseInt(e.target.closest('.delete-button').dataset.index, 10);
-                showDeleteModal(index);
+                showModal("Are you sure you want to delete this character?", 'delete', index);
             } else if (e.target.closest('.edit-button')) {
                 const index = parseInt(e.target.closest('.edit-button').dataset.index, 10);
                 const item = encounterItems[index];
@@ -433,17 +446,9 @@
         toggleDiceRollerButton.addEventListener('click', toggleDiceRoller);
         rollDiceButton.addEventListener('click', rollDice);
 
-        // New event listener for the reset button
+        // Event listener for the reset button
         resetStateButton.addEventListener('click', () => {
-            const confirmReset = confirm("Are you sure you want to reset the app? This will delete all saved characters.");
-            if (confirmReset) {
-                localStorage.clear();
-                encounterItems = [];
-                currentTurnIndex = -1;
-                round = 1;
-                updateTurnDisplay();
-                alert("App has been reset!");
-            }
+            showModal("Are you sure you want to reset the app? This will delete all saved characters.", 'reset');
         });
 
         // Set default die type
