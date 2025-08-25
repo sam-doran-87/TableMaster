@@ -14,12 +14,8 @@
 
         <div class="main-content">
             <div class="encounter-tracker-card">
-                <div class="input-section">
-                    <input type="text" id="newItemText" placeholder="Character Name">
-                    <input type="number" id="newItemInitiative" placeholder="Initiative">
-                    <button id="addItemButton">Add Character</button>
-                    <button id="sortInitiativeButton" class="sort-button">Sort by Initiative</button>
-                </div>
+                <!-- NEW: This button will open your character builder tool -->
+                <button id="addCharacterButton" class="sort-button">Add New Character</button>
 
                 <ul id="sortable-list" class="sortable-list">
                     <!-- List items will be dynamically added here -->
@@ -171,9 +167,7 @@
     <script>
         // --- Get references to all necessary HTML elements ---
         const sortableList = document.getElementById('sortable-list');
-        const newItemText = document.getElementById('newItemText');
-        const newItemInitiative = document.getElementById('newItemInitiative');
-        const addItemButton = document.getElementById('addItemButton');
+        const addCharacterButton = document.getElementById('addCharacterButton'); // NEW button reference
         const sortInitiativeButton = document.getElementById('sortInitiativeButton');
         const nextTurnButton = document.getElementById('nextTurnButton');
         const prevTurnButton = document.getElementById('prevTurnButton');
@@ -314,7 +308,9 @@
         }
 
         // --- Helper function to create a new list item HTML element ---
-        function createListItemElement(nameText, initiativeValue, currentHp = 10, mp = 10, ac = 0, speed = 0, modifier = 0, statusObj = null, isLocked = false) {
+        // REFACTORED: Now accepts a single character object
+        function createListItemElement(character) {
+            const { name, initiative, currentHp, mp, ac, speed, modifier, status, isLocked } = character;
             const listItem = document.createElement('li');
 
             // Create individual elements to safely set textContent where user input is involved
@@ -329,7 +325,7 @@
 
             const itemTextSpan = document.createElement('span');
             itemTextSpan.classList.add('item-text');
-            itemTextSpan.textContent = nameText; // SECURITY FIX: Use textContent to prevent XSS
+            itemTextSpan.textContent = name; // SECURITY FIX: Use textContent to prevent XSS
 
             const initiativeScoreSpan = document.createElement('span');
             initiativeScoreSpan.classList.add('initiative-score');
@@ -356,7 +352,7 @@
             listItem.appendChild(removeButton);
 
             // Now update attributes and text content using the helper
-            updateListItem(listItem, 'initiative', initiativeValue);
+            updateListItem(listItem, 'initiative', initiative);
             updateListItem(listItem, 'current-hp', currentHp);
             listItem.setAttribute('data-mp', mp);
             listItem.setAttribute('data-ac', ac);
@@ -364,8 +360,8 @@
             listItem.setAttribute('data-modifier', modifier);
             listItem.setAttribute('data-locked', isLocked ? 'true' : 'false');
 
-            if (statusObj === null) {
-                statusObj = {
+            if (status === null) {
+                status = {
                     "poisoned": false,
                     "burning": false,
                     "immobile": false,
@@ -375,8 +371,8 @@
                     "disadvantage": false
                 };
             }
-            listItem.setAttribute('data-status', JSON.stringify(statusObj));
-            updateStatusIcons(listItem, statusObj); // Initial update of icons
+            listItem.setAttribute('data-status', JSON.stringify(status));
+            updateStatusIcons(listItem, status); // Initial update of icons
 
             return listItem;
         }
@@ -415,7 +411,18 @@
                             console.error("Error parsing status JSON for item during load:", item.name, e);
                             // If status is corrupted, default to empty object
                         }
-                        const listItem = createListItemElement(item.name, item.initiative, item.currentHp, item.mp, item.ac, item.speed, item.modifier, statusObj, item.isLocked === 'true');
+                        const characterObject = {
+                            name: item.name,
+                            initiative: item.initiative,
+                            currentHp: item.currentHp,
+                            mp: item.mp,
+                            ac: item.ac,
+                            speed: item.speed,
+                            modifier: item.modifier,
+                            status: statusObj,
+                            isLocked: item.isLocked === 'true'
+                        };
+                        const listItem = createListItemElement(characterObject);
                         sortableList.appendChild(listItem);
                     });
                     console.log('List state loaded from localStorage.');
@@ -445,30 +452,35 @@
         }
 
         // --- Function to Add a New List Item ---
-        function addListItem() {
-            const nameText = newItemText.value.trim();
-            const initiativeValue = newItemInitiative.value.trim();
-
-            if (nameText.length > 0 && initiativeValue.length > 0) {
-                const listItem = createListItemElement(nameText, initiativeValue);
-                sortableList.appendChild(listItem);
-                newItemText.value = '';
-                newItemInitiative.value = '';
-                newItemText.focus();
-                saveState();
-            } else {
-                console.error("Failed to add character: Name or Initiative is missing.");
-            }
+        // DEMO: This function now adds a hardcoded character object to demonstrate the new workflow.
+        // Your character builder will replace this logic.
+        function addNewCharacter() {
+            const newCharacter = {
+                name: 'New Character',
+                initiative: Math.floor(Math.random() * 20) + 1, // Example random initiative
+                currentHp: 10,
+                mp: 10,
+                ac: 15,
+                speed: 30,
+                modifier: 0,
+                status: {
+                    "poisoned": false,
+                    "burning": false,
+                    "immobile": false,
+                    "ko": false,
+                    "dead": false,
+                    "advantage": false,
+                    "disadvantage": false
+                },
+                isLocked: false
+            };
+            const listItem = createListItemElement(newCharacter);
+            sortableList.appendChild(listItem);
+            saveState();
         }
 
         // --- Event listeners for adding items ---
-        addItemButton.addEventListener('click', addListItem);
-        newItemText.addEventListener('keypress', function (event) {
-            if (event.key === 'Enter') addListItem();
-        });
-        newItemInitiative.addEventListener('keypress', function (event) {
-            if (event.key === 'Enter') addListItem();
-        });
+        addCharacterButton.addEventListener('click', addNewCharacter);
 
         // --- Event handler for list item clicks ---
         function handleListItemClick(event) {
